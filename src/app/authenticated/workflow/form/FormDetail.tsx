@@ -1,8 +1,18 @@
-import { View, Text, TouchableOpacity, TextInput, StyleSheet, ScrollView, Modal, Image } from 'react-native';
-import React, { useState } from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  StyleSheet,
+  ScrollView,
+  Modal,
+} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { SelectList } from 'react-native-dropdown-select-list';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/shared/RootStackedList';
+import axios from 'axios';
 import { Languages } from 'lucide-react-native';
 
 type FormDetailNavigationProp = NativeStackNavigationProp<
@@ -14,154 +24,158 @@ type Props = {
   navigation: FormDetailNavigationProp;
 };
 
+type Field = {
+  fieldname: string;
+  fieldtype: string;
+  label: string;
+  options?: string;
+  default?: string;
+};
 
 const FormDetail: React.FC<Props> = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [farmerName, setFarmerName] = useState('Ravi Kumar');
-  const [cropName, setCropName] = useState('Peanut');
-  const [season, setSeason] = useState('Rabi');
-  const [region, setRegion] = useState('');
-  const [landArea, setLandArea] = useState('');
+  const [fields, setFields] = useState<Field[]>([]);
+  const [formData, setFormData] = useState<Record<string, any>>({});
+  const [loading, setLoading] = useState(true);
+
+  const API_BASE = 'https://erp.kisanmitra.net';
+
+  useEffect(() => {
+    loginAndFetchFields();
+  }, []);
+
+  const loginAndFetchFields = async () => {
+    try {
+      await axios.post(
+        `${API_BASE}/api/method/login`,
+        {
+          usr: 'ads@aegiondynamic.com',
+          pwd: 'Csa@2025',
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      const response = await axios.get(
+        `${API_BASE}/api/resource/DocType/issue`,
+        {
+          withCredentials: true,
+        }
+      );
+
+      const allFields: Field[] = response.data.data.fields;
+
+      const inputFields = allFields.filter(field =>
+        ['Data', 'Select', 'Text', 'Int', 'Link'].includes(field.fieldtype)
+      );
+
+      const defaults: Record<string, any> = {};
+      inputFields.forEach(field => {
+        if (field.default) {
+          defaults[field.fieldname] = field.default;
+        }
+      });
+
+      setFormData(defaults);
+      setFields(inputFields);
+      setLoading(false);
+    } catch (error: any) {
+      console.error('Error fetching data:', error.message);
+    }
+  };
 
   const handleSubmit = () => {
-    console.log('Form submitted:', {
-      farmerName,
-      cropName,
-      season,
-      region,
-      landArea
-    });
+    console.log('Form submitted:', formData);
     setModalVisible(true);
-    // Add your submit logic here
   };
+
+  const handleChange = (fieldname: string, value: any) => {
+    setFormData({ ...formData, [fieldname]: value });
+  };
+
+  if (loading) {
+    return <Text style={styles.loading}>Loading...</Text>;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>ERP 1</Text>
-        <TouchableOpacity style={styles.translateButton}>
-          <Languages size={42}></Languages>
+        <Text style={styles.headerTitle}>Sample</Text>
+        <TouchableOpacity>
+          <Languages size={42} />
         </TouchableOpacity>
       </View>
 
-      {/* Form Content */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.formTitle}>Form 1</Text>
-        <Text style={styles.formSubtitle}>
-          Make sure you entre the farmer details are correct.
-        </Text>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.title}>Sample Form 1</Text>
+        <Text style={styles.subtitle}>This is just a sample form</Text>
 
-        {/* Form Fields */}
-        <View style={styles.formFields}>
-          <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Farmer Name</Text>
-            <TextInput
-              style={styles.textInput}
-              value={farmerName}
-              onChangeText={setFarmerName}
-              placeholder="Enter farmer name"
-            />
+        {fields.map((field) => (
+          <View key={field.fieldname} style={styles.inputContainer}>
+            <Text style={styles.label}>{field.label || field.fieldname}</Text>
+
+            {field.fieldtype === 'Select' && field.options ? (
+              <SelectList
+                setSelected={(val: string) => handleChange(field.fieldname, val)}
+                data={field.options.split('\n').map(opt => ({ key: opt, value: opt }))}
+                save="value"
+                defaultOption={
+                  field.default ? { key: field.default, value: field.default } : undefined
+                }
+                placeholder={`Select ${field.label}`}
+                boxStyles={{ borderColor: '#ccc', marginTop: 8 }}
+              />
+            ) : (
+              <TextInput
+                style={styles.input}
+                placeholder={`Enter ${field.label || field.fieldname}`}
+                value={formData[field.fieldname] || ''}
+                onChangeText={(text) => handleChange(field.fieldname, text)}
+              />
+            )}
           </View>
+        ))}
 
-          <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Crop Name</Text>
-            <TextInput
-              style={styles.textInput}
-              value={cropName}
-              onChangeText={setCropName}
-              placeholder="Enter crop name"
-            />
-          </View>
-
-          <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Season</Text>
-            <TextInput
-              style={styles.textInput}
-              value={season}
-              onChangeText={setSeason}
-              placeholder="Enter season"
-            />
-          </View>
-
-          <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Region</Text>
-            <TextInput
-              style={styles.textInput}
-              value={region}
-              onChangeText={setRegion}
-              placeholder="Region"
-            />
-          </View>
-
-          <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>Land Area</Text>
-            <TextInput
-              style={styles.textInput}
-              value={landArea}
-              onChangeText={setLandArea}
-              placeholder="Land Area"
-            />
-          </View>
-        </View>
-
-        {/* Submit Button */}
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
           <Text style={styles.submitButtonText}>Submit</Text>
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Bottom Navigation
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>🏠</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>📋</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>👤</Text>
-        </TouchableOpacity>
-      </View> */}
       <Modal
-  animationType="fade"
-  transparent={true}
-  visible={modalVisible}
-  onRequestClose={() => setModalVisible(false)}
->
-  <View style={styles.modalOverlay}>
-    <View style={styles.modalContent}>
-      <Text style={styles.modalTitle}>Form is ready to upload!</Text>
-      <Text style={styles.modalMessage}>
-        Form needs to be uploaded after the network is available.
-      </Text>
-      <View style={styles.modalButtons}>
-        <TouchableOpacity
-          style={styles.cancelButton}
-          onPress={() => setModalVisible(false)}
-        >
-          <Text style={styles.cancelButtonText}>Cancel</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.uploadButton}
-          onPress={() => {
-            setModalVisible(false);
-            // add upload logic here
-          }}
-        >
-          <Text style={styles.uploadButtonText}>Upload</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  </View>
-</Modal>
-
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>Form is ready to upload!</Text>
+            <Text style={styles.modalDescription}>
+              Form needs to be uploaded after the network is available.
+            </Text>
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalUploadButton}
+                onPress={() => {
+                  setModalVisible(false);
+                }}
+              >
+                <Text style={styles.modalUploadText}>Upload</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -169,160 +183,127 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#F4F6F8',
+  },
+  loading: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginTop: 50,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
     backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  backButton: {
-    padding: 8,
+    elevation: 2,
   },
   backArrow: {
+    fontSize: 24,
+    color: '#1E1E1E',
+  },
+  headerTitle: {
     fontSize: 20,
-    color: '#333',
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-  },
-  translateButton: {
-    padding: 8,
-  },
-  image: {
-    height: 30,
-    width: 30,
+    fontWeight: '700',
+    color: '#1E1E1E',
   },
   content: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 20,
+    padding: 24,
+    gap: 12,
   },
-  formTitle: {
-    fontSize: 28,
-    fontWeight: '600',
+  title: {
+    fontSize: 26,
+    fontWeight: '700',
     color: '#333',
-    marginTop: 24,
-    marginBottom: 8,
+    marginBottom: 4,
   },
-  formSubtitle: {
+  subtitle: {
     fontSize: 16,
-    color: '#8e8e93',
-    marginBottom: 32,
-    lineHeight: 22,
-  },
-  formFields: {
-    marginBottom: 32,
-  },
-  fieldContainer: {
+    color: '#6e6e6e',
     marginBottom: 24,
   },
-  fieldLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
-    marginBottom: 8,
+  inputContainer: {
+    marginBottom: 15,
   },
-  textInput: {
-    backgroundColor: '#f6f6f6',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+  label: {
+    marginBottom: 6,
     fontSize: 16,
-    color: '#333',
+    fontWeight: '600',
+  },
+  input: {
     borderWidth: 1,
-    borderColor: '#e8e8e8',
+    borderColor: '#ccc',
+    padding: 8,
+    borderRadius: 5,
   },
   submitButton: {
-    backgroundColor: '#1c1c1e',
-    borderRadius: 12,
-    paddingVertical: 16,
+    backgroundColor: '#2C3E50',
+    borderRadius: 10,
+    paddingVertical: 14,
     alignItems: 'center',
-    marginBottom: 32,
   },
   submitButtonText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
   },
-  bottomNav: {
-    flexDirection: 'row',
-    backgroundColor: '#ffffff',
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-    paddingBottom: 20,
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  navIcon: {
-    fontSize: 20,
-  },
   modalOverlay: {
-  flex: 1,
-  backgroundColor: 'rgba(0, 0, 0, 0.3)',
-  justifyContent: 'center',
-  alignItems: 'center',
-},
-modalContent: {
-  width: '80%',
-  backgroundColor: '#fff',
-  padding: 24,
-  borderRadius: 12,
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 2 },
-  shadowOpacity: 0.25,
-  shadowRadius: 4,
-  elevation: 5,
-},
-modalTitle: {
-  fontSize: 18,
-  fontWeight: '600',
-  marginBottom: 8,
-  color: '#1c1c1e',
-},
-modalMessage: {
-  fontSize: 14,
-  color: '#666',
-  marginBottom: 24,
-},
-modalButtons: {
-  flexDirection: 'row',
-  justifyContent: 'flex-end',
-},
-cancelButton: {
-  paddingVertical: 10,
-  paddingHorizontal: 20,
-  borderRadius: 8,
-  backgroundColor: '#fff',
-  borderWidth: 1,
-  borderColor: '#ccc',
-  marginRight: 10,
-},
-cancelButtonText: {
-  color: '#333',
-  fontWeight: '500',
-},
-uploadButton: {
-  paddingVertical: 10,
-  paddingHorizontal: 20,
-  borderRadius: 8,
-  backgroundColor: '#1c1c1e',
-},
-uploadButtonText: {
-  color: '#fff',
-  fontWeight: '600',
-},
-
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 24,
+    width: '85%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 12,
+    color: '#1E1E1E',
+  },
+  modalDescription: {
+    fontSize: 15,
+    color: '#666',
+    marginBottom: 24,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+  },
+  modalCancelButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#999',
+    backgroundColor: '#ffffff',
+  },
+  modalCancelText: {
+    fontSize: 14,
+    color: '#333',
+  },
+  modalUploadButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: '#2C3E50',
+  },
+  modalUploadText: {
+    fontSize: 14,
+    color: '#ffffff',
+    fontWeight: '600',
+  },
 });
 
 export default FormDetail;
