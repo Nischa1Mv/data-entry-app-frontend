@@ -43,7 +43,6 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
@@ -60,7 +59,6 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Forms List */}
       <FlatList
         data={forms}
         renderItem={renderFormItem}
@@ -68,19 +66,6 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
         style={styles.formsList}
         showsVerticalScrollIndicator={false}
       />
-
-      {/* Bottom Navigation
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>🏠</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>📋</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIcon}>👤</Text>
-        </TouchableOpacity>
-      </View> */}
     </SafeAreaView>
   );
 };
