@@ -7,21 +7,17 @@ import {
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import { enableScreens } from 'react-native-screens';
-import Login from './src/Login';
-import ERP from './src/ERP';
-import FormsList from './src/FormsList';
-import FormDetail from './src/FormDetail';
+import Login from './public/Login';
+import ERP from './authenticated/Home';
+import FormsList from './authenticated/workflow/form/FormsList';
+import FormDetail from './authenticated/workflow/form/FormDetail';
 
 import { Colors } from 'react-native/Libraries/NewAppScreen';
+import { RootStackParamList } from '@/shared/RootStackedList';
 
 enableScreens();
 
-export type RootStackParamList = {
-  Login: undefined;
-  ERP: undefined;
-  FormsList: undefined;
-  FormDetail: undefined;
-};
+
 
 
 function App(): React.JSX.Element {
@@ -45,6 +41,7 @@ function App(): React.JSX.Element {
           <Stack.Screen name="ERP" component={ERP} />
           <Stack.Screen name="FormsList" component={FormsList} />
           <Stack.Screen name="FormDetail" component={FormDetail} />
+          
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaView>
