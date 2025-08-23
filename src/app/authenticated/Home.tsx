@@ -67,6 +67,12 @@ const ERP: React.FC<Props> = ({ navigation }) => {
             <Text>15 Forms</Text>
           </View>
         </View>
+        <TouchableOpacity 
+          style={[styles.box, { width: '95%', marginTop: 20 }]} 
+          onPress={() => navigation.navigate('Downloads')}
+        >
+          <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Downloads</Text>
+        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );

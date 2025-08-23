@@ -3,4 +3,5 @@ export type RootStackParamList = {
   ERP: undefined;
   FormsList: undefined;
   FormDetail: {formName:string};
+  Downloads: undefined;
 };

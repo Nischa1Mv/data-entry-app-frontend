@@ -19,6 +19,7 @@
     "@react-navigation/native-stack": "^7.3.21",
     "axios": "^1.9.0",
     "firebase": "^11.8.1",
+    "lucide-react": "^0.541.0",
     "lucide-react-native": "^0.513.0",
     "react": "^19.0.0",
     "react-native": "^0.79.2",
