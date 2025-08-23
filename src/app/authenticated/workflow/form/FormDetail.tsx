@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   Modal,
+  Alert,
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
 import { SelectList } from 'react-native-dropdown-select-list';
@@ -17,6 +18,7 @@ import { Languages } from 'lucide-react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { useNetwork } from "../../../../context/NetworkProvider";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { enqueue } from '../../../pendingQueue';
 
 type FormDetailNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -113,7 +115,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
           ];
         } else {
           console.warn("No cached data available for offline use");
-          allFields = []; 
+          allFields = [];
         }
       }
       const inputFields = allFields.filter(field =>
@@ -135,9 +137,24 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
       setLoading(false);
     }
   };
-  const handleSubmit = () => {
-    console.log('Form submitted:', formData);
-    setModalVisible(true);
+
+  const handleSubmit = async () => {
+    const newSubmission = {
+      id: Date.now().toString(),
+      formName,
+      data: formData,
+      status: "pending",
+    };
+    setLoading(true);
+    try {
+      await enqueue(newSubmission);
+      setFormData({}); 
+    } catch (e) {
+      Alert.alert("Error", "Failed to save submission.");
+    } finally {
+      setLoading(false); 
+      setModalVisible(true);
+    }
   };
 
   const handleChange = (fieldname: string, value: any) => {
@@ -220,7 +237,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
                   setModalVisible(false);
                 }}
               >
-                <Text style={styles.modalUploadText}>Upload</Text>
+                <Text style={styles.modalUploadText}>ok</Text>
               </TouchableOpacity>
             </View>
           </View>
