@@ -14,6 +14,7 @@ import FormDetail from './authenticated/workflow/form/FormDetail';
 
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { RootStackParamList } from '@/shared/RootStackedList';
+import { NetworkProvider } from 'react-native-offline';
 
 enableScreens();
 
@@ -35,6 +36,7 @@ function App(): React.JSX.Element {
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
       />
+      <NetworkProvider>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
           <Stack.Screen name="Login" component={Login} />
@@ -44,6 +46,7 @@ function App(): React.JSX.Element {
           
         </Stack.Navigator>
       </NavigationContainer>
+      </NetworkProvider>
     </SafeAreaView>
   );
 }

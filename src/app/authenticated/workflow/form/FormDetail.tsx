@@ -14,15 +14,24 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/shared/RootStackedList';
 import axios from 'axios';
 import { Languages } from 'lucide-react-native';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import { useNetwork } from "../../../../context/NetworkProvider";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type FormDetailNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'FormDetail'
 >;
 
+type FormDetailRouteProp = RouteProp<RootStackParamList, "FormDetail">;
+
 type Props = {
   navigation: FormDetailNavigationProp;
 };
+
+interface FormItem {
+  name: string;
+}
 
 type Field = {
   fieldname: string;
@@ -33,6 +42,10 @@ type Field = {
 };
 
 const FormDetail: React.FC<Props> = ({ navigation }) => {
+  //this is the network status , make it true/false to simulate offline/online
+  const isConnected = useNetwork();
+  const route = useRoute<FormDetailRouteProp>();
+  const { formName } = route.params;
   const [modalVisible, setModalVisible] = useState(false);
   const [fields, setFields] = useState<Field[]>([]);
   const [formData, setFormData] = useState<Record<string, any>>({});
@@ -41,31 +54,68 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
   const API_BASE = 'https://erp.kisanmitra.net';
 
   useEffect(() => {
-    loginAndFetchFields();
-  }, []);
+    (isConnected != null) &&
+      loginAndFetchFields();
+  }, [formName]);
+
+  //what is happening here
+  // When online → login → fetch → save for offline.
+  // When offline → load from AsyncStorage.
 
   const loginAndFetchFields = async () => {
     try {
-      await axios.post(
-        `${API_BASE}/api/method/login`,
-        {
-          usr: 'ads@aegiondynamic.com',
-          pwd: 'Csa@2025',
-        },
-        {
-          withCredentials: true,
+      let allFields: Field[] = [];
+      const cached = await AsyncStorage.getItem(`docType_${formName}`);
+      if (isConnected) {
+        if (!cached) {
+          await axios.post(
+            `${API_BASE}/api/method/login`,
+            {
+              usr: 'ads@aegiondynamic.com',
+              pwd: 'Csa@2025',
+            },
+            {
+              withCredentials: true,
+            }
+          );
+
+          const response = await axios.get(
+            `${API_BASE}/api/resource/DocType/${formName}`,
+            {
+              withCredentials: true,
+            }
+          );
+
+          allFields = response.data.data.fields;
+          //saves for offline use 
+          await AsyncStorage.setItem(`docType_${formName}`, JSON.stringify(response.data));
+          const existingDoctypes = await AsyncStorage.getItem("downloadedDoctypes");
+          const doctypes: FormItem[] = existingDoctypes ? JSON.parse(existingDoctypes) : [];
+          //syncs the list of downloaded doctypes
+          const newItem: FormItem = { name: formName };
+          if (!doctypes.some((doctype) => doctype.name === newItem.name)) {
+            doctypes.push(newItem);
+            await AsyncStorage.setItem("downloadedDoctypes", JSON.stringify(doctypes));
+          }
+        } else {
+          // Already cached, use it
+          const parsedData = JSON.parse(cached);
+          allFields = parsedData.data.fields || [
+            { fieldname: 'name', fieldtype: 'Data', label: 'Name' }
+          ];
         }
-      );
-
-      const response = await axios.get(
-        `${API_BASE}/api/resource/DocType/issue`,
-        {
-          withCredentials: true,
+      } else {
+        // Offline: use cached data
+        if (cached) {
+          const parsedData = JSON.parse(cached);
+          allFields = parsedData.data.fields || [
+            { fieldname: 'name', fieldtype: 'Data', label: 'Name' }
+          ];
+        } else {
+          console.warn("No cached data available for offline use");
+          allFields = []; 
         }
-      );
-
-      const allFields: Field[] = response.data.data.fields;
-
+      }
       const inputFields = allFields.filter(field =>
         ['Data', 'Select', 'Text', 'Int', 'Link'].includes(field.fieldtype)
       );
@@ -82,9 +132,9 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
       setLoading(false);
     } catch (error: any) {
       console.error('Error fetching data:', error.message);
+      setLoading(false);
     }
   };
-
   const handleSubmit = () => {
     console.log('Form submitted:', formData);
     setModalVisible(true);
@@ -104,15 +154,15 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Sample</Text>
+        <Text style={styles.headerTitle}>{formName}</Text>
         <TouchableOpacity>
           <Languages size={42} />
         </TouchableOpacity>
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>Sample Form 1</Text>
-        <Text style={styles.subtitle}>This is just a sample form</Text>
+        <Text style={styles.title}>{formName}</Text>
+        <Text style={styles.subtitle}>Fill in the form below</Text>
 
         {fields.map((field) => (
           <View key={field.fieldname} style={styles.inputContainer}>

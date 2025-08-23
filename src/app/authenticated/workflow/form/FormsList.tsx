@@ -5,6 +5,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/shared/RootStackedList';
 import { Languages } from 'lucide-react-native';
 import axios from 'axios';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNetwork } from "../../../../context/NetworkProvider";
+// import { fetchDocType } from '@/api';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -22,14 +25,82 @@ interface FormItem {
 const FormsList: React.FC<Props> = ({ navigation }) => {
   const [forms, setForms] = useState<FormItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [downloadStates, setDownloadStates] = useState<{ [key: string]: { isDownloaded: boolean, isDownloading: boolean } }>({});
+  const isConnected = useNetwork();
 
   const API_BASE = 'https://erp.kisanmitra.net';
 
   useEffect(() => {
-    loginAndFetchForms();
-  }, []);
+    if (isConnected !== null) {
+      loginAndFetchForms();
+    }
+  }, [isConnected]);
 
   const loginAndFetchForms = async () => {
+    setLoading(true);
+    try {
+      if (isConnected) {
+        try {
+          await axios.post(
+            `${API_BASE}/api/method/login`,
+            {
+              usr: 'ads@aegiondynamic.com',
+              pwd: 'Csa@2025',
+            },
+            { withCredentials: true }
+          );
+
+          const response = await axios.get(`${API_BASE}/api/resource/DocType`, {
+            withCredentials: true,
+          });
+
+          const data = response.data.data;
+          setForms(data);
+        } catch (onlineError: any) {
+          console.error('Error while online:', onlineError.message);
+          // You can show a toast or alert to the user here
+        }
+      } else {
+        try {
+          const stored = await AsyncStorage.getItem("downloadedDoctypes");
+          if (stored) {
+            setForms(JSON.parse(stored));
+          } else {
+            setForms([]);
+          }
+        } catch (offlineError: any) {
+          console.error('Error while offline:', offlineError.message);
+          // Show offline-specific error to user
+        }
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    const checkAllDownloaded = async () => {
+      const existingDoctypes = await AsyncStorage.getItem("downloadedDoctypes");
+      const doctypes: FormItem[] = existingDoctypes ? JSON.parse(existingDoctypes) : [];
+
+      const newDownloadStates: { [key: string]: { isDownloaded: boolean, isDownloading: boolean } } = {};
+      forms.forEach(form => {
+        const exists = doctypes.some((doctype) => doctype.name === form.name);
+        newDownloadStates[form.name] = { isDownloaded: exists, isDownloading: false };
+      });
+      setDownloadStates(newDownloadStates);
+    };
+
+    if (forms.length > 0) {
+      checkAllDownloaded();
+    }
+  }, [forms]);
+
+  const handleDownload = async (docTypeName: string) => {
+    setDownloadStates(prev => ({
+      ...prev,
+      [docTypeName]: { ...prev[docTypeName], isDownloading: true }
+    }));
+
     try {
       await axios.post(
         `${API_BASE}/api/method/login`,
@@ -40,28 +111,69 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
         { withCredentials: true }
       );
 
-      const response = await axios.get(`${API_BASE}/api/resource/DocType`, {
+      const response = await axios.get(`${API_BASE}/api/resource/DocType/${docTypeName}`, {
         withCredentials: true,
       });
+      const docTypeData = response.data;
 
-      const data = response.data.data;
-      setForms(data);
-    } catch (error: any) {
-      console.error('Error fetching forms:', error.message);
-    } finally {
-      setLoading(false);
+      //saves the doctype data
+      await AsyncStorage.setItem(`docType_${docTypeName}`, JSON.stringify(docTypeData));
+
+      //saves the list of downloaded doctypes
+      const existingDoctypes = await AsyncStorage.getItem("downloadedDoctypes");
+      const doctypes: FormItem[] = existingDoctypes ? JSON.parse(existingDoctypes) : [];
+
+      const formItem = forms.find(form => form.name === docTypeName);
+      if (formItem && !doctypes.some((doctype) => doctype.name === docTypeName)) {
+        doctypes.push(formItem);
+        await AsyncStorage.setItem("downloadedDoctypes", JSON.stringify(doctypes));
+        setDownloadStates(prev => ({
+          ...prev,
+          [docTypeName]: { isDownloaded: true, isDownloading: false }
+        }));
+      }
+    } catch (error) {
+      console.error('Error downloading doctype:', error);
+      setDownloadStates(prev => ({
+        ...prev,
+        [docTypeName]: { ...prev[docTypeName], isDownloading: false }
+      }));
     }
   };
 
-  const renderFormItem = ({ item }: { item: FormItem }) => (
-    <TouchableOpacity
-      style={styles.formItem}
-      onPress={() => navigation.navigate('FormDetail')}
-    >
-      <Text style={styles.formName}>{item.name}</Text>
-      <Text style={styles.formStatus}>Open</Text>
-    </TouchableOpacity>
-  );
+  const renderFormItem = ({ item }: { item: FormItem }) => {
+    const itemState = downloadStates[item.name] || { isDownloaded: false, isDownloading: false };
+
+    return (
+      <TouchableOpacity style={styles.formItem}
+        onPress={() => {
+
+          navigation.navigate('FormDetail', { formName: item.name });
+
+        }}
+      >
+        <Text style={styles.formName}>{item.name}</Text>
+        {
+          isConnected && (
+            itemState.isDownloading ? (
+              <ActivityIndicator size="small" color="blue" />
+            ) : itemState.isDownloaded ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={{ color: 'green', fontSize: 16, marginRight: 4 }}>✓</Text>
+                <Text style={{ color: 'green' }}>Downloaded</Text>
+              </View>
+            ) : (
+              <TouchableOpacity
+                style={{ backgroundColor: "blue", padding: 8, borderRadius: 5 }}
+                onPress={() => { handleDownload(item.name) }}
+              >
+                <Text style={{ color: "white" }}>Download</Text>
+              </TouchableOpacity>
+            ))
+        }
+      </TouchableOpacity >
+    );
+  };
 
   if (loading) {
     return (
