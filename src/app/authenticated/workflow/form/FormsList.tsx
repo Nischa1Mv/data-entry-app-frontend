@@ -7,6 +7,7 @@ import { Languages } from 'lucide-react-native';
 import axios from 'axios';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNetwork } from "../../../../context/NetworkProvider";
+import { useFocusEffect } from "@react-navigation/native";
 // import { fetchDocType } from '@/api';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
@@ -77,7 +78,7 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
       setLoading(false);
     }
   };
-  useEffect(() => {
+  useFocusEffect(() => {
     const checkAllDownloaded = async () => {
       const existingDoctypes = await AsyncStorage.getItem("downloadedDoctypes");
       const doctypes: FormItem[] = existingDoctypes ? JSON.parse(existingDoctypes) : [];
@@ -93,8 +94,8 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
     if (forms.length > 0) {
       checkAllDownloaded();
     }
-  }, [forms]);
-
+  });
+  
   const handleDownload = async (docTypeName: string) => {
     setDownloadStates(prev => ({
       ...prev,
