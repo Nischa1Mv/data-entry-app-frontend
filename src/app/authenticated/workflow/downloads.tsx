@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Modal, TextInput, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ChevronDown, ChevronRight } from "lucide-react-native"; // RN version
+import { ChevronDown, ChevronRight, Edit, Save, X } from "lucide-react-native"; // RN version
 
 interface StorageItem {
     key: string;
@@ -13,6 +13,9 @@ const Downloads: React.FC = () => {
     const [docTypeNames, setDocTypeNames] = useState<StorageItem[]>([]);
     const [docTypeData, setDocTypeData] = useState<StorageItem[]>([]);
     const [queueData, setQueueData] = useState<StorageItem[]>([]);
+    const [editingQueue, setEditingQueue] = useState<{index: number, data: any} | null>(null);
+    const [editModalVisible, setEditModalVisible] = useState(false);
+    const [editedData, setEditedData] = useState<string>("");
 
     const [collapsed, setCollapsed] = useState({
         names: false,
@@ -102,12 +105,6 @@ const Downloads: React.FC = () => {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
     };
 
-    // Remove a regular AsyncStorage key
-    const removeItem = async (key: string) => {
-        await AsyncStorage.removeItem(key);
-        fetchAsyncStorageData();
-    };
-
     // Remove doctype data and sync with downloadedDoctypes
     const removeDocTypeDataWithSync = async (key: string, doctypeData: any) => {
         try {
@@ -186,22 +183,42 @@ const Downloads: React.FC = () => {
         }
     };
 
-    // Remove a specific downloadedDoctypes item if it's an array
-    const removeDoctypeItem = async (indexToRemove: number) => {
+    // Edit queue item
+    const editQueueItem = (index: number, data: any) => {
+        setEditingQueue({ index, data });
+        setEditedData(JSON.stringify(data, null, 2));
+        setEditModalVisible(true);
+    };
+
+    const saveQueueItem = async () => {
+        if (!editingQueue) return;
+
         try {
-            const raw = await AsyncStorage.getItem("downloadedDoctypes");
+            const parsedData = JSON.parse(editedData);
+            
+            const raw = await AsyncStorage.getItem("pendingSubmissions");
             if (!raw) return;
 
-            const arr = JSON.parse(raw);
-            if (!Array.isArray(arr)) return;
+            const queue = JSON.parse(raw);
+            if (!Array.isArray(queue)) return;
 
-            arr.splice(indexToRemove, 1);
-            await AsyncStorage.setItem("downloadedDoctypes", JSON.stringify(arr));
+            queue[editingQueue.index] = parsedData;
+            await AsyncStorage.setItem("pendingSubmissions", JSON.stringify(queue));
 
+            setEditModalVisible(false);
+            setEditingQueue(null);
+            setEditedData("");
             fetchAsyncStorageData();
         } catch (e) {
-            console.error("Error removing downloadedDoctypes item:", e);
+            Alert.alert("Error", "Invalid JSON format. Please check your input.");
+            console.error("Error saving queue item:", e);
         }
+    };
+
+    const cancelEdit = () => {
+        setEditModalVisible(false);
+        setEditingQueue(null);
+        setEditedData("");
     };
 
     // Remove a specific doctype by name from downloadedDoctypes array
@@ -322,7 +339,8 @@ const Downloads: React.FC = () => {
         items: StorageItem[],
         sectionKey: keyof typeof collapsed,
         removeHandler?: (index: number) => void,
-        removeByNameHandler?: (name: string) => void
+        removeByNameHandler?: (name: string) => void,
+        editHandler?: (index: number, data: any) => void
     ) => (
         <View style={styles.section}>
             <TouchableOpacity
@@ -352,27 +370,38 @@ const Downloads: React.FC = () => {
                                         <Text style={styles.itemKey}>{item.key}</Text>
                                         <Text style={styles.itemSize}>Size: {item.size}</Text>
                                     </View>
-                                    {(removeHandler || removeByNameHandler) && (
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                if (sectionKey === 'names' && removeByNameHandler) {
-                                                    // Extract doctype name from the value
-                                                    const doctypeName = typeof item.value === 'string' 
-                                                        ? item.value 
-                                                        : item.value?.name || item.value;
-                                                    
-                                                    if (doctypeName) {
-                                                        removeDoctypeByDisplayIndex(index);
+                                    <View style={styles.buttonContainer}>
+                                        {editHandler && (
+                                            <TouchableOpacity
+                                                onPress={() => editHandler(index, item.value)}
+                                                style={styles.editButton}
+                                            >
+                                                <Edit size={16} color="#0369a1" />
+                                                <Text style={styles.editButtonText}>Edit</Text>
+                                            </TouchableOpacity>
+                                        )}
+                                        {(removeHandler || removeByNameHandler) && (
+                                            <TouchableOpacity
+                                                onPress={() => {
+                                                    if (sectionKey === 'names' && removeByNameHandler) {
+                                                        // Extract doctype name from the value
+                                                        const doctypeName = typeof item.value === 'string' 
+                                                            ? item.value 
+                                                            : item.value?.name || item.value;
+                                                        
+                                                        if (doctypeName) {
+                                                            removeDoctypeByDisplayIndex(index);
+                                                        }
+                                                    } else if (removeHandler) {
+                                                        removeHandler(index);
                                                     }
-                                                } else if (removeHandler) {
-                                                    removeHandler(index);
-                                                }
-                                            }}
-                                            style={styles.removeButton}
-                                        >
-                                            <Text style={styles.removeButtonText}>Remove</Text>
-                                        </TouchableOpacity>
-                                    )}
+                                                }}
+                                                style={styles.removeButton}
+                                            >
+                                                <Text style={styles.removeButtonText}>Remove</Text>
+                                            </TouchableOpacity>
+                                        )}
+                                    </View>
                                 </View>
                                 <View style={styles.itemValueBox}>
                                     <Text style={styles.itemValue}>
@@ -405,7 +434,45 @@ const Downloads: React.FC = () => {
                 "data",
                 (index: number) => removeDocTypeDataWithSync(docTypeData[index].key, docTypeData[index].value)
             )}
-            {renderSection("⏳ Pending Queue", queueData, "queue", removeQueueItem)}
+            {renderSection("⏳ Pending Queue", queueData, "queue", removeQueueItem, undefined, editQueueItem)}
+
+            {/* Edit Modal */}
+            <Modal
+                visible={editModalVisible}
+                animationType="slide"
+                presentationStyle="pageSheet"
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalHeader}>
+                        <Text style={styles.modalTitle}>Edit Queue Item</Text>
+                        <View style={styles.modalButtons}>
+                            <TouchableOpacity onPress={cancelEdit} style={styles.cancelButton}>
+                                <X size={20} color="#6b7280" />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalLabel}>JSON Data:</Text>
+                        <TextInput
+                            style={styles.modalTextInput}
+                            value={editedData}
+                            onChangeText={setEditedData}
+                            multiline
+                            placeholder="Enter JSON data..."
+                            textAlignVertical="top"
+                        />
+                    </View>
+                    <View style={styles.modalFooter}>
+                        <TouchableOpacity onPress={cancelEdit} style={styles.modalCancelButton}>
+                            <Text style={styles.modalCancelText}>Cancel</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={saveQueueItem} style={styles.modalSaveButton}>
+                            <Save size={16} color="white" />
+                            <Text style={styles.modalSaveText}>Save</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
         </ScrollView>
     );
 };
@@ -465,6 +532,24 @@ const styles = StyleSheet.create({
         alignItems: "flex-start",
         marginBottom: 6,
     },
+    buttonContainer: {
+        flexDirection: "row",
+        gap: 8,
+    },
+    editButton: {
+        backgroundColor: "#dbeafe",
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 6,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
+    },
+    editButtonText: {
+        color: "#0369a1",
+        fontWeight: "600",
+        fontSize: 12,
+    },
     itemKey: {
         fontWeight: "600",
         color: "#111827",
@@ -491,6 +576,88 @@ const styles = StyleSheet.create({
     itemValue: {
         fontSize: 12,
         color: "#374151",
+    },
+    // Modal styles
+    modalContainer: {
+        flex: 1,
+        backgroundColor: "#fff",
+    },
+    modalHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#e5e7eb",
+        backgroundColor: "#f9fafb",
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: "#111827",
+    },
+    modalButtons: {
+        flexDirection: "row",
+        gap: 8,
+    },
+    cancelButton: {
+        padding: 8,
+        borderRadius: 6,
+    },
+    modalContent: {
+        flex: 1,
+        padding: 16,
+    },
+    modalLabel: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: "#374151",
+        marginBottom: 8,
+    },
+    modalTextInput: {
+        flex: 1,
+        borderWidth: 1,
+        borderColor: "#d1d5db",
+        borderRadius: 8,
+        padding: 12,
+        fontSize: 14,
+        fontFamily: "monospace",
+        backgroundColor: "#f9fafb",
+    },
+    modalFooter: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        padding: 16,
+        borderTopWidth: 1,
+        borderTopColor: "#e5e7eb",
+        gap: 12,
+    },
+    modalCancelButton: {
+        flex: 1,
+        backgroundColor: "#f3f4f6",
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        alignItems: "center",
+    },
+    modalCancelText: {
+        color: "#6b7280",
+        fontWeight: "600",
+    },
+    modalSaveButton: {
+        flex: 1,
+        backgroundColor: "#0369a1",
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 8,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 6,
+    },
+    modalSaveText: {
+        color: "white",
+        fontWeight: "600",
     },
 });
 
