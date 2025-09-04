@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Modal, TextInput, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ChevronDown, ChevronRight, Edit, Save, X } from "lucide-react-native"; // RN version
+import { ChevronDown, ChevronRight, Edit, Save, X, Trash2 } from "lucide-react-native"; // RN version
 
 interface StorageItem {
     key: string;
@@ -16,16 +16,30 @@ const Downloads: React.FC = () => {
     const [editingQueue, setEditingQueue] = useState<{index: number, data: any} | null>(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [editedData, setEditedData] = useState<string>("");
+    const [formFields, setFormFields] = useState<{[key: string]: any}>({});
+    const [relatedDocType, setRelatedDocType] = useState<any>(null);
 
     const [collapsed, setCollapsed] = useState({
         names: false,
         data: false,
         queue: false,
+        json: true,
     });
 
     useEffect(() => {
         fetchAsyncStorageData();
     }, []);
+
+    // Sync editedData with formFields changes
+    useEffect(() => {
+        if (editingQueue && Object.keys(formFields).length > 0) {
+            const updatedQueueItem = {
+                ...editingQueue.data,
+                data: formFields
+            };
+            setEditedData(JSON.stringify(updatedQueueItem, null, 2));
+        }
+    }, [formFields, editingQueue]);
 
     const fetchAsyncStorageData = async () => {
         try {
@@ -187,14 +201,66 @@ const Downloads: React.FC = () => {
     const editQueueItem = (index: number, data: any) => {
         setEditingQueue({ index, data });
         setEditedData(JSON.stringify(data, null, 2));
+        
+        // Extract form data from the data.data field
+        if (data && data.data) {
+            setFormFields({ ...data.data });
+        } else {
+            setFormFields({});
+        }
+
+        // Find related doctype data
+        findRelatedDocType(data);
+        
         setEditModalVisible(true);
+    };
+
+    // Find related doctype data based on doctype name
+    const findRelatedDocType = async (queueItem: any) => {
+        try {
+            const doctypeName = queueItem?.doctype;
+            if (!doctypeName) {
+                setRelatedDocType(null);
+                return;
+            }
+
+            const keys = await AsyncStorage.getAllKeys();
+            const docTypeKeys = keys.filter(key => key.startsWith("docType_"));
+            
+            for (const key of docTypeKeys) {
+                const data = await AsyncStorage.getItem(key);
+                if (data) {
+                    const parsedData = tryParseJSON(data);
+                    if (parsedData && (parsedData.name === doctypeName || parsedData.doctype === doctypeName)) {
+                        setRelatedDocType(parsedData);
+                        return;
+                    }
+                }
+            }
+            setRelatedDocType(null);
+        } catch (e) {
+            console.error("Error finding related doctype:", e);
+            setRelatedDocType(null);
+        }
+    };
+
+    // Update a specific field in form data
+    const updateFormField = (fieldName: string, value: any) => {
+        setFormFields(prev => ({
+            ...prev,
+            [fieldName]: value
+        }));
     };
 
     const saveQueueItem = async () => {
         if (!editingQueue) return;
 
         try {
-            const parsedData = JSON.parse(editedData);
+            // Reconstruct the queue item with updated form data
+            const updatedQueueItem = {
+                ...editingQueue.data,
+                data: formFields
+            };
             
             const raw = await AsyncStorage.getItem("pendingSubmissions");
             if (!raw) return;
@@ -202,15 +268,17 @@ const Downloads: React.FC = () => {
             const queue = JSON.parse(raw);
             if (!Array.isArray(queue)) return;
 
-            queue[editingQueue.index] = parsedData;
+            queue[editingQueue.index] = updatedQueueItem;
             await AsyncStorage.setItem("pendingSubmissions", JSON.stringify(queue));
 
             setEditModalVisible(false);
             setEditingQueue(null);
             setEditedData("");
+            setFormFields({});
+            setRelatedDocType(null);
             fetchAsyncStorageData();
         } catch (e) {
-            Alert.alert("Error", "Invalid JSON format. Please check your input.");
+            Alert.alert("Error", "Failed to save queue item. Please try again.");
             console.error("Error saving queue item:", e);
         }
     };
@@ -219,6 +287,8 @@ const Downloads: React.FC = () => {
         setEditModalVisible(false);
         setEditingQueue(null);
         setEditedData("");
+        setFormFields({});
+        setRelatedDocType(null);
     };
 
     // Remove a specific doctype by name from downloadedDoctypes array
@@ -444,24 +514,92 @@ const Downloads: React.FC = () => {
             >
                 <View style={styles.modalContainer}>
                     <View style={styles.modalHeader}>
-                        <Text style={styles.modalTitle}>Edit Queue Item</Text>
-                        <View style={styles.modalButtons}>
-                            <TouchableOpacity onPress={cancelEdit} style={styles.cancelButton}>
-                                <X size={20} color="#6b7280" />
-                            </TouchableOpacity>
+                        <View>
+                            <Text style={styles.modalTitle}>Edit Queue Item</Text>
+                            {relatedDocType && (
+                                <Text style={styles.modalSubtitle}>
+                                    DocType: {relatedDocType.name || relatedDocType.doctype || 'Unknown'}
+                                </Text>
+                            )}
                         </View>
+                        <TouchableOpacity onPress={cancelEdit} style={styles.cancelButton}>
+                            <X size={20} color="#6b7280" />
+                        </TouchableOpacity>
                     </View>
-                    <View style={styles.modalContent}>
-                        <Text style={styles.modalLabel}>JSON Data:</Text>
-                        <TextInput
-                            style={styles.modalTextInput}
-                            value={editedData}
-                            onChangeText={setEditedData}
-                            multiline
-                            placeholder="Enter JSON data..."
-                            textAlignVertical="top"
-                        />
-                    </View>
+
+                    <ScrollView style={styles.modalContent}>
+                        {/* Form Fields Editor */}
+                        <View style={styles.formSection}>
+                            <Text style={styles.sectionTitle}>Form Data Fields</Text>
+                            
+                            {Object.entries(formFields).map(([key, value]) => (
+                                <View key={key} style={styles.fieldContainer}>
+                                    <View style={styles.fieldHeader}>
+                                        <Text style={styles.fieldName}>{key}</Text>
+                                    </View>
+                                    <TextInput
+                                        style={styles.fieldInput}
+                                        value={String(value || '')}
+                                        onChangeText={(text) => updateFormField(key, text)}
+                                        placeholder={`Enter value for ${key}`}
+                                        multiline={String(value || '').length > 50}
+                                        textAlignVertical="top"
+                                    />
+                                </View>
+                            ))}
+                        </View>
+
+                        {/* DocType Structure Reference */}
+                        {relatedDocType && relatedDocType.fields && (
+                            <View style={styles.referenceSection}>
+                                <Text style={styles.sectionTitle}>DocType Fields Reference</Text>
+                                <View style={styles.referenceContainer}>
+                                    {relatedDocType.fields.map((field: any, index: number) => (
+                                        <View key={index} style={styles.referenceField}>
+                                            <Text style={styles.referenceFieldName}>
+                                                {field.fieldname || field.label || `Field ${index}`}
+                                            </Text>
+                                            <Text style={styles.referenceFieldType}>
+                                                Type: {field.fieldtype || 'Unknown'}
+                                            </Text>
+                                            {field.options && (
+                                                <Text style={styles.referenceFieldOptions}>
+                                                    Options: {field.options}
+                                                </Text>
+                                            )}
+                                        </View>
+                                    ))}
+                                </View>
+                            </View>
+                        )}
+
+                        {/* Raw JSON Editor (Collapsed) */}
+                        <View style={styles.jsonSection}>
+                            <TouchableOpacity 
+                                onPress={() => setCollapsed(prev => ({ ...prev, json: !prev.json }))}
+                                style={styles.jsonToggle}
+                            >
+                                <Text style={styles.sectionTitle}>Raw JSON Data (Read Only)</Text>
+                                {collapsed.json ? <ChevronRight size={18} /> : <ChevronDown size={18} />}
+                            </TouchableOpacity>
+                            
+                            {!collapsed.json && (
+                                <View style={styles.readOnlyContainer}>
+                                    <Text style={styles.readOnlyLabel}>This updates automatically when you edit form fields above</Text>
+                                    <TextInput
+                                        style={[styles.modalTextInput, styles.readOnlyTextInput]}
+                                        value={editedData}
+                                        placeholder="JSON data will appear here"
+                                        multiline
+                                        textAlignVertical="top"
+                                        editable={false}
+                                        selectTextOnFocus={false}
+                                    />
+                                </View>
+                            )}
+                        </View>
+                    </ScrollView>
+
                     <View style={styles.modalFooter}>
                         <TouchableOpacity onPress={cancelEdit} style={styles.modalCancelButton}>
                             <Text style={styles.modalCancelText}>Cancel</Text>
@@ -507,10 +645,6 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 6,
-    },
-    sectionTitle: {
-        fontSize: 16,
-        fontWeight: "600",
     },
     itemCount: {
         fontSize: 12,
@@ -658,6 +792,115 @@ const styles = StyleSheet.create({
     modalSaveText: {
         color: "white",
         fontWeight: "600",
+    },
+    // New form editor styles
+    modalSubtitle: {
+        fontSize: 12,
+        color: "#6b7280",
+        fontStyle: "italic",
+    },
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: "#111827",
+        marginBottom: 12,
+    },
+    formSection: {
+        marginBottom: 24,
+    },
+    fieldContainer: {
+        backgroundColor: "#f9fafb",
+        borderWidth: 1,
+        borderColor: "#e5e7eb",
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 8,
+    },
+    fieldHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 8,
+    },
+    fieldName: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: "#374151",
+    },
+    deleteFieldButton: {
+        padding: 4,
+        borderRadius: 4,
+        backgroundColor: "#fee2e2",
+    },
+    fieldInput: {
+        borderWidth: 1,
+        borderColor: "#d1d5db",
+        borderRadius: 6,
+        padding: 8,
+        backgroundColor: "white",
+        fontSize: 14,
+        minHeight: 36,
+    },
+    referenceSection: {
+        marginBottom: 24,
+    },
+    referenceContainer: {
+        backgroundColor: "#f8fafc",
+        borderRadius: 8,
+        padding: 12,
+    },
+    referenceField: {
+        backgroundColor: "white",
+        borderRadius: 6,
+        padding: 8,
+        marginBottom: 6,
+        borderLeftWidth: 3,
+        borderLeftColor: "#0369a1",
+    },
+    referenceFieldName: {
+        fontSize: 13,
+        fontWeight: "600",
+        color: "#111827",
+    },
+    referenceFieldType: {
+        fontSize: 11,
+        color: "#6b7280",
+        marginTop: 2,
+    },
+    referenceFieldOptions: {
+        fontSize: 11,
+        color: "#059669",
+        marginTop: 2,
+        fontStyle: "italic",
+    },
+    jsonSection: {
+        marginBottom: 16,
+    },
+    jsonToggle: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingVertical: 8,
+        marginBottom: 8,
+    },
+    readOnlyContainer: {
+        backgroundColor: "#f8fafc",
+        borderRadius: 8,
+        padding: 12,
+        borderWidth: 1,
+        borderColor: "#e2e8f0",
+    },
+    readOnlyLabel: {
+        fontSize: 12,
+        color: "#64748b",
+        fontStyle: "italic",
+        marginBottom: 8,
+        textAlign: "center",
+    },
+    readOnlyTextInput: {
+        backgroundColor: "#f1f5f9",
+        color: "#475569",
+        borderColor: "#cbd5e1",
     },
 });
 
