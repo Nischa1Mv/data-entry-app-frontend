@@ -149,6 +149,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
     try {
       await enqueue(newSubmission);
       setFormData({}); 
+      await AsyncStorage.removeItem("tempFormData"); 
     } catch (e) {
       Alert.alert("Error", "Failed to save submission.");
     } finally {
@@ -157,14 +158,57 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const handleChange = (fieldname: string, value: any) => {
-    setFormData({ ...formData, [fieldname]: value });
+  //to remove the temp data after user uses naigation
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+      if (Object.keys(formData).length === 0) {
+        // no data to save, don't prompt
+        return;
+      }
+      // Prevent default back action
+      e.preventDefault();
+      Alert.alert(
+        "Discard changes?",
+        "You have unsaved data. Are you sure you want to go back?",
+        [
+          { text: "Cancel", style: "cancel", onPress: () => { } },
+          {
+            text: "Discard",
+            style: "destructive",
+            onPress: async () => {
+              await AsyncStorage.removeItem("tempFormData"); // clear saved draft
+              navigation.dispatch(e.data.action); // continue with back navigation
+            },
+          },
+        ]
+      );
+    });
+
+    return unsubscribe;
+  }, [navigation, formData]);
+
+  //to restore the temp data when user losses internet and wants to continue filling the form 
+  useEffect(() => {
+    const restoreForm = async () => {
+      const saved = await AsyncStorage.getItem("tempFormData");
+      if (saved) {
+        setFormData(JSON.parse(saved));
+      }
+    };
+    restoreForm();
+  }, []);
+
+  const handleChange = async (fieldname: string, value: any) => {
+    const updated = { ...formData, [fieldname]: value };
+    setFormData(updated);
+    //store the temp data on every change
+    await AsyncStorage.setItem("tempFormData", JSON.stringify(updated));
   };
 
   if (loading) {
     return <Text style={styles.loading}>Loading...</Text>;
   }
-
+  
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
