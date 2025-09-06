@@ -8,7 +8,8 @@ import axios from 'axios';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNetwork } from "../../../../context/NetworkProvider";
 import { useFocusEffect } from "@react-navigation/native";
-// import { fetchDocType } from '@/api';
+import { fetchDocType, fetchAllDocTypes, getAllDoctypesFromLocal, saveDocTypeToLocal } from '../../../../api';
+import { DocType, FormItem } from '../../../../types';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -19,9 +20,7 @@ type Props = {
   navigation: LoginScreenNavigationProp;
 };
 
-interface FormItem {
-  name: string;
-}
+
 
 const FormsList: React.FC<Props> = ({ navigation }) => {
   const [forms, setForms] = useState<FormItem[]>([]);
@@ -32,70 +31,75 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
   const API_BASE = 'https://erp.kisanmitra.net';
 
   useEffect(() => {
+    const loadForms = async () => {
+      // if connected fetch froms server
+      setLoading(true);
+      try {
+        if (isConnected) {
+          const doctypes = await loginAndFetchForms();
+          if (doctypes && doctypes.length > 0) {
+            doctypes.map(doc => doc.data).forEach(docData => {
+              if (docData && docData.name) {
+                setForms(prevForms => [...prevForms, { name: docData.name }]);
+              }
+            });
+          }
+          else {
+            // else get form local storage
+            const stored: DocType[] = await getAllDoctypesFromLocal();
+            if (stored && stored.length > 0) {
+              stored.map(doc => doc.data).forEach(docData => {
+                if (docData && docData.name) {
+                  setForms(prevForms => [...prevForms, { name: docData.name }]);
+                }
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading forms:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
     if (isConnected !== null) {
-      loginAndFetchForms();
+      loadForms();
     }
   }, [isConnected]);
 
-  const loginAndFetchForms = async () => {
-    setLoading(true);
+  const loginAndFetchForms = async (): Promise<DocType[]> => {
     try {
-      if (isConnected) {
-        try {
-          await axios.post(
-            `${API_BASE}/api/method/login`,
-            {
-              usr: 'ads@aegiondynamic.com',
-              pwd: 'Csa@2025',
-            },
-            { withCredentials: true }
-          );
-
-          const response = await axios.get(`${API_BASE}/api/resource/DocType`, {
-            withCredentials: true,
-          });
-
-          const data = response.data.data;
-          setForms(data);
-        } catch (onlineError: any) {
-          console.error('Error while online:', onlineError.message);
-          // You can show a toast or alert to the user here
-        }
-      } else {
-        try {
-          const stored = await AsyncStorage.getItem("downloadedDoctypes");
-          if (stored) {
-            setForms(JSON.parse(stored));
-          } else {
-            setForms([]);
-          }
-        } catch (offlineError: any) {
-          console.error('Error while offline:', offlineError.message);
-          // Show offline-specific error to user
-        }
-      }
-    } finally {
-      setLoading(false);
+      const data = await fetchAllDocTypes();
+      return data;
+    } catch (error) {
+      console.error('Error fetching forms:', error);
+      throw error;
     }
-  };
-  useFocusEffect(() => {
-    const checkAllDownloaded = async () => {
-      const existingDoctypes = await AsyncStorage.getItem("downloadedDoctypes");
-      const doctypes: FormItem[] = existingDoctypes ? JSON.parse(existingDoctypes) : [];
+  }
 
-      const newDownloadStates: { [key: string]: { isDownloaded: boolean, isDownloading: boolean } } = {};
-      forms.forEach(form => {
-        const exists = doctypes.some((doctype) => doctype.name === form.name);
-        newDownloadStates[form.name] = { isDownloaded: exists, isDownloading: false };
-      });
-      setDownloadStates(newDownloadStates);
+  useFocusEffect(() => {
+    const checkDownloadStatus = async () => {
+      const existingDoctypeData = await AsyncStorage.getItem("downloadDoctypes");
+      const allDocTypeStorage: Record<string, any> = existingDoctypeData
+        ? JSON.parse(existingDoctypeData)
+        : {};
+      const initialDownloadStates = forms.reduce((acc, f) => {
+        acc[f.name] = {
+          isDownloaded: !!allDocTypeStorage[f.name], // true if exists in storage
+          isDownloading: false
+        };
+        return acc;
+      }, {} as Record<string, { isDownloaded: boolean; isDownloading: boolean }>);
+
+      setDownloadStates(initialDownloadStates);
     };
 
-    if (forms.length > 0) {
-      checkAllDownloaded();
+    if (forms.length > 0 && isConnected) {
+      checkDownloadStatus();
     }
   });
-  
+
+
   const handleDownload = async (docTypeName: string) => {
     setDownloadStates(prev => ({
       ...prev,
@@ -103,38 +107,19 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
     }));
 
     try {
-      await axios.post(
-        `${API_BASE}/api/method/login`,
-        {
-          usr: 'ads@aegiondynamic.com',
-          pwd: 'Csa@2025',
-        },
-        { withCredentials: true }
-      );
-
-      const response = await axios.get(`${API_BASE}/api/resource/DocType/${docTypeName}`, {
-        withCredentials: true,
-      });
-      const docTypeData = response.data;
+      const docTypeData = await fetchDocType(docTypeName);
 
       //saves the doctype data
-      await AsyncStorage.setItem(`docType_${docTypeName}`, JSON.stringify(docTypeData));
+      await saveDocTypeToLocal(docTypeName, docTypeData);
 
-      //saves the list of downloaded doctypes
-      const existingDoctypes = await AsyncStorage.getItem("downloadedDoctypes");
-      const doctypes: FormItem[] = existingDoctypes ? JSON.parse(existingDoctypes) : [];
-
-      const formItem = forms.find(form => form.name === docTypeName);
-      if (formItem && !doctypes.some((doctype) => doctype.name === docTypeName)) {
-        doctypes.push(formItem);
-        await AsyncStorage.setItem("downloadedDoctypes", JSON.stringify(doctypes));
-        setDownloadStates(prev => ({
-          ...prev,
-          [docTypeName]: { isDownloaded: true, isDownloading: false }
-        }));
-      }
+      // Update download state to show as downloaded
+      setDownloadStates(prev => ({
+        ...prev,
+        [docTypeName]: { isDownloaded: true, isDownloading: false }
+      }));
     } catch (error) {
       console.error('Error downloading doctype:', error);
+      // Reset download state on error
       setDownloadStates(prev => ({
         ...prev,
         [docTypeName]: { ...prev[docTypeName], isDownloading: false }

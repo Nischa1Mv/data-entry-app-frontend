@@ -10,8 +10,7 @@ interface StorageItem {
 }
 
 const Downloads: React.FC = () => {
-    const [docTypeNames, setDocTypeNames] = useState<StorageItem[]>([]);
-    const [docTypeData, setDocTypeData] = useState<StorageItem[]>([]);
+    const [downloadDoctypesData, setDownloadDoctypesData] = useState<StorageItem[]>([]);
     const [queueData, setQueueData] = useState<StorageItem[]>([]);
     const [editingQueue, setEditingQueue] = useState<{index: number, data: any} | null>(null);
     const [editModalVisible, setEditModalVisible] = useState(false);
@@ -20,8 +19,7 @@ const Downloads: React.FC = () => {
     const [relatedDocType, setRelatedDocType] = useState<any>(null);
 
     const [collapsed, setCollapsed] = useState({
-        names: false,
-        data: false,
+        downloadDoctypes: false,
         queue: false,
         json: true,
     });
@@ -43,8 +41,7 @@ const Downloads: React.FC = () => {
 
     const fetchAsyncStorageData = async () => {
         try {
-            const names: StorageItem[] = [];
-            const data: StorageItem[] = [];
+            const downloadDoctypes: StorageItem[] = [];
             const queue: StorageItem[] = [];
 
             const keys = await AsyncStorage.getAllKeys();
@@ -61,23 +58,20 @@ const Downloads: React.FC = () => {
                     size: formatBytes(size),
                 };
 
-                if (key.startsWith("downloadedDoctypes")) {
-                    // If it's an array of doctype names, create separate items for each
-                    if (Array.isArray(parsedValue)) {
-                        parsedValue.forEach((val: any, idx: number) => {
-                            const doctypeName = typeof val === 'string' ? val : val?.name || `Item ${idx}`;
+                if (key === "downloadDoctypes") {
+                    // Handle Record<string, {}> structure
+                    if (parsedValue && typeof parsedValue === 'object' && !Array.isArray(parsedValue)) {
+                        Object.entries(parsedValue).forEach(([doctypeName, doctypeData]: [string, any]) => {
                             const subItem = {
-                                key: `${key}[${idx}] - ${doctypeName}`,
-                                value: val,
-                                size: formatBytes(new TextEncoder().encode(JSON.stringify(val)).length),
+                                key: `${key}.${doctypeName}`,
+                                value: doctypeData,
+                                size: formatBytes(new TextEncoder().encode(JSON.stringify(doctypeData)).length),
                             };
-                            names.push(subItem);
+                            downloadDoctypes.push(subItem);
                         });
                     } else {
-                        names.push(item);
+                        downloadDoctypes.push(item);
                     }
-                } else if (key.startsWith("docType_")) {
-                    data.push(item);
                 } else if (key === "pendingSubmissions") {
                     // If it's an array, split it into individual items for rendering
                     if (Array.isArray(parsedValue)) {
@@ -95,8 +89,7 @@ const Downloads: React.FC = () => {
                 }
             }
 
-            setDocTypeNames(names);
-            setDocTypeData(data);
+            setDownloadDoctypesData(downloadDoctypes);
             setQueueData(queue);
         } catch (e) {
             console.error("Error fetching AsyncStorage data:", e);
@@ -119,67 +112,6 @@ const Downloads: React.FC = () => {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
     };
 
-    // Remove doctype data and sync with downloadedDoctypes
-    const removeDocTypeDataWithSync = async (key: string, doctypeData: any) => {
-        try {
-            // Remove the doctype data entry
-            await AsyncStorage.removeItem(key);
-
-            // Extract doctype name from the data
-            let doctypeName = null;
-            if (doctypeData && typeof doctypeData === 'object') {
-                // Try multiple possible field names for the doctype name
-                doctypeName = doctypeData.name || 
-                             doctypeData.doctype || 
-                             doctypeData.title || 
-                             doctypeData.doc_type ||
-                             doctypeData.type;
-                
-                // If it's nested in a data object
-                if (!doctypeName && doctypeData.data) {
-                    doctypeName = doctypeData.data.name || 
-                                 doctypeData.data.doctype || 
-                                 doctypeData.data.title;
-                }
-            }
-
-            console.log("Attempting to sync removal for doctype:", doctypeName);
-
-            // If we found a doctype name, also remove it from downloadedDoctypes
-            if (doctypeName) {
-                const raw = await AsyncStorage.getItem("downloadedDoctypes");
-                if (raw) {
-                    const arr = JSON.parse(raw);
-                    if (Array.isArray(arr)) {
-                        const originalLength = arr.length;
-                        const filteredArr = arr.filter(item => {
-                            // Handle both string items and object items
-                            if (typeof item === 'string') {
-                                return item !== doctypeName;
-                            } else if (typeof item === 'object' && item.name) {
-                                return item.name !== doctypeName;
-                            }
-                            return true;
-                        });
-                        
-                        if (filteredArr.length !== originalLength) {
-                            await AsyncStorage.setItem("downloadedDoctypes", JSON.stringify(filteredArr));
-                            console.log("Successfully synced removal from downloadedDoctypes");
-                        } else {
-                            console.log("No matching doctype found in downloadedDoctypes to remove");
-                        }
-                    }
-                }
-            } else {
-                console.log("Could not extract doctype name from data:", doctypeData);
-            }
-
-            fetchAsyncStorageData();
-        } catch (e) {
-            console.error("Error removing doctype data with sync:", e);
-        }
-    };
-
     const removeQueueItem = async (indexToRemove: number) => {
         try {
             const raw = await AsyncStorage.getItem("pendingSubmissions");
@@ -194,6 +126,32 @@ const Downloads: React.FC = () => {
             fetchAsyncStorageData();
         } catch (e) {
             console.error("Error removing queue item:", e);
+        }
+    };
+
+    // Remove downloadDoctypes item
+    const removeDownloadDoctypeItem = async (index: number) => {
+        try {
+            const raw = await AsyncStorage.getItem("downloadDoctypes");
+            if (!raw) return;
+
+            const data = JSON.parse(raw);
+            if (typeof data !== 'object' || Array.isArray(data)) return;
+
+            // Get the doctype name from the displayed item
+            const downloadDoctypeItem = downloadDoctypesData[index];
+            if (!downloadDoctypeItem) return;
+
+            // Extract doctype name from key (format: "downloadDoctypes.doctypeName")
+            const doctypeName = downloadDoctypeItem.key.replace("downloadDoctypes.", "");
+            
+            // Remove the specific doctype from the record
+            delete data[doctypeName];
+            
+            await AsyncStorage.setItem("downloadDoctypes", JSON.stringify(data));
+            fetchAsyncStorageData();
+        } catch (e) {
+            console.error("Error removing downloadDoctypes item:", e);
         }
     };
 
@@ -291,115 +249,6 @@ const Downloads: React.FC = () => {
         setRelatedDocType(null);
     };
 
-    // Remove a specific doctype by name from downloadedDoctypes array
-    const removeDoctypeByName = async (doctypeName: string) => {
-        try {
-            const raw = await AsyncStorage.getItem("downloadedDoctypes");
-            if (!raw) return;
-
-            const arr = JSON.parse(raw);
-            if (!Array.isArray(arr)) return;
-
-            const filteredArr = arr.filter(item => {
-                // Handle both string items and object items
-                if (typeof item === 'string') {
-                    return item !== doctypeName;
-                } else if (typeof item === 'object' && item.name) {
-                    return item.name !== doctypeName;
-                }
-                return true;
-            });
-
-            await AsyncStorage.setItem("downloadedDoctypes", JSON.stringify(filteredArr));
-
-            console.log("Attempting to sync removal of doctype data for:", doctypeName);
-
-            // Also remove corresponding docType_ data
-            await removeCorrespondingDocTypeData(doctypeName);
-
-            fetchAsyncStorageData();
-        } catch (e) {
-            console.error("Error removing doctype by name:", e);
-        }
-    };
-
-    // Remove a specific doctype by index from the displayed list
-    const removeDoctypeByDisplayIndex = async (displayIndex: number) => {
-        try {
-            const raw = await AsyncStorage.getItem("downloadedDoctypes");
-            if (!raw) return;
-
-            const arr = JSON.parse(raw);
-            if (!Array.isArray(arr)) return;
-
-            // Get the doctype name before removing it
-            const doctypeToRemove = arr[displayIndex];
-            let doctypeName = null;
-            
-            if (typeof doctypeToRemove === 'string') {
-                doctypeName = doctypeToRemove;
-            } else if (typeof doctypeToRemove === 'object' && doctypeToRemove.name) {
-                doctypeName = doctypeToRemove.name;
-            }
-
-            // Remove from downloadedDoctypes array
-            arr.splice(displayIndex, 1);
-            await AsyncStorage.setItem("downloadedDoctypes", JSON.stringify(arr));
-
-            console.log("Attempting to sync removal of doctype data for:", doctypeName);
-
-            // If we have a doctype name, also remove corresponding docType_ data
-            if (doctypeName) {
-                await removeCorrespondingDocTypeData(doctypeName);
-            }
-
-            fetchAsyncStorageData();
-        } catch (e) {
-            console.error("Error removing doctype by index:", e);
-        }
-    };
-
-    // Remove corresponding docType_ data based on doctype name
-    const removeCorrespondingDocTypeData = async (doctypeName: string) => {
-        try {
-            const keys = await AsyncStorage.getAllKeys();
-            const docTypeKeys = keys.filter(key => key.startsWith("docType_"));
-            
-            for (const key of docTypeKeys) {
-                const data = await AsyncStorage.getItem(key);
-                if (data) {
-                    const parsedData = tryParseJSON(data);
-                    
-                    // Check if this doctype data matches the name we're looking for
-                    let dataName = null;
-                    if (parsedData && typeof parsedData === 'object') {
-                        dataName = parsedData.name || 
-                                  parsedData.doctype || 
-                                  parsedData.title || 
-                                  parsedData.doc_type ||
-                                  parsedData.type;
-                        
-                        // Check nested data object
-                        if (!dataName && parsedData.data) {
-                            dataName = parsedData.data.name || 
-                                      parsedData.data.doctype || 
-                                      parsedData.data.title;
-                        }
-                    }
-                    
-                    // If names match, remove this doctype data
-                    if (dataName === doctypeName) {
-                        await AsyncStorage.removeItem(key);
-                        console.log(`Removed corresponding doctype data: ${key}`);
-                        break; // Assuming one doctype data per name
-                    }
-                }
-            }
-        } catch (e) {
-            console.error("Error removing corresponding doctype data:", e);
-        }
-    };
-
     const toggleCollapse = (section: keyof typeof collapsed) => {
         setCollapsed((prev) => ({ ...prev, [section]: !prev[section] }));
     };
@@ -450,22 +299,9 @@ const Downloads: React.FC = () => {
                                                 <Text style={styles.editButtonText}>Edit</Text>
                                             </TouchableOpacity>
                                         )}
-                                        {(removeHandler || removeByNameHandler) && (
+                                        {removeHandler && (
                                             <TouchableOpacity
-                                                onPress={() => {
-                                                    if (sectionKey === 'names' && removeByNameHandler) {
-                                                        // Extract doctype name from the value
-                                                        const doctypeName = typeof item.value === 'string' 
-                                                            ? item.value 
-                                                            : item.value?.name || item.value;
-                                                        
-                                                        if (doctypeName) {
-                                                            removeDoctypeByDisplayIndex(index);
-                                                        }
-                                                    } else if (removeHandler) {
-                                                        removeHandler(index);
-                                                    }
-                                                }}
+                                                onPress={() => removeHandler(index)}
                                                 style={styles.removeButton}
                                             >
                                                 <Text style={styles.removeButtonText}>Remove</Text>
@@ -492,17 +328,10 @@ const Downloads: React.FC = () => {
         <ScrollView style={styles.container}>
             <Text style={styles.title}>AsyncStorage Manager</Text>
             {renderSection(
-                "📄 downloadedDoctypes", 
-                docTypeNames, 
-                "names", 
-                undefined,
-                removeDoctypeByName
-            )}
-            {renderSection(
-                "📑 DocType Data",
-                docTypeData,
-                "data",
-                (index: number) => removeDocTypeDataWithSync(docTypeData[index].key, docTypeData[index].value)
+                " Download Doctypes",
+                downloadDoctypesData,
+                "downloadDoctypes",
+                removeDownloadDoctypeItem
             )}
             {renderSection("⏳ Pending Queue", queueData, "queue", removeQueueItem, undefined, editQueueItem)}
 
