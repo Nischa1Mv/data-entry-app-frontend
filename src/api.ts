@@ -1,6 +1,6 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DocType } from "./types";
+import { DocType, FormItem } from "./types";
 
 const API_BASE = "https://erp.kisanmitra.net";
 
@@ -16,7 +16,7 @@ export async function login(username: string, password: string) {
 }
 
 //fetch all doctypes
-export async function fetchAllDocTypes(): Promise<DocType[]> {
+export async function fetchAllDocTypeNamess(): Promise<FormItem[]> {
   try {
     await axios.post(
       `${API_BASE}/api/method/login`,
@@ -61,40 +61,52 @@ export async function fetchDocType(docTypeName: string): Promise<DocType> {
   }
 }
 
-export async function getAllDoctypesFromLocal(): Promise<DocType[]> {
+export async function getAllDoctypesFromLocal(): Promise<Record<string, DocType>> {
   try {
-    const stored = await AsyncStorage.getItem("downloadedDoctypes");
+    const stored = await AsyncStorage.getItem("downloadDoctypes");
     if (stored) {
-      return JSON.parse(stored);
+      return JSON.parse(stored) as Record<string, DocType>;
     } else {
-      return [];
+      return {};
     }
+  } catch (error) {
+    console.error("Error fetching local doctypes:", error);
+    throw error as Error;
   }
-  catch (error) {
-    console.error('Error fetching local doctypes:', error);
+}
+
+export async function getAllDocTypeNames(): Promise<FormItem[]> {
+  try {
+    const allDoctypes = await getAllDoctypesFromLocal();
+
+    return Object.keys(allDoctypes).map((docTypeName) => ({
+      name: docTypeName,
+    }));
+  } catch (error) {
+    console.error("Error fetching docType names:", error);
     throw error as Error;
   }
 }
 
 export async function getDocTypeFromLocal(docTypeName: string): Promise<DocType> {
   try {
-    const reponse = await AsyncStorage.getItem(`downlodDocTypes[${docTypeName}]`);
-    if (reponse) {
-      return JSON.parse(reponse);
-    }
-    else {
+    const stored = await AsyncStorage.getItem("downloadDoctypes");
+    if (stored) {
+      const allDoctypes = JSON.parse(stored) as Record<string, DocType>;
+      return allDoctypes[docTypeName] || ({} as DocType);
+    } else {
       return {} as DocType;
     }
-  }
-  catch (error) {
+  } catch (error) {
     console.error(`Error fetching local doctype: ${docTypeName}:`, error);
     throw error as Error;
   }
 }
+
 export async function saveDocTypeToLocal(docTypeName: string, docTypeData: DocType): Promise<void> {
   try {
     const existingDoctypeData = await AsyncStorage.getItem("downloadDoctypes");
-    let allDocTypeStorage: Record<string, {}> = existingDoctypeData ? JSON.parse(existingDoctypeData) : {};
+    let allDocTypeStorage: Record<string, DocType> = existingDoctypeData ? JSON.parse(existingDoctypeData) : {};
     allDocTypeStorage[docTypeName] = docTypeData;
     await AsyncStorage.setItem("downloadDoctypes", JSON.stringify(allDocTypeStorage));
   } catch (error) {

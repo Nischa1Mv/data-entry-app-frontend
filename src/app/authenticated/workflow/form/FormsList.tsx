@@ -1,14 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/shared/RootStackedList';
 import { Languages } from 'lucide-react-native';
-import axios from 'axios';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNetwork } from "../../../../context/NetworkProvider";
 import { useFocusEffect } from "@react-navigation/native";
-import { fetchDocType, fetchAllDocTypes, getAllDoctypesFromLocal, saveDocTypeToLocal } from '../../../../api';
+import { fetchDocType, fetchAllDocTypeNamess, getAllDoctypesFromLocal, saveDocTypeToLocal, getAllDocTypeNames } from '../../../../api';
 import { DocType, FormItem } from '../../../../types';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
@@ -20,41 +19,27 @@ type Props = {
   navigation: LoginScreenNavigationProp;
 };
 
-
-
 const FormsList: React.FC<Props> = ({ navigation }) => {
   const [forms, setForms] = useState<FormItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [downloadStates, setDownloadStates] = useState<{ [key: string]: { isDownloaded: boolean, isDownloading: boolean } }>({});
-  const isConnected = useNetwork();
+  const isConnected = false;
 
   const API_BASE = 'https://erp.kisanmitra.net';
 
   useEffect(() => {
     const loadForms = async () => {
-      // if connected fetch froms server
+      // if connected fetch from server
       setLoading(true);
       try {
         if (isConnected) {
-          const doctypes = await loginAndFetchForms();
-          if (doctypes && doctypes.length > 0) {
-            doctypes.map(doc => doc.data).forEach(docData => {
-              if (docData && docData.name) {
-                setForms(prevForms => [...prevForms, { name: docData.name }]);
-              }
-            });
-          }
-          else {
-            // else get form local storage
-            const stored: DocType[] = await getAllDoctypesFromLocal();
-            if (stored && stored.length > 0) {
-              stored.map(doc => doc.data).forEach(docData => {
-                if (docData && docData.name) {
-                  setForms(prevForms => [...prevForms, { name: docData.name }]);
-                }
-              });
-            }
-          }
+          const docTypeNames = await loginAndFetchForms() as FormItem[];
+          setForms(docTypeNames);
+        }
+        else {
+          // else get form local storage
+          const stored = await getAllDocTypeNames() as FormItem[];
+          setForms(stored);
         }
       } catch (error) {
         console.error('Error loading forms:', error);
@@ -67,9 +52,9 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
     }
   }, [isConnected]);
 
-  const loginAndFetchForms = async (): Promise<DocType[]> => {
+  const loginAndFetchForms = async (): Promise<FormItem[]> => {
     try {
-      const data = await fetchAllDocTypes();
+      const data = await fetchAllDocTypeNamess() as FormItem[];
       return data;
     } catch (error) {
       console.error('Error fetching forms:', error);
