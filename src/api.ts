@@ -54,7 +54,10 @@ export async function fetchDocType(docTypeName: string): Promise<DocType> {
     const response = await axios.get(`${API_BASE}/api/resource/DocType/${docTypeName}`, {
       withCredentials: true,
     });
-    return response.data;
+    if (!response.data || !response.data.data) {
+      throw new Error(`No data found for doctype: ${docTypeName}`);
+    }
+    return response.data as DocType;
   } catch (error) {
     console.error('Error fetching doctype data:', error);
     throw error as Error;
@@ -91,9 +94,10 @@ export async function getAllDocTypeNames(): Promise<FormItem[]> {
 export async function getDocTypeFromLocal(docTypeName: string): Promise<DocType> {
   try {
     const stored = await AsyncStorage.getItem("downloadDoctypes");
-    if (stored) {
-      const allDoctypes = JSON.parse(stored) as Record<string, DocType>;
-      return allDoctypes[docTypeName] || ({} as DocType);
+    if (stored && JSON.parse(stored)[docTypeName]) {
+      console.log("stored value:", stored);
+      const DocType = JSON.parse(stored)[docTypeName]
+      return DocType.data ? DocType.data as DocType : {} as DocType;
     } else {
       return {} as DocType;
     }
@@ -103,12 +107,16 @@ export async function getDocTypeFromLocal(docTypeName: string): Promise<DocType>
   }
 }
 
-export async function saveDocTypeToLocal(docTypeName: string, docTypeData: DocType): Promise<void> {
+export async function saveDocTypeToLocal(docTypeName: string, docTypeData: DocType): Promise<boolean> {
   try {
     const existingDoctypeData = await AsyncStorage.getItem("downloadDoctypes");
     let allDocTypeStorage: Record<string, DocType> = existingDoctypeData ? JSON.parse(existingDoctypeData) : {};
     allDocTypeStorage[docTypeName] = docTypeData;
     await AsyncStorage.setItem("downloadDoctypes", JSON.stringify(allDocTypeStorage));
+    console.log(`DocType ${docTypeName} saved locally.`);
+    const reponse = await getDocTypeFromLocal(docTypeName);
+    if (reponse) return true;
+    else return false;
   } catch (error) {
     console.error(`Error saving local doctype: ${docTypeName}:`, error);
     throw error as Error;

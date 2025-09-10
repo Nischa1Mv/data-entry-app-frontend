@@ -13,12 +13,13 @@ import { SelectList } from 'react-native-dropdown-select-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/shared/RootStackedList';
-import axios from 'axios';
 import { Languages } from 'lucide-react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { useNetwork } from "../../../../context/NetworkProvider";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { enqueue } from '../../../pendingQueue';
+import { fetchDocType, getDocTypeFromLocal, saveDocTypeToLocal } from '../../../../api';
+import { DocType } from '../../../../types';
 
 type FormDetailNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -31,11 +32,8 @@ type Props = {
   navigation: FormDetailNavigationProp;
 };
 
-interface FormItem {
-  name: string;
-}
 
-type Field = {
+type RawField = {
   fieldname: string;
   fieldtype: string;
   label: string;
@@ -49,7 +47,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
   const route = useRoute<FormDetailRouteProp>();
   const { formName } = route.params;
   const [modalVisible, setModalVisible] = useState(false);
-  const [fields, setFields] = useState<Field[]>([]);
+  const [fields, setFields] = useState<RawField[]>([])
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
 
@@ -65,59 +63,49 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
   // When offline → load from AsyncStorage.
 
   const loginAndFetchFields = async () => {
+    // console.log("Form Name:", formName);
+    let allFields: RawField[] = [];
+    // console.log("Network status:", isConnected ? "Online" : "Offline");
+
     try {
-      let allFields: Field[] = [];
-      const cached = await AsyncStorage.getItem(`docType_${formName}`);
-      if (isConnected) {
-        if (!cached) {
-          await axios.post(
-            `${API_BASE}/api/method/login`,
-            {
-              usr: 'ads@aegiondynamic.com',
-              pwd: 'Csa@2025',
-            },
-            {
-              withCredentials: true,
+      // console.log("Attempting to fetch doctype:", formName);
+      const savedDoctypeData = await getDocTypeFromLocal(formName) as DocType;
+      if (savedDoctypeData && Object.keys(savedDoctypeData).length > 0) {
+        const filteredFields: RawField[] = savedDoctypeData.fields.map((field: RawField) => ({
+          fieldname: field.fieldname,
+          fieldtype: field.fieldtype,
+          label: field.label,
+          options: field.options,
+        }));
+        allFields = filteredFields;
+      }
+      else {
+        // if cache is empty+
+        if (isConnected) {
+          //saves for offline use
+          const docTypeData = await fetchDocType(formName);
+          //working till here
+          if (docTypeData) {
+            const isDataSaved = await saveDocTypeToLocal(formName, docTypeData);
+            const savedDoctypeData = await getDocTypeFromLocal(formName) as DocType;
+            if (savedDoctypeData && Object.keys(savedDoctypeData).length > 0) {
+              const filteredFields: RawField[] = savedDoctypeData.fields.map((field: RawField) => ({
+                fieldname: field.fieldname,
+                fieldtype: field.fieldtype,
+                label: field.label,
+                options: field.options,
+              }));
+              allFields = filteredFields;
             }
-          );
-
-          const response = await axios.get(
-            `${API_BASE}/api/resource/DocType/${formName}`,
-            {
-              withCredentials: true,
-            }
-          );
-
-          allFields = response.data.data.fields;
-          //saves for offline use 
-          await AsyncStorage.setItem(`docType_${formName}`, JSON.stringify(response.data));
-          const existingDoctypes = await AsyncStorage.getItem("downloadedDoctypes");
-          const doctypes: FormItem[] = existingDoctypes ? JSON.parse(existingDoctypes) : [];
-          //syncs the list of downloaded doctypes
-          const newItem: FormItem = { name: formName };
-          if (!doctypes.some((doctype) => doctype.name === newItem.name)) {
-            doctypes.push(newItem);
-            await AsyncStorage.setItem("downloadedDoctypes", JSON.stringify(doctypes));
           }
-        } else {
-          // Already cached, use it
-          const parsedData = JSON.parse(cached);
-          allFields = parsedData.data.fields || [
-            { fieldname: 'name', fieldtype: 'Data', label: 'Name' }
-          ];
         }
-      } else {
-        // Offline: use cached data
-        if (cached) {
-          const parsedData = JSON.parse(cached);
-          allFields = parsedData.data.fields || [
-            { fieldname: 'name', fieldtype: 'Data', label: 'Name' }
-          ];
-        } else {
+        else {
           console.warn("No cached data available for offline use");
           allFields = [];
+          console.log(allFields);
         }
       }
+
       const inputFields = allFields.filter(field =>
         ['Data', 'Select', 'Text', 'Int', 'Link'].includes(field.fieldtype)
       );
@@ -148,12 +136,12 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
     setLoading(true);
     try {
       await enqueue(newSubmission);
-      setFormData({}); 
-      await AsyncStorage.removeItem("tempFormData"); 
+      setFormData({});
+      await AsyncStorage.removeItem("tempFormData");
     } catch (e) {
       Alert.alert("Error", "Failed to save submission.");
     } finally {
-      setLoading(false); 
+      setLoading(false);
       setModalVisible(true);
     }
   };
@@ -208,7 +196,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
   if (loading) {
     return <Text style={styles.loading}>Loading...</Text>;
   }
-  
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
