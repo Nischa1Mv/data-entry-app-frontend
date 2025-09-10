@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useState, useContext } from "react";
 import NetInfo from "@react-native-community/netinfo";
+import { TreeDeciduous } from "lucide-react-native";
 
 interface NetworkContextProps {
   isConnected: boolean;
@@ -11,9 +12,15 @@ export const NetworkProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [isConnected, setIsConnected] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = NetInfo.addEventListener((state) => {
-      setIsConnected(!!state.isConnected);
-    });
+    const unsubscribe = NetInfo.addEventListener(state => {
+      if (state.isConnected === false) {
+        setIsConnected(false)
+      }
+      else {
+        console.log("connected")
+        setIsConnected(true)
+      }
+    })
 
     return () => unsubscribe();
   }, []);

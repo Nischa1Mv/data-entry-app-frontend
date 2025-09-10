@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   StatusBar,
   useColorScheme,
@@ -11,26 +11,14 @@ import Login from './public/Login';
 import ERP from './authenticated/Home';
 import FormsList from './authenticated/workflow/form/FormsList';
 import FormDetail from './authenticated/workflow/form/FormDetail';
-
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import { RootStackParamList } from '@/shared/RootStackedList';
-import { NetworkProvider } from 'react-native-offline';
+import { NetworkProvider } from '../context/NetworkProvider';
 import Downloads from './authenticated/workflow/downloads';
 
 enableScreens();
 
-
-
-
 function App(): React.JSX.Element {
-
-  // useEffect(() => {
-    // autoProcessOnNetwork(async (item) => {
-    //   await axios.post("https://example.com/api/submit", item);
-    // });
-
-  // }, []);
-
   const isDarkMode = useColorScheme() === 'dark';
   const Stack = createNativeStackNavigator<RootStackParamList>();
 

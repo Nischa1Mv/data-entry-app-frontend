@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -8,7 +8,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNetwork } from "../../../../context/NetworkProvider";
 import { useFocusEffect } from "@react-navigation/native";
 import { fetchDocType, fetchAllDocTypeNamess, saveDocTypeToLocal, getAllDocTypeNames } from '../../../../api';
-import { DocType, FormItem } from '../../../../types';
+import { FormItem } from '../../../../types';
+import NetInfo from '@react-native-community/netinfo'
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -23,7 +24,7 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
   const [forms, setForms] = useState<FormItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [downloadStates, setDownloadStates] = useState<{ [key: string]: { isDownloaded: boolean, isDownloading: boolean } }>({});
-  const isConnected = useNetwork();
+  const { isConnected } = useNetwork();
 
   useEffect(() => {
     const loadForms = async () => {

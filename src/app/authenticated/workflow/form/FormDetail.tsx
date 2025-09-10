@@ -18,8 +18,8 @@ import { RouteProp, useRoute } from '@react-navigation/native';
 import { useNetwork } from "../../../../context/NetworkProvider";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { enqueue } from '../../../pendingQueue';
-import { fetchDocType, getDocTypeFromLocal, saveDocTypeToLocal } from '../../../../api';
-import { DocType } from '../../../../types';
+import { fetchDocType, getDocTypeFromLocal, saveDocTypeToLocal, extractFields } from '../../../../api';
+import { RawField } from '../../../../types';
 
 type FormDetailNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -33,17 +33,9 @@ type Props = {
 };
 
 
-type RawField = {
-  fieldname: string;
-  fieldtype: string;
-  label: string;
-  options?: string;
-  default?: string;
-};
-
 const FormDetail: React.FC<Props> = ({ navigation }) => {
   //this is the network status , make it true/false to simulate offline/online
-  const isConnected = useNetwork();
+  const { isConnected } = useNetwork();
   const route = useRoute<FormDetailRouteProp>();
   const { formName } = route.params;
   const [modalVisible, setModalVisible] = useState(false);
@@ -52,6 +44,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
 
   const API_BASE = 'https://erp.kisanmitra.net';
+
 
   useEffect(() => {
     (isConnected != null) &&
@@ -63,47 +56,20 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
   // When offline → load from AsyncStorage.
 
   const loginAndFetchFields = async () => {
-    // console.log("Form Name:", formName);
     let allFields: RawField[] = [];
-    // console.log("Network status:", isConnected ? "Online" : "Offline");
 
     try {
-      // console.log("Attempting to fetch doctype:", formName);
-      const savedDoctypeData = await getDocTypeFromLocal(formName) as DocType;
-      if (savedDoctypeData && Object.keys(savedDoctypeData).length > 0) {
-        const filteredFields: RawField[] = savedDoctypeData.fields.map((field: RawField) => ({
-          fieldname: field.fieldname,
-          fieldtype: field.fieldtype,
-          label: field.label,
-          options: field.options,
-        }));
-        allFields = filteredFields;
+      let savedDoctypeData = await getDocTypeFromLocal(formName);
+      if (!savedDoctypeData && isConnected) {
+        // fetch + save if not available locally
+        const fetched = await fetchDocType(formName);
+        await saveDocTypeToLocal(formName, fetched);
+        savedDoctypeData = fetched;
       }
-      else {
-        // if cache is empty+
-        if (isConnected) {
-          //saves for offline use
-          const docTypeData = await fetchDocType(formName);
-          //working till here
-          if (docTypeData) {
-            const isDataSaved = await saveDocTypeToLocal(formName, docTypeData);
-            const savedDoctypeData = await getDocTypeFromLocal(formName) as DocType;
-            if (savedDoctypeData && Object.keys(savedDoctypeData).length > 0) {
-              const filteredFields: RawField[] = savedDoctypeData.fields.map((field: RawField) => ({
-                fieldname: field.fieldname,
-                fieldtype: field.fieldtype,
-                label: field.label,
-                options: field.options,
-              }));
-              allFields = filteredFields;
-            }
-          }
-        }
-        else {
-          console.warn("No cached data available for offline use");
-          allFields = [];
-          console.log(allFields);
-        }
+      if (savedDoctypeData) {
+        allFields = extractFields(savedDoctypeData);
+      } else {
+        console.warn("No cached data available for offline use");
       }
 
       const inputFields = allFields.filter(field =>
@@ -116,12 +82,12 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
           defaults[field.fieldname] = field.default;
         }
       });
-
       setFormData(defaults);
       setFields(inputFields);
       setLoading(false);
     } catch (error: any) {
-      console.error('Error fetching data:', error.message);
+      console.error("Error in loginAndFetchFields:", error);
+    } finally {
       setLoading(false);
     }
   };

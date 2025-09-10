@@ -1,6 +1,13 @@
 export interface FormItem {
     name: string;
 }
+export type RawField = {
+    fieldname: string;
+    fieldtype: string;
+    label: string;
+    options?: string;
+    default?: string;
+};
 export interface DocType {
     data: Data;
     fields: Field[]
