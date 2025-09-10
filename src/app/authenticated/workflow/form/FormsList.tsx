@@ -23,7 +23,7 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
   const [forms, setForms] = useState<FormItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [downloadStates, setDownloadStates] = useState<{ [key: string]: { isDownloaded: boolean, isDownloading: boolean } }>({});
-  const isConnected = false;
+  const isConnected = useNetwork();
 
   const API_BASE = 'https://erp.kisanmitra.net';
 
