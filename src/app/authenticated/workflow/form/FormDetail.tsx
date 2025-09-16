@@ -21,6 +21,7 @@ import { fetchDocType, getDocTypeFromLocal, saveDocTypeToLocal, extractFields } 
 import { RawField } from '../../../../types';
 import { useTranslation } from 'react-i18next';
 import LanguageControl from "../../../components/LanguageControl"
+import generateSchemaHash from "../../../../helper/hashFunction"
 
 type FormDetailNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -92,19 +93,30 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
+    if (!formName || !formData) return;
+
+    const doctype = await getDocTypeFromLocal(formName);
+    if (!doctype) {
+      Alert.alert(t("common.error"), t("formDetail.missingDoctype"));
+      return;
+    }
+    const schemaHash = generateSchemaHash(doctype.fields);
+
     const newSubmission = {
       id: Date.now().toString(),
       formName,
       data: formData,
+      schemaHash,
       status: "pending",
     };
+
     setLoading(true);
     try {
       await enqueue(newSubmission);
       setFormData({});
       await AsyncStorage.removeItem("tempFormData");
     } catch (e) {
-      Alert.alert(t('common.error'), t('formDetail.errorSaving'));
+      Alert.alert(t("common.error"), t("formDetail.errorSaving"));
     } finally {
       setLoading(false);
       setModalVisible(true);
