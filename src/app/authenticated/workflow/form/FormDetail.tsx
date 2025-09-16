@@ -8,18 +8,19 @@ import {
   Modal,
   Alert,
 } from 'react-native';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { SelectList } from 'react-native-dropdown-select-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/shared/RootStackedList';
-import { Languages } from 'lucide-react-native';
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { useNetwork } from "../../../../context/NetworkProvider";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { enqueue } from '../../../pendingQueue';
 import { fetchDocType, getDocTypeFromLocal, saveDocTypeToLocal, extractFields } from '../../../../api';
 import { RawField } from '../../../../types';
+import { useTranslation } from 'react-i18next';
+import LanguageControl from "../../../components/LanguageControl"
 
 type FormDetailNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -42,9 +43,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
   const [fields, setFields] = useState<RawField[]>([])
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
-
-  const API_BASE = 'https://erp.kisanmitra.net';
-
+  const { t } = useTranslation();
 
   useEffect(() => {
     (isConnected != null) &&
@@ -105,7 +104,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
       setFormData({});
       await AsyncStorage.removeItem("tempFormData");
     } catch (e) {
-      Alert.alert("Error", "Failed to save submission.");
+      Alert.alert(t('common.error'), t('formDetail.errorSaving'));
     } finally {
       setLoading(false);
       setModalVisible(true);
@@ -122,12 +121,12 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
       // Prevent default back action
       e.preventDefault();
       Alert.alert(
-        "Discard changes?",
-        "You have unsaved data. Are you sure you want to go back?",
+        t('formDetail.discardChanges'),
+        t('formDetail.unsavedDataMessage'),
         [
-          { text: "Cancel", style: "cancel", onPress: () => { } },
+          { text: t('common.cancel'), style: "cancel", onPress: () => { } },
           {
-            text: "Discard",
+            text: t('formDetail.discard'),
             style: "destructive",
             onPress: async () => {
               await AsyncStorage.removeItem("tempFormData"); // clear saved draft
@@ -160,7 +159,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
   };
 
   if (loading) {
-    return <Text style={styles.loading}>Loading...</Text>;
+    return <Text style={styles.loading}>{t('formDetail.loading')}</Text>;
   }
 
   return (
@@ -170,14 +169,13 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
           <Text style={styles.backArrow}>←</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{formName}</Text>
-        <TouchableOpacity>
-          <Languages size={42} />
-        </TouchableOpacity>
-      </View>
+        <LanguageControl />
+
+      </View >
 
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.title}>{formName}</Text>
-        <Text style={styles.subtitle}>Fill in the form below</Text>
+        <Text style={styles.subtitle}>{t('formDetail.subtitle')}</Text>
 
         {fields.map((field) => (
           <View key={field.fieldname} style={styles.inputContainer}>
@@ -191,13 +189,13 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
                 defaultOption={
                   field.default ? { key: field.default, value: field.default } : undefined
                 }
-                placeholder={`Select ${field.label}`}
+                placeholder={t('formDetail.selectPlaceholder', { label: field.label || field.fieldname })}
                 boxStyles={{ borderColor: '#ccc', marginTop: 8 }}
               />
             ) : (
               <TextInput
                 style={styles.input}
-                placeholder={`Enter ${field.label || field.fieldname}`}
+                placeholder={t('formDetail.enterPlaceholder', { label: field.label || field.fieldname })}
                 value={formData[field.fieldname] || ''}
                 onChangeText={(text) => handleChange(field.fieldname, text)}
               />
@@ -206,7 +204,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
         ))}
 
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>Submit</Text>
+          <Text style={styles.submitButtonText}>{t('formDetail.submit')}</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -218,16 +216,16 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
       >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Form is ready to upload!</Text>
+            <Text style={styles.modalTitle}>{t('formDetail.modalTitle')}</Text>
             <Text style={styles.modalDescription}>
-              Form needs to be uploaded after the network is available.
+              {t('formDetail.modalDescription')}
             </Text>
             <View style={styles.modalActions}>
               <TouchableOpacity
                 style={styles.modalCancelButton}
                 onPress={() => setModalVisible(false)}
               >
-                <Text style={styles.modalCancelText}>Cancel</Text>
+                <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.modalUploadButton}
@@ -235,13 +233,13 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
                   setModalVisible(false);
                 }}
               >
-                <Text style={styles.modalUploadText}>ok</Text>
+                <Text style={styles.modalUploadText}>{t('common.ok')}</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </SafeAreaView >
   );
 };
 

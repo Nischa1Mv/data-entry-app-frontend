@@ -3,13 +3,13 @@ import { View, Text, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator }
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/shared/RootStackedList';
-import { Languages } from 'lucide-react-native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNetwork } from "../../../../context/NetworkProvider";
 import { useFocusEffect } from "@react-navigation/native";
 import { fetchDocType, fetchAllDocTypeNamess, saveDocTypeToLocal, getAllDocTypeNames } from '../../../../api';
 import { FormItem } from '../../../../types';
-import NetInfo from '@react-native-community/netinfo'
+import { useTranslation } from 'react-i18next';
+import LanguageControl from "../../../components/LanguageControl"
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -25,6 +25,7 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [downloadStates, setDownloadStates] = useState<{ [key: string]: { isDownloaded: boolean, isDownloading: boolean } }>({});
   const { isConnected } = useNetwork();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const loadForms = async () => {
@@ -130,14 +131,15 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
             ) : itemState.isDownloaded ? (
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <Text style={{ color: 'green', fontSize: 16, marginRight: 4 }}>✓</Text>
-                <Text style={{ color: 'green' }}>Downloaded</Text>
+                <Text style={{ color: 'green' }}>
+                  {t('forms.downloaded') || 'Downloaded'}</Text>
               </View>
             ) : (
               <TouchableOpacity
                 style={{ backgroundColor: "blue", padding: 8, borderRadius: 5 }}
                 onPress={() => { handleDownload(item.name) }}
               >
-                <Text style={{ color: "white" }}>Download</Text>
+                <Text style={{ color: "white" }}>{t('forms.download') || 'Download'}</Text>
               </TouchableOpacity>
             ))
         }
@@ -161,11 +163,9 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
         </TouchableOpacity>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>ERP 1</Text>
-          <Text style={styles.subtitle}>{forms.length} Forms</Text>
+          <Text style={styles.subtitle}>{forms.length} {t('navigation.forms') || 'Forms'}</Text>
         </View>
-        <TouchableOpacity style={styles.translateButton}>
-          <Languages size={42} />
-        </TouchableOpacity>
+        <LanguageControl />
       </View>
 
       <FlatList

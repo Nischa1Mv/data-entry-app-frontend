@@ -1,0 +1,72 @@
+{
+  "welcome": {
+    "title": "Welcome back!",
+    "subtitle": "Ready to start your workflow?",
+    "getStarted": "Get Started"
+  },
+  "navigation": {
+    "forms": "Forms",
+    "downloads": "Downloads",
+    "back": "Back",
+    "home": "Home"
+  },
+  "forms": {
+    "title": "Available Forms",
+    "loading": "Loading forms...",
+    "noForms": "No forms available",
+    "download": "Download",
+    "downloaded": "Downloaded",
+    "fillForm": "Fill Form",
+    "refresh": "Refresh"
+  },
+  "formDetail": {
+    "loading": "Loading...",
+    "submit": "Submit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "required": "This field is required",
+    "success": "Form submitted successfully!",
+    "error": "Error submitting form",
+    "subtitle": "Fill in the form below",
+    "selectPlaceholder": "Select {{label}}",
+    "enterPlaceholder": "Enter {{label}}",
+    "discardChanges": "Discard changes?",
+    "unsavedDataMessage": "You have unsaved data. Are you sure you want to go back?",
+    "discard": "Discard",
+    "modalTitle": "Form is ready to upload!",
+    "modalDescription": "Form needs to be uploaded after the network is available.",
+    "errorSaving": "Failed to save submission."
+  },
+  "common": {
+    "ok": "OK",
+    "cancel": "Cancel",
+    "yes": "Yes",
+    "no": "No",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "retry": "Retry",
+    "offline": "You are offline",
+    "online": "You are online"
+  },
+  "login": {
+    "title": "Login",
+    "subtitle": "Enter your email below to login to your account",
+    "email": "Email",
+    "emailPlaceholder": "Admin@example",
+    "password": "Password",
+    "passwordPlaceholder": "Password",
+    "signIn": "Login",
+    "signInWithGoogle": "Login with Google",
+    "forgotPassword": "Forgot password ?",
+    "noAccount": "Don't have an account? Sign up",
+    "welcomeMessage": "Welcome {{name}}",
+    "successTitle": "Success",
+    "cancelledTitle": "Cancelled",
+    "cancelledMessage": "User cancelled sign-in",
+    "errorTitle": "Error",
+    "errorMessage": "Google sign-in failed",
+    "backendError": "Backend token verification failed"
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "welcome": {
+    "title": "वापस स्वागत है!",
+    "subtitle": "अपना वर्कफ़्लो शुरू करने के लिए तैयार हैं?",
+    "getStarted": "शुरू करें"
+  },
+  "navigation": {
+    "forms": "फॉर्म",
+    "downloads": "डाउनलोड",
+    "back": "वापस",
+    "home": "होम"
+  },
+  "forms": {
+    "title": "उपलब्ध फॉर्म",
+    "loading": "फॉर्म लोड हो रहे हैं...",
+    "noForms": "कोई फॉर्म उपलब्ध नहीं",
+    "download": "डाउनलोड",
+    "downloaded": "डाउनलोड किया गया",
+    "fillForm": "फॉर्म भरें",
+    "refresh": "रीफ्रेश"
+  },
+  "formDetail": {
+    "loading": "लोड हो रहा है...",
+    "submit": "जमा करें",
+    "save": "सेव",
+    "cancel": "रद्द करें",
+    "required": "यह फील्ड आवश्यक है",
+    "success": "फॉर्म सफलतापूर्वक जमा किया गया!",
+    "error": "फॉर्म जमा करने में त्रुटि",
+    "subtitle": "नीचे दिया गया फॉर्म भरें",
+    "selectPlaceholder": "{{label}} चुनें",
+    "enterPlaceholder": "{{label}} दर्ज करें",
+    "discardChanges": "बदलाव रद्द करें?",
+    "unsavedDataMessage": "आपका डेटा सेव नहीं हुआ है। क्या आप वापस जाना चाहते हैं?",
+    "discard": "रद्द करें",
+    "modalTitle": "फॉर्म अपलोड के लिए तैयार है!",
+    "modalDescription": "नेटवर्क उपलब्ध होने के बाद फॉर्म अपलोड करना होगा।",
+    "errorSaving": "सबमिशन सेव करने में विफल।"
+  },
+  "common": {
+    "ok": "ठीक",
+    "cancel": "रद्द करें",
+    "yes": "हाँ",
+    "no": "नहीं",
+    "save": "सेव",
+    "delete": "डिलीट",
+    "edit": "संपादित करें",
+    "loading": "लोड हो रहा है...",
+    "retry": "फिर कोशिश करें",
+    "offline": "आप ऑफ़लाइन हैं",
+    "online": "आप ऑनलाइन हैं"
+  },
+  "login": {
+    "title": "लॉगिन",
+    "subtitle": "अपने खाते में लॉगिन करने के लिए नीचे अपना ईमेल दर्ज करें",
+    "email": "ईमेल",
+    "emailPlaceholder": "Admin@example",
+    "password": "पासवर्ड",
+    "passwordPlaceholder": "पासवर्ड",
+    "signIn": "लॉगिन",
+    "signInWithGoogle": "Google के साथ लॉगिन करें",
+    "forgotPassword": "पासवर्ड भूल गए?",
+    "noAccount": "खाता नहीं है? साइन अप करें",
+    "welcomeMessage": "स्वागत है {{name}}",
+    "successTitle": "सफलता",
+    "cancelledTitle": "रद्द किया गया",
+    "cancelledMessage": "उपयोगकर्ता ने साइन-इन रद्द किया",
+    "errorTitle": "त्रुटि",
+    "errorMessage": "Google साइन-इन विफल",
+    "backendError": "बैकएंड टोकन सत्यापन विफल"
+  }
+}

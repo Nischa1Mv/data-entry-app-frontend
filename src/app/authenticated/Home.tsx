@@ -3,14 +3,14 @@ import {
   Text,
   StyleSheet,
   SafeAreaView,
-  Image,
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/shared/RootStackedList';
 import React from 'react';
-import { Languages } from 'lucide-react-native';
+import { useTranslation } from 'react-i18next';
+import LanguageControl from '../components/LanguageControl'
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -22,56 +22,58 @@ type Props = {
 };
 
 const ERP: React.FC<Props> = ({ navigation }) => {
+  const { t } = useTranslation();
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.head}>
         <View>
-          <Text style={styles.heading}>Welcome back!</Text>
+          <Text style={styles.heading}>{t('welcome.title') || 'Welcome back!'}</Text>
           <Text style={styles.subtext}>
-            Here's a list of your ERP Systems for you!
+            {t('welcome.subtitle') || 'Ready to start your workflow?'}
           </Text>
         </View>
-        <Languages size={42}></Languages>
+        <LanguageControl />
       </View>
 
       <ScrollView contentContainerStyle={styles.block}>
         <View style={styles.top}>
           <TouchableOpacity style={styles.box} onPress={() => navigation.navigate('FormsList')}>
-              <Text>ERP 1</Text>
-              <Text>15 Forms</Text>
+            <Text>ERP 1</Text>
+            <Text>15 {t('navigation.forms') || 'Forms'}</Text>
           </TouchableOpacity>
           <View style={styles.box}>
             <Text>ERP 2</Text>
-            <Text>15 Forms</Text>
+            <Text>15 {t('navigation.forms') || 'Forms'}</Text>
           </View>
         </View>
 
         <View style={styles.top}>
           <View style={styles.box}>
             <Text>ERP 3</Text>
-            <Text>15 Forms</Text>
+            <Text>15 {t('navigation.forms') || 'Forms'}</Text>
           </View>
           <View style={styles.box}>
             <Text>ERP 4</Text>
-            <Text>15 Forms</Text>
+            <Text>15 {t('navigation.forms') || 'Forms'}</Text>
           </View>
         </View>
 
         <View style={styles.top}>
           <View style={styles.box}>
             <Text>ERP 5</Text>
-            <Text>15 Forms</Text>
+            <Text>15 {t('navigation.forms') || 'Forms'}</Text>
           </View>
           <View style={styles.box}>
             <Text>ERP 6</Text>
-            <Text>15 Forms</Text>
+            <Text>15 {t('navigation.forms') || 'Forms'}</Text>
           </View>
         </View>
-        <TouchableOpacity 
-          style={[styles.box, { width: '95%', marginTop: 20 }]} 
+        <TouchableOpacity
+          style={[styles.box, { width: '95%', marginTop: 20 }]}
           onPress={() => navigation.navigate('Downloads')}
         >
-          <Text style={{ fontSize: 16, fontWeight: 'bold' }}>Downloads</Text>
+          <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{t('navigation.downloads') || 'Downloads'}</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

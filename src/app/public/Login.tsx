@@ -4,8 +4,9 @@ import { useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/shared/RootStackedList';
-import React from 'react';
-import { Languages } from 'lucide-react-native';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import LanguageControl from '../components/LanguageControl';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
@@ -14,8 +15,9 @@ type Props = {
 };
 
 const Login: React.FC<Props> = ({ navigation }) => {
-  const [mail, onEntermail] = React.useState('');
-  const [pass, onEnterpass] = React.useState('');
+  const [mail, onEntermail] = useState('');
+  const [pass, onEnterpass] = useState('');
+  const { t } = useTranslation();
 
   useEffect(() => {
     GoogleSignin.configure({
@@ -46,18 +48,18 @@ const Login: React.FC<Props> = ({ navigation }) => {
       });
 
       if (!response.ok) {
-        throw new Error('Backend token verification failed');
+        throw new Error(t('login.backendError'));
       }
 
       const data = await response.json();
-      Alert.alert('Success', `Welcome ${data.user.name}`);
+      Alert.alert(t('login.successTitle'), t('login.welcomeMessage', { name: data.user.name }));
       navigation.navigate('ERP');
     } catch (error: any) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        Alert.alert('Cancelled', 'User cancelled sign-in');
+        Alert.alert(t('login.cancelledTitle'), t('login.cancelledMessage'));
       } else {
         console.error('Google Sign-In Error:', error);
-        Alert.alert('Error', error.message || 'Google sign-in failed');
+        Alert.alert(t('login.errorTitle'), error.message || t('login.errorMessage'));
       }
     }
   };
@@ -65,42 +67,42 @@ const Login: React.FC<Props> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.head}>
-        <View>
-          <Text style={styles.heading}>Login</Text>
-          <Text style={styles.subtext}>
-            Enter your email below to login to your account
-          </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <Text style={styles.heading}>{t('login.title')}</Text>
+          <LanguageControl />
         </View>
-        <Languages size={42}></Languages>
       </View>
+      <Text style={styles.subtext}>
+        {t('login.subtitle')}
+      </Text>
       <View style={styles.credentials}>
-        <Text style={styles.label}>Email</Text>
+        <Text style={styles.label}>{t('login.email')}</Text>
         <TextInput
           style={styles.input}
           onChangeText={onEntermail}
           value={mail}
-          placeholder="Admin@example"
+          placeholder={t('login.emailPlaceholder')}
           keyboardType="email-address"
         />
         <View style={styles.password}>
-          <Text style={styles.label}>Password</Text>
-          <Text style={styles.forgot}>Forgot password ?</Text>
+          <Text style={styles.label}>{t('login.password')}</Text>
+          <Text style={styles.forgot}>{t('login.forgotPassword')}</Text>
         </View>
         <TextInput
           style={styles.input}
           onChangeText={onEnterpass}
           value={pass}
-          placeholder="Password"
+          placeholder={t('login.passwordPlaceholder')}
           secureTextEntry
         />
       </View>
       <TouchableOpacity style={styles.loginbtn} onPress={() => navigation.navigate('ERP')}>
-        <Text style={styles.buttonText}>Login</Text>
+        <Text style={styles.buttonText}>{t('login.signIn')}</Text>
       </TouchableOpacity>
       <TouchableOpacity style={[styles.loginbtn, styles.googlebtn]} onPress={handleGoogleLogin}>
-        <Text style={[styles.buttonText, styles.googlebtnText]}>Login with Google</Text>
+        <Text style={[styles.buttonText, styles.googlebtnText]}>{t('login.signInWithGoogle')}</Text>
       </TouchableOpacity>
-      <Text style={styles.signUp}>Don't have an account? Sign up</Text>
+      <Text style={styles.signUp}>{t('login.noAccount')}</Text>
     </View>
   );
 };
