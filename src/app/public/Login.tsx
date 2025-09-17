@@ -15,8 +15,6 @@ type Props = {
 };
 
 const Login: React.FC<Props> = ({ navigation }) => {
-  const [mail, onEntermail] = useState('');
-  const [pass, onEnterpass] = useState('');
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -75,34 +73,12 @@ const Login: React.FC<Props> = ({ navigation }) => {
       <Text style={styles.subtext}>
         {t('login.subtitle')}
       </Text>
-      <View style={styles.credentials}>
-        <Text style={styles.label}>{t('login.email')}</Text>
-        <TextInput
-          style={styles.input}
-          onChangeText={onEntermail}
-          value={mail}
-          placeholder={t('login.emailPlaceholder')}
-          keyboardType="email-address"
-        />
-        <View style={styles.password}>
-          <Text style={styles.label}>{t('login.password')}</Text>
-          <Text style={styles.forgot}>{t('login.forgotPassword')}</Text>
-        </View>
-        <TextInput
-          style={styles.input}
-          onChangeText={onEnterpass}
-          value={pass}
-          placeholder={t('login.passwordPlaceholder')}
-          secureTextEntry
-        />
-      </View>
       <TouchableOpacity style={styles.loginbtn} onPress={() => navigation.navigate('ERP')}>
-        <Text style={styles.buttonText}>{t('login.signIn')}</Text>
+        <Text style={styles.buttonText}>{t('login.signInWithGoogle')}</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.loginbtn, styles.googlebtn]} onPress={handleGoogleLogin}>
+      {/* <TouchableOpacity style={[styles.loginbtn, styles.googlebtn]} onPress={handleGoogleLogin}>
         <Text style={[styles.buttonText, styles.googlebtnText]}>{t('login.signInWithGoogle')}</Text>
-      </TouchableOpacity>
-      <Text style={styles.signUp}>{t('login.noAccount')}</Text>
+      </TouchableOpacity> */}
     </View>
   );
 };
@@ -110,34 +86,25 @@ const Login: React.FC<Props> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: { flex: 1, alignItems: 'center', justifyContent: 'center', width: '100%' },
   head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '85%' },
-  heading: { fontSize: 20, fontWeight: 'bold', marginBottom: 1 },
-  subtext: { fontSize: 14, textAlign: 'center', color: '#999999' },
+  heading: { fontSize: 20, fontWeight: 'bold', marginBottom: 1, color: '#020617', },
+  subtext: { fontSize: 14, textAlign: 'center', color: '#64748B' },
   image: { height: 20, color: '#ffffff' },
   credentials: { flexDirection: 'column', alignItems: 'flex-start', padding: 10, width: '90%' },
   label: { fontSize: 14, fontWeight: '400' },
-  input: {
-    height: 40,
-    width: '100%',
-    marginVertical: 10,
-    borderWidth: 0.5,
-    borderRadius: 10,
-    borderColor: '#999999',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-  },
   password: { display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '95%' },
   forgot: { fontSize: 14, textAlign: 'right', color: '#999999' },
   loginbtn: {
     width: '85%',
     backgroundColor: '#0f172a',
     padding: 12,
-    borderRadius: 10,
+    borderRadius: 5,
     alignItems: 'center',
     marginTop: 10,
+    borderColor: '#E2E8F0',
   },
   buttonText: { color: '#fff', fontSize: 16 },
-  googlebtn: { backgroundColor: '#fff' },
-  googlebtnText: { color: '#000' },
+  googlebtn: { backgroundColor: '#020617' },
+  googlebtnText: { color: '#E2E8F0' },
   signUp: { margin: 10 },
 });
 
