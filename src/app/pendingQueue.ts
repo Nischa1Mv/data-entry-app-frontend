@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {SubmissionItem} from "../types"
 
 const STORAGE_KEY = "pendingSubmissions";
 
@@ -20,7 +21,7 @@ export const getQueue = async () => {
   }
 };
 
-export const enqueue = async (submission: any) => {
+export const enqueue = async (submission: SubmissionItem) => {
   const queue = await getQueue();
   const updatedQueue = [...queue, submission];
   try {

@@ -107,7 +107,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
       formName,
       data: formData,
       schemaHash,
-      status: "pending",
+      status : "pending" as 'pending' | 'submitted' | 'failed',
     };
 
     setLoading(true);

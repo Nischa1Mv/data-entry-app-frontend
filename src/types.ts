@@ -1,6 +1,13 @@
 export interface FormItem {
     name: string;
 }
+export interface SubmissionItem{
+    id: string;
+    formName: string;
+    data: Record<string, any>;
+    schemaHash: string;
+    status: 'pending' | 'submitted' | 'failed';
+}
 export type RawField = {
     fieldname: string;
     fieldtype: string;

@@ -1,7 +1,8 @@
 import SHA256 from "crypto-js/sha256";
 import encHex from "crypto-js/enc-hex";
+import { RawField } from "@/types";
 
-function generateSchemaHash(fields: any[]): string {
+function generateSchemaHash(fields: RawField[]): string {
   const simplifiedFields = fields.map(f => ({
     fieldname: f.fieldname,
     fieldtype: f.fieldtype,
