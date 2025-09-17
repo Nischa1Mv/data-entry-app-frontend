@@ -94,6 +94,21 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
 
   const handleSubmit = async () => {
     if (!formName || !formData) return;
+    
+    const missingFields = fields.filter(field =>
+      (!formData[field.fieldname] || formData[field.fieldname].toString().trim() === '')
+    );
+
+    if (missingFields.length > 0) {
+      const fieldNames = missingFields.map(field => field.label || field.fieldname).join(', ');
+      Alert.alert(t("common.error"), t("formDetail.requiredFields", { fields: fieldNames }));
+      return;
+    }
+
+    if (Object.keys(formData).length === 0) {
+      Alert.alert(t("common.error"), t("formDetail.noData"));
+      return;
+    }
 
     const doctype = await getDocTypeFromLocal(formName);
     if (!doctype) {
@@ -107,7 +122,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
       formName,
       data: formData,
       schemaHash,
-      status : "pending" as 'pending' | 'submitted' | 'failed',
+      status: "pending" as 'pending' | 'submitted' | 'failed',
     };
 
     setLoading(true);

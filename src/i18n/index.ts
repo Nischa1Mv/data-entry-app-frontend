@@ -43,7 +43,10 @@ const resources = {
                 discard: "Discard",
                 modalTitle: "Form is ready to upload!",
                 modalDescription: "Form needs to be uploaded after the network is available.",
-                errorSaving: "Failed to save submission."
+                errorSaving: "Failed to save submission.",
+                requiredFields: "Please fill in the required fields: {{fields}}",
+                noData: "Please enter some data before submitting.",
+                missingDoctype: "Form configuration is missing. Please try again."
             },
             common: {
                 ok: "OK",
@@ -118,7 +121,10 @@ const resources = {
                 discard: "रद्द करें",
                 modalTitle: "फॉर्म अपलोड के लिए तैयार है!",
                 modalDescription: "नेटवर्क उपलब्ध होने के बाद फॉर्म अपलोड करना होगा।",
-                errorSaving: "सबमिशन सेव करने में विफल।"
+                errorSaving: "सबमिशन सेव करने में विफल।",
+                requiredFields: "कृपया आवश्यक फील्ड भरें: {{fields}}",
+                noData: "कृपया सबमिट करने से पहले कुछ डेटा दर्ज करें।",
+                missingDoctype: "फॉर्म कॉन्फ़िगरेशन अनुपलब्ध है। कृपया फिर से कोशिश करें।"
             },
             common: {
                 ok: "ठीक",
@@ -193,7 +199,10 @@ const resources = {
                 discard: "రద్దు చేయండి",
                 modalTitle: "ఫారం అప్‌లోడ్ చేయడానికి సిద్ధంగా ఉంది!",
                 modalDescription: "నెట్‌వర్క్ అందుబాటులో ఉన్న తర్వాత ఫారం అప్‌లోడ్ చేయాలి.",
-                errorSaving: "సబ్మిషన్ సేవ్ చేయడంలో విఫలమైంది."
+                errorSaving: "సబ్మిషన్ సేవ్ చేయడంలో విఫలమైంది.",
+                requiredFields: "దయచేసి అవసరమైన ఫీల్డ్‌లను పూరించండి: {{fields}}",
+                noData: "దయచేసి సమర్పించే ముందు కొంత డేటా నమోదు చేయండి।",
+                missingDoctype: "ఫారం కాన్ఫిగరేషన్ లేదు। దయచేసి మళ్లీ ప్రయత్నించండి।"
             },
             common: {
                 ok: "సరే",

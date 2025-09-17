@@ -35,7 +35,10 @@
     "discard": "Discard",
     "modalTitle": "Form is ready to upload!",
     "modalDescription": "Form needs to be uploaded after the network is available.",
-    "errorSaving": "Failed to save submission."
+    "errorSaving": "Failed to save submission.",
+    "requiredFields": "Please fill in the required fields: {{fields}}",
+    "noData": "Please enter some data before submitting.",
+    "missingDoctype": "Form configuration is missing. Please try again."
   },
   "common": {
     "ok": "OK",
@@ -47,6 +50,7 @@
     "edit": "Edit",
     "loading": "Loading...",
     "retry": "Retry",
+    "error": "Error",
     "offline": "You are offline",
     "online": "You are online"
   },
