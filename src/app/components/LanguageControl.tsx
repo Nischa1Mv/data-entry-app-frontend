@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next';
-import { View, Text, TouchableOpacity, StyleSheet, ViewStyle, TextStyle } from 'react-native'
+import { View, Text, TouchableOpacity } from 'react-native'
 import { Languages, ChevronDown } from 'lucide-react-native';
 
 const languages = [
@@ -24,31 +24,31 @@ function languageControl() {
         setShowLanguageOptions(false);
     };
     return (
-        <View style={styles.languageContainer}>
+        <View className="relative z-[1000]">
             <TouchableOpacity
-                style={styles.languageSelector}
+                className="flex-row items-center px-2 py-1.5 bg-gray-100 rounded-md border border-gray-300 min-w-[80px]"
                 onPress={() => setShowLanguageOptions(!showLanguageOptions)}
             >
                 <Languages size={20} color="#666" />
-                <Text style={styles.languageText}>{getCurrentLanguage()}</Text>
+                <Text className="ml-1 mr-0.5 text-xs text-gray-800 font-medium">{getCurrentLanguage()}</Text>
                 <ChevronDown size={16} color="#666" />
             </TouchableOpacity>
 
             {showLanguageOptions && (
-                <View style={styles.languageDropdown}>
+                <View className="absolute top-full right-0 bg-white rounded-md border border-gray-300 shadow-lg min-w-[100px] z-[1001]">
                     {languages.map((language) => (
                         <TouchableOpacity
                             key={language.code}
-                            style={[
-                                styles.languageOption,
-                                i18n.language === language.code && styles.activeLanguageOption
-                            ]}
+                            className={`px-3 py-2.5 border-b border-gray-100 ${
+                                i18n.language === language.code ? 'bg-blue-500' : ''
+                            }`}
                             onPress={() => changeLanguage(language.code)}
                         >
-                            <Text style={[
-                                styles.languageOptionText,
-                                i18n.language === language.code && styles.activeLanguageOptionText
-                            ]}>
+                            <Text className={`text-xs text-center ${
+                                i18n.language === language.code 
+                                    ? 'text-white font-semibold' 
+                                    : 'text-gray-800'
+                            }`}>
                                 {language.nativeName}
                             </Text>
                         </TouchableOpacity>
@@ -58,66 +58,5 @@ function languageControl() {
         </View>
     )
 }
-const styles = StyleSheet.create({
-    languageContainer: {
-        position: 'relative',
-        zIndex: 1000,
-    } as ViewStyle,
-    languageSelector: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 8,
-        paddingVertical: 6,
-        backgroundColor: '#f5f5f5',
-        borderRadius: 6,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        minWidth: 80,
-    } as ViewStyle,
-    languageText: {
-        marginLeft: 4,
-        marginRight: 2,
-        fontSize: 12,
-        color: '#333',
-        fontWeight: '500',
-    } as TextStyle,
-    languageDropdown: {
-        position: 'absolute',
-        top: '100%',
-        right: 0,
-        backgroundColor: 'white',
-        borderRadius: 6,
-        borderWidth: 1,
-        borderColor: '#ddd',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 3.84,
-        elevation: 5,
-        minWidth: 100,
-        zIndex: 1001,
-    } as ViewStyle,
-    languageOption: {
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
-    } as ViewStyle,
-    activeLanguageOption: {
-        backgroundColor: '#007AFF',
-    } as ViewStyle,
-    languageOptionText: {
-        fontSize: 12,
-        color: '#333',
-        textAlign: 'center',
-    } as TextStyle,
-    activeLanguageOptionText: {
-        color: 'white',
-        fontWeight: '600',
-    } as TextStyle,
-});
 
 export default languageControl

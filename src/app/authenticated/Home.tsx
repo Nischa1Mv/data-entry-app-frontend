@@ -1,7 +1,6 @@
 import {
   View,
   Text,
-  StyleSheet,
   SafeAreaView,
   TouchableOpacity,
   ScrollView,
@@ -25,107 +24,61 @@ const ERP: React.FC<Props> = ({ navigation }) => {
   const { t } = useTranslation();
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.head}>
+    <SafeAreaView className="flex-1 items-center w-full pt-20">
+      <View className="flex-row justify-between items-center w-4/5 mb-5">
         <View>
-          <Text style={styles.heading}>{t('welcome.title') || 'Welcome back!'}</Text>
-          <Text style={styles.subtext}>
-            {t('welcome.subtitle') || 'Ready to start your workflow?'}
+          <Text className="text-xl font-bold">{t('welcome.title') || 'Welcome back!'}</Text>
+          <Text className="text-sm text-gray-400">
+            {t('welcome.subtitle') || 'Here is a List of ERP Systems available to you.'}
           </Text>
         </View>
         <LanguageControl />
       </View>
-
-      <ScrollView contentContainerStyle={styles.block}>
-        <View style={styles.top}>
-          <TouchableOpacity style={styles.box} onPress={() => navigation.navigate('FormsList')}>
+      <ScrollView contentContainerStyle={{ alignItems: 'center', margin: 10, width: '100%' }}>
+        <View className="flex-row w-[95%] justify-center">
+          <TouchableOpacity 
+            className="w-[45%] min-h-[100px] rounded-2xl border border-black items-center justify-center m-2" 
+            onPress={() => navigation.navigate('FormsList')}
+          >
             <Text>ERP 1</Text>
             <Text>15 {t('navigation.forms') || 'Forms'}</Text>
           </TouchableOpacity>
-          <View style={styles.box}>
+          <View className="w-[45%] min-h-[100px] rounded-2xl border border-black items-center justify-center m-2">
             <Text>ERP 2</Text>
             <Text>15 {t('navigation.forms') || 'Forms'}</Text>
           </View>
         </View>
 
-        <View style={styles.top}>
-          <View style={styles.box}>
+        <View className="flex-row w-[95%] justify-center">
+          <View className="w-[45%] min-h-[100px] rounded-2xl border border-black items-center justify-center m-2">
             <Text>ERP 3</Text>
             <Text>15 {t('navigation.forms') || 'Forms'}</Text>
           </View>
-          <View style={styles.box}>
+          <View className="w-[45%] min-h-[100px] rounded-2xl border border-black items-center justify-center m-2">
             <Text>ERP 4</Text>
             <Text>15 {t('navigation.forms') || 'Forms'}</Text>
           </View>
         </View>
 
-        <View style={styles.top}>
-          <View style={styles.box}>
+        <View className="flex-row w-[95%] justify-center">
+          <View className="w-[45%] min-h-[100px] rounded-2xl border border-black items-center justify-center m-2">
             <Text>ERP 5</Text>
             <Text>15 {t('navigation.forms') || 'Forms'}</Text>
           </View>
-          <View style={styles.box}>
+          <View className="w-[45%] min-h-[100px] rounded-2xl border border-black items-center justify-center m-2">
             <Text>ERP 6</Text>
             <Text>15 {t('navigation.forms') || 'Forms'}</Text>
           </View>
         </View>
         <TouchableOpacity
-          style={[styles.box, { width: '95%', marginTop: 20 }]}
+          className="w-[95%] min-h-[100px] rounded-2xl border border-black items-center justify-center m-2 mt-5"
           onPress={() => navigation.navigate('Downloads')}
         >
-          <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{t('navigation.downloads') || 'Downloads'}</Text>
+          <Text className="text-base font-bold">{t('navigation.downloads') || 'Downloads'}</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    width: '100%',
-    paddingTop: 80,
-  },
-  head: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    width: '85%',
-    marginBottom: 20,
-  },
-  heading: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  subtext: {
-    fontSize: 14,
-    color: '#999999',
-  },
-  image: {
-    height: 30,
-    width: 30,
-  },
-  block: {
-    alignItems: 'center',
-    margin: 10,
-    width: '100%',
-  },
-  top: {
-    flexDirection: 'row',
-    width: '95%',
-    justifyContent: 'center',
-  },
-  box: {
-    width: '45%',
-    minHeight: 100,
-    borderRadius: 20,
-    borderColor: '#000',
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    margin: 8,
-  },
-});
 
 export default ERP;

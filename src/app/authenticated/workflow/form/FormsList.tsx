@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/shared/RootStackedList';
@@ -84,7 +84,6 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
     }
   });
 
-
   const handleDownload = async (docTypeName: string) => {
     setDownloadStates(prev => ({
       ...prev,
@@ -116,30 +115,28 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
     const itemState = downloadStates[item.name] || { isDownloaded: false, isDownloading: false };
 
     return (
-      <TouchableOpacity style={styles.formItem}
+      <TouchableOpacity className="flex-row justify-between items-center px-5 py-4 border-b border-gray-100"
         onPress={() => {
-
           navigation.navigate('FormDetail', { formName: item.name });
-
         }}
       >
-        <Text style={styles.formName}>{item.name}</Text>
+        <Text className="text-base text-gray-800 font-normal">{item.name}</Text>
         {
           isConnected && (
             itemState.isDownloading ? (
               <ActivityIndicator size="small" color="blue" />
             ) : itemState.isDownloaded ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <Text style={{ color: 'green', fontSize: 16, marginRight: 4 }}>✓</Text>
-                <Text style={{ color: 'green' }}>
+              <View className="flex-row items-center">
+                <Text className="text-green-600 text-base mr-1">✓</Text>
+                <Text className="text-green-600">
                   {t('forms.downloaded') || 'Downloaded'}</Text>
               </View>
             ) : (
               <TouchableOpacity
-                style={{ backgroundColor: "blue", padding: 8, borderRadius: 5 }}
+                className="bg-blue-500 px-2 py-2 rounded"
                 onPress={() => { handleDownload(item.name) }}
               >
-                <Text style={{ color: "white" }}>{t('forms.download') || 'Download'}</Text>
+                <Text className="text-white">{t('forms.download') || 'Download'}</Text>
               </TouchableOpacity>
             ))
         }
@@ -149,21 +146,21 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#000" style={{ marginTop: 40 }} />
+      <SafeAreaView className="flex-1 bg-gray-100">
+        <ActivityIndicator size="large" color="#000" className="mt-10" />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Text style={styles.backArrow}>←</Text>
+    <SafeAreaView className="flex-1 bg-gray-100">
+      <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
+        <TouchableOpacity className="p-2" onPress={() => navigation.goBack()}>
+          <Text className="text-xl text-gray-800">←</Text>
         </TouchableOpacity>
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>ERP 1</Text>
-          <Text style={styles.subtitle}>{forms.length} {t('navigation.forms') || 'Forms'}</Text>
+        <View className="flex-1 items-center">
+          <Text className="text-lg font-semibold text-gray-800">ERP 1</Text>
+          <Text className="text-sm text-gray-600 mt-0.5">{forms.length} {t('navigation.forms') || 'Forms'}</Text>
         </View>
         <LanguageControl />
       </View>
@@ -172,43 +169,11 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
         data={forms}
         renderItem={renderFormItem}
         keyExtractor={(item) => item.name}
-        style={styles.formsList}
+        className="flex-1 bg-white"
         showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f8f8f8' },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  backButton: { padding: 8 },
-  backArrow: { fontSize: 20, color: '#333' },
-  titleContainer: { flex: 1, alignItems: 'center' },
-  title: { fontSize: 18, fontWeight: '600', color: '#333' },
-  subtitle: { fontSize: 14, color: '#666', marginTop: 2 },
-  translateButton: { padding: 8 },
-  formsList: { flex: 1, backgroundColor: '#ffffff' },
-  formItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  formName: { fontSize: 16, color: '#333', fontWeight: '400' },
-  formStatus: { fontSize: 16, color: '#666' },
-});
 
 export default FormsList;

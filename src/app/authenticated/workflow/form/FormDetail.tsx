@@ -3,7 +3,6 @@ import {
   Text,
   TouchableOpacity,
   TextInput,
-  StyleSheet,
   ScrollView,
   Modal,
   Alert,
@@ -33,7 +32,6 @@ type FormDetailRouteProp = RouteProp<RootStackParamList, "FormDetail">;
 type Props = {
   navigation: FormDetailNavigationProp;
 };
-
 
 const FormDetail: React.FC<Props> = ({ navigation }) => {
   //this is the network status , make it true/false to simulate offline/online
@@ -94,7 +92,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
 
   const handleSubmit = async () => {
     if (!formName || !formData) return;
-    
+
     const missingFields = fields.filter(field =>
       (!formData[field.fieldname] || formData[field.fieldname].toString().trim() === '')
     );
@@ -186,27 +184,26 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
   };
 
   if (loading) {
-    return <Text style={styles.loading}>{t('formDetail.loading')}</Text>;
+    return <Text className="text-lg text-center mt-12">{t('formDetail.loading')}</Text>;
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+    <SafeAreaView className="flex-1 bg-slate-50">
+      <View className="flex-row items-center justify-between px-5 py-4 bg-white shadow-sm">
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backArrow}>←</Text>
+          <Text className="text-2xl text-gray-900">←</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{formName}</Text>
+        <Text className="text-xl font-bold text-gray-900">{formName}</Text>
         <LanguageControl />
+      </View>
 
-      </View >
-
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text style={styles.title}>{formName}</Text>
-        <Text style={styles.subtitle}>{t('formDetail.subtitle')}</Text>
+      <ScrollView className="p-6 gap-3">
+        <Text className="text-3xl font-bold text-gray-800 mb-1">{formName}</Text>
+        <Text className="text-base text-gray-500 mb-6">{t('formDetail.subtitle')}</Text>
 
         {fields.map((field) => (
-          <View key={field.fieldname} style={styles.inputContainer}>
-            <Text style={styles.label}>{field.label || field.fieldname}</Text>
+          <View key={field.fieldname} className="mb-4">
+            <Text className="mb-1.5 text-base font-semibold">{field.label || field.fieldname}</Text>
 
             {field.fieldtype === 'Select' && field.options ? (
               <SelectList
@@ -221,7 +218,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
               />
             ) : (
               <TextInput
-                style={styles.input}
+                className="border border-gray-300 p-2 rounded"
                 placeholder={t('formDetail.enterPlaceholder', { label: field.label || field.fieldname })}
                 value={formData[field.fieldname] || ''}
                 onChangeText={(text) => handleChange(field.fieldname, text)}
@@ -230,8 +227,8 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
           </View>
         ))}
 
-        <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
-          <Text style={styles.submitButtonText}>{t('formDetail.submit')}</Text>
+        <TouchableOpacity className="bg-slate-700 rounded-xl py-3.5 items-center" onPress={handleSubmit}>
+          <Text className="text-white text-base font-semibold">{t('formDetail.submit')}</Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -241,159 +238,33 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>{t('formDetail.modalTitle')}</Text>
-            <Text style={styles.modalDescription}>
-              {t('formDetail.modalDescription')}
-            </Text>
-            <View style={styles.modalActions}>
-              <TouchableOpacity
-                style={styles.modalCancelButton}
-                onPress={() => setModalVisible(false)}
-              >
-                <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.modalUploadButton}
-                onPress={() => {
-                  setModalVisible(false);
-                }}
-              >
-                <Text style={styles.modalUploadText}>{t('common.ok')}</Text>
-              </TouchableOpacity>
-            </View>
+        <View className="flex-1 bg-black/30 justify-center items-center">
+          <View className="bg-white rounded-2xl p-6 w-4/5 shadow-lg"></View>
+          <Text className="text-xl font-bold mb-3 text-gray-900">{t('formDetail.modalTitle')}</Text>
+          <Text className="text-sm text-gray-600 mb-6">
+            {t('formDetail.modalDescription')}
+          </Text>
+          <View className="flex-row justify-end gap-3">
+            <TouchableOpacity
+              className="py-2.5 px-4 rounded-lg border border-gray-400 bg-white"
+              onPress={() => setModalVisible(false)}
+            >
+              <Text className="text-sm text-gray-800">{t('common.cancel')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="py-2.5 px-4 rounded-lg bg-slate-700"
+              onPress={() => {
+                setModalVisible(false);
+              }}
+            >
+              <Text className="text-sm text-white font-semibold">{t('common.ok')}</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
-    </SafeAreaView >
+    </SafeAreaView>
+
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F4F6F8',
-  },
-  loading: {
-    fontSize: 18,
-    textAlign: 'center',
-    marginTop: 50,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    backgroundColor: '#ffffff',
-    elevation: 2,
-  },
-  backArrow: {
-    fontSize: 24,
-    color: '#1E1E1E',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1E1E1E',
-  },
-  content: {
-    padding: 24,
-    gap: 12,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: '#333',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#6e6e6e',
-    marginBottom: 24,
-  },
-  inputContainer: {
-    marginBottom: 15,
-  },
-  label: {
-    marginBottom: 6,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 8,
-    borderRadius: 5,
-  },
-  submitButton: {
-    backgroundColor: '#2C3E50',
-    borderRadius: 10,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  submitButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 24,
-    width: '85%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    marginBottom: 12,
-    color: '#1E1E1E',
-  },
-  modalDescription: {
-    fontSize: 15,
-    color: '#666',
-    marginBottom: 24,
-  },
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 12,
-  },
-  modalCancelButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#999',
-    backgroundColor: '#ffffff',
-  },
-  modalCancelText: {
-    fontSize: 14,
-    color: '#333',
-  },
-  modalUploadButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    backgroundColor: '#2C3E50',
-  },
-  modalUploadText: {
-    fontSize: 14,
-    color: '#ffffff',
-    fontWeight: '600',
-  },
-});
 
 export default FormDetail;
