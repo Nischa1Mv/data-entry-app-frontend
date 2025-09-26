@@ -1,13 +1,12 @@
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import auth from '@react-native-firebase/auth';
 import { useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, Image, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '@/shared/RootStackedList';
+import { RootStackParamList } from './../../shared/RootStackedList'
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import LanguageControl from '../components/LanguageControl';
-
 type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
 
 type Props = {
@@ -63,49 +62,23 @@ const Login: React.FC<Props> = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.head}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
-          <Text style={styles.heading}>{t('login.title')}</Text>
+    <View className="flex-1 items-center justify-center w-full">
+      <View className="flex-row justify-between items-center w-[85%]">
+        <View className="flex-row items-center justify-between w-full">
+          <Text className="text-xl font-bold mb-0.5 text-slate-900">{t('login.title')}</Text>
           <LanguageControl />
         </View>
       </View>
-      <Text style={styles.subtext}>
+      <Text className="text-sm text-center text-slate-500">
         {t('login.subtitle')}
       </Text>
-      <TouchableOpacity style={styles.loginbtn} onPress={() => navigation.navigate('ERP')}>
-        <Text style={styles.buttonText}>{t('login.signInWithGoogle')}</Text>
+      <TouchableOpacity className="w-[85%] bg-slate-900 p-3 rounded-md items-center mt-2.5 border border-slate-200" onPress={() => navigation.navigate('ERP')}>
+        <Text className="text-white text-base">{t('login.signInWithGoogle')}</Text>
       </TouchableOpacity>
-      {/* <TouchableOpacity style={[styles.loginbtn, styles.googlebtn]} onPress={handleGoogleLogin}>
-        <Text style={[styles.buttonText, styles.googlebtnText]}>{t('login.signInWithGoogle')}</Text>
-      </TouchableOpacity> */}
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', width: '100%' },
-  head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', width: '85%' },
-  heading: { fontSize: 20, fontWeight: 'bold', marginBottom: 1, color: '#020617', },
-  subtext: { fontSize: 14, textAlign: 'center', color: '#64748B' },
-  image: { height: 20, color: '#ffffff' },
-  credentials: { flexDirection: 'column', alignItems: 'flex-start', padding: 10, width: '90%' },
-  label: { fontSize: 14, fontWeight: '400' },
-  password: { display: 'flex', flexDirection: 'row', justifyContent: 'space-between', width: '95%' },
-  forgot: { fontSize: 14, textAlign: 'right', color: '#999999' },
-  loginbtn: {
-    width: '85%',
-    backgroundColor: '#0f172a',
-    padding: 12,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginTop: 10,
-    borderColor: '#E2E8F0',
-  },
-  buttonText: { color: '#fff', fontSize: 16 },
-  googlebtn: { backgroundColor: '#020617' },
-  googlebtnText: { color: '#E2E8F0' },
-  signUp: { margin: 10 },
-});
+
 
 export default Login;

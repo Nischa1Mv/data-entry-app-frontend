@@ -8,6 +8,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { enableScreens } from 'react-native-screens';
 import '../i18n';
+import '../../global.css';
 import Login from './public/Login';
 import ERP from './authenticated/Home';
 import FormsList from './authenticated/workflow/form/FormsList';
