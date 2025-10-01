@@ -10,6 +10,7 @@ import { fetchDocType, fetchAllDocTypeNamess, saveDocTypeToLocal, getAllDocTypeN
 import { FormItem } from '../../../../types';
 import { useTranslation } from 'react-i18next';
 import LanguageControl from "../../../components/LanguageControl"
+import { ArrowBigLeft, ArrowLeft, Download, Check } from 'lucide-react-native';
 
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -115,31 +116,32 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
     const itemState = downloadStates[item.name] || { isDownloaded: false, isDownloading: false };
 
     return (
-      <TouchableOpacity className="flex-row justify-between items-center px-5 py-4 border-b border-gray-100"
+      <TouchableOpacity className="flex-row justify-between items-center px-5 py-4  border-b border-gray-100"
         onPress={() => {
           navigation.navigate('FormDetail', { formName: item.name });
         }}
       >
         <Text className="text-base text-gray-800 font-normal">{item.name}</Text>
-        {
-          isConnected && (
-            itemState.isDownloading ? (
-              <ActivityIndicator size="small" color="blue" />
-            ) : itemState.isDownloaded ? (
-              <View className="flex-row items-center">
-                <Text className="text-green-600 text-base mr-1">✓</Text>
-                <Text className="text-green-600">
-                  {t('forms.downloaded') || 'Downloaded'}</Text>
-              </View>
-            ) : (
-              <TouchableOpacity
-                className="bg-blue-500 px-2 py-2 rounded"
-                onPress={() => { handleDownload(item.name) }}
-              >
-                <Text className="text-white">{t('forms.download') || 'Download'}</Text>
-              </TouchableOpacity>
-            ))
-        }
+        <View className="flex-row items-center">
+          {
+            isConnected && (
+              itemState.isDownloading ? (
+                <ActivityIndicator size="small" color="blue" />
+              ) : itemState.isDownloaded ? (
+                <View className="mr-3">
+                  <Check color="#16a34a" size={20} />
+                </View>
+              ) : (
+                <TouchableOpacity
+                  className="mr-3 p-2"
+                  onPress={() => { handleDownload(item.name) }}
+                >
+                  <Download color="#3b82f6" size={20} />
+                </TouchableOpacity>
+              ))
+          }
+          <Text className="text-base text-gray-800 font-normal">Open</Text>
+        </View>
       </TouchableOpacity >
     );
   };
@@ -154,12 +156,12 @@ const FormsList: React.FC<Props> = ({ navigation }) => {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-100">
-      <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-gray-200">
+      <View className="flex-row items-center justify-between px-4 py-3 pt-10 bg-white border-b border-gray-200">
         <TouchableOpacity className="p-2" onPress={() => navigation.goBack()}>
-          <Text className="text-xl text-gray-800">←</Text>
+          <ArrowLeft color="#020617" size={16} />
         </TouchableOpacity>
         <View className="flex-1 items-center">
-          <Text className="text-lg font-semibold text-gray-800">ERP 1</Text>
+          <Text className="font-inter font-semibold text-[18px] leading-[32px] tracking-[-0.006em] text-center">ERP 1</Text>
           <Text className="text-sm text-gray-600 mt-0.5">{forms.length} {t('navigation.forms') || 'Forms'}</Text>
         </View>
         <LanguageControl />
