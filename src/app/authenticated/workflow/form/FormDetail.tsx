@@ -283,30 +283,41 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View className="flex-1 bg-black/30 justify-center items-center">
-          <View className="bg-white rounded-2xl p-6 w-4/5 shadow-lg"></View>
-          <Text className="text-xl font-bold mb-3 text-gray-900">{t('formDetail.modalTitle')}</Text>
-          <Text className="text-sm text-gray-600 mb-6">
-            {t('formDetail.modalDescription')}
-          </Text>
-          <View className="flex-row justify-end gap-3">
-            <TouchableOpacity
-              className="py-2.5 px-4 rounded-lg border border-gray-400 bg-white"
-              onPress={() => setModalVisible(false)}
-            >
-              <Text className="text-sm text-gray-800">{t('common.cancel')}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="py-2.5 px-4 rounded-lg bg-slate-700"
-              onPress={() => {
-                setModalVisible(false);
-              }}
-            >
-              <Text className="text-sm text-white font-semibold">{t('common.ok')}</Text>
-            </TouchableOpacity>
+        <View className="flex-1 bg-[#00000033] justify-center items-center p-[1.25rem]">
+          {/* Modal container */}
+          <View className="w-full h-[176px] max-w-[512px] opacity-100 gap-4 rounded-[6px] border p-6 border-[#E2E8F0] bg-white
+">
+            {/* Title */}
+            <Text className="font-inter font-semibold text-[18px] leading-[28px] tracking-[-0.006em] text-[#020617]
+">
+              {t('formDetail.modalTitle')}
+            </Text>
+
+            {/* Description */}
+            <Text className="font-inter font-normal text-[14px] leading-[20px] tracking-normal text-[#64748B]">
+              {t('formDetail.modalDescription')}
+            </Text>
+
+            {/* Buttons */}
+            <View className="flex-row justify-end gap-3">
+              <TouchableOpacity
+                className="w-[78px] h-[36px] opacity-100 gap-2 rounded-md border px-4 items-center justify-center border-[#E2E8F0]"
+                onPress={() => setModalVisible(false)}
+              >
+                <Text className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle text-[#020617]">{t('common.cancel')}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="py-2.5 px-4 rounded-lg bg-[#0F172A]"
+                onPress={() => setModalVisible(false)}
+              >
+                <Text className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle text-[#F8FAFC] ">{t('common.ok')}</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
+
     </SafeAreaView >
 
   );

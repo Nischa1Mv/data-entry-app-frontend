@@ -41,7 +41,7 @@
     "missingDoctype": "Form configuration is missing. Please try again."
   },
   "common": {
-    "ok": "OK",
+    "ok": "Upload",
     "cancel": "Cancel",
     "yes": "Yes",
     "no": "No",
