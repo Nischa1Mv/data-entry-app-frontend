@@ -22,6 +22,8 @@ import { useTranslation } from 'react-i18next';
 import LanguageControl from "../../../components/LanguageControl"
 import generateSchemaHash from "../../../../helper/hashFunction"
 import { ArrowLeft } from 'lucide-react-native';
+// import { KeyboardAvoidingView, Platform } from 'react-native';
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"
 
 type FormDetailNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -200,77 +202,81 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
         <LanguageControl />
       </View>
 
-      <ScrollView className="p-6 gap-3">
-        <Text className="text-3xl font-bold text-gray-800 mb-1">{formName}</Text>
-        <Text className="text-base text-gray-500 mb-6">{t('formDetail.subtitle')}</Text>
-        <View className='flex-col'>
-          {fields.map((field) => (
-            <View key={field.fieldname} className="mb-4">
-              <Text className="font-sans font-medium text-sm leading-5 tracking-normal text-[#020617]">{field.label || field.fieldname}</Text>
-              {field.fieldtype === 'Select' && field.options ? (
-                <View className="w-full bg-white rounded-md overflow-hidden z-50">
-                  <SelectList
-                    setSelected={(val: string) => handleChange(field.fieldname, val)}
-                    data={
-                      field.options?.split('\n').map(opt => ({ key: opt, value: opt })) || []
-                    }
-                    save="value"
-                    defaultOption={
-                      field.default
-                        ? { key: field.default, value: field.default }
-                        : undefined
-                    }
-                    placeholder={t('formDetail.selectPlaceholder', {
-                      label: field.label || field.fieldname,
-                    })}
-                    boxStyles={{
-                      height: 45,
-                      justifyContent: 'space-between',
-                      paddingHorizontal: 12,
-                      borderWidth: 1,
-                      borderColor: '#E2E8F0',
-                      borderRadius: 6,
-                      backgroundColor: '#FFFFFF',
-                    }}
-                    dropdownStyles={{
-                      borderWidth: 1,
-                      borderColor: '#E5E7EB',
-                      borderRadius: 10,
-                      backgroundColor: '#FFFFFF',
-                      shadowColor: '#000',
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.05,
-                      shadowRadius: 5,
-                      zIndex: 1000,
-                    }}
-                    dropdownItemStyles={{
-                      paddingVertical: 12,
-                      paddingHorizontal: 15,
-                    }}
-                    dropdownTextStyles={{
-                      fontSize: 16,
-                      color: '#111827',
-                    }}
+      <KeyboardAwareScrollView
+        // contentContainerStyle={{ padding: 24 }}
+        extraScrollHeight={50}
+        enableOnAndroid={true}
+      >
+        <ScrollView className="p-6 gap-3">
+
+          <Text className="text-3xl font-bold text-gray-800 mb-1">{formName}</Text>
+          <Text className="text-base text-gray-500 mb-6">{t('formDetail.subtitle')}</Text>
+          <View className='flex-col'>
+            {fields.map((field) => (
+              <View key={field.fieldname} className="mb-4">
+                <Text className="font-sans font-medium text-sm leading-5 tracking-normal text-[#020617]">{field.label || field.fieldname}</Text>
+                {field.fieldtype === 'Select' && field.options ? (
+                  <View className="w-full bg-white rounded-md overflow-hidden z-50">
+                    <SelectList
+                      setSelected={(val: string) => handleChange(field.fieldname, val)}
+                      data={
+                        field.options?.split('\n').map(opt => ({ key: opt, value: opt })) || []
+                      }
+                      save="value"
+                      defaultOption={
+                        field.default
+                          ? { key: field.default, value: field.default }
+                          : undefined
+                      }
+                      placeholder={t('formDetail.selectPlaceholder', {
+                        label: field.label || field.fieldname,
+                      })}
+                      boxStyles={{
+                        height: 45,
+                        justifyContent: 'space-between',
+                        paddingHorizontal: 12,
+                        borderWidth: 1,
+                        borderColor: '#E2E8F0',
+                        borderRadius: 6,
+                        backgroundColor: '#FFFFFF',
+                      }}
+                      dropdownStyles={{
+                        borderWidth: 1,
+                        borderColor: '#E5E7EB',
+                        borderRadius: 10,
+                        backgroundColor: '#FFFFFF',
+                        shadowColor: '#000',
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.05,
+                        shadowRadius: 5,
+                        zIndex: 1000,
+                      }}
+                      dropdownItemStyles={{
+                        paddingVertical: 12,
+                        paddingHorizontal: 15,
+                      }}
+                      dropdownTextStyles={{
+                        fontSize: 16,
+                        color: '#111827',
+                      }}
+                    />
+                  </View>
+                ) : (
+                  <TextInput
+                    className="w-full h-[40px] rotate-0 opacity-100 rounded-md border pt-2.5 pr-3 pb-2.5 pl-3  border-[#E2E8F0]"
+                    placeholder={t('formDetail.enterPlaceholder', { label: field.label || field.fieldname })}
+                    value={formData[field.fieldname] || ''}
+                    onChangeText={(text) => handleChange(field.fieldname, text)}
                   />
-                </View>
-              ) : (
-                <TextInput
-                  className="w-full h-[40px] rotate-0 opacity-100 rounded-md border pt-2.5 pr-3 pb-2.5 pl-3  border-[#E2E8F0]"
-                  placeholder={t('formDetail.enterPlaceholder', { label: field.label || field.fieldname })}
-                  value={formData[field.fieldname] || ''}
-                  onChangeText={(text) => handleChange(field.fieldname, text)}
-                />
-              )}
-            </View>
-          ))}
-          <TouchableOpacity className="w-[345px] h-[40px] min-w-[80px] opacity-100 rounded-md p-4 gap-1 justify-center items-center bg-[#0F172A]" onPress={handleSubmit}>
-            <Text className="w-[55px] h-[24px] text-[#F8FAFC] 
-">{t('formDetail.submit')}</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-
-
+                )}
+              </View>
+            ))}
+            <TouchableOpacity className="w-full min-w-[80px] opacity-100 rounded-md p-4 gap-1 justify-center items-center bg-[#0F172A]" onPress={handleSubmit}>
+              <Text className=" text-[#F8FAFC]">{t('formDetail.submit')}</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAwareScrollView >
       <Modal
         animationType="fade"
         transparent={true}
