@@ -27,7 +27,7 @@
     "required": "This field is required",
     "success": "Form submitted successfully!",
     "error": "Error submitting form",
-    "subtitle": "Fill in the form below",
+    "subtitle": "Make sure you enter the farmer details are correct.",
     "selectPlaceholder": "Select {{label}}",
     "enterPlaceholder": "Enter {{label}}",
     "discardChanges": "Discard changes?",
