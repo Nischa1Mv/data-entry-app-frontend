@@ -7,7 +7,7 @@ import {
   Modal,
   Alert,
 } from 'react-native';
-import React, { useState, useEffect, use } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { SelectList } from 'react-native-dropdown-select-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -22,7 +22,6 @@ import { useTranslation } from 'react-i18next';
 import LanguageControl from "../../../components/LanguageControl"
 import generateSchemaHash from "../../../../helper/hashFunction"
 import { ArrowLeft } from 'lucide-react-native';
-// import { KeyboardAvoidingView, Platform } from 'react-native';
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"
 
 type FormDetailNavigationProp = NativeStackNavigationProp<
@@ -41,11 +40,12 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
   const { isConnected } = useNetwork();
   const route = useRoute<FormDetailRouteProp>();
   const { formName } = route.params;
-  const [modalVisible, setModalVisible] = useState(false);
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [fields, setFields] = useState<RawField[]>([])
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation();
+  const isSubmittedRef = useRef(false);
 
   useEffect(() => {
     (isConnected != null) &&
@@ -93,7 +93,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmitConfirmation = () => {
     if (!formName || !formData) return;
 
     const missingFields = fields.filter(field =>
@@ -110,6 +110,11 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
       Alert.alert(t("common.error"), t("formDetail.noData"));
       return;
     }
+    setConfirmModalVisible(true);
+  };
+
+  const handleSubmit = async () => {
+    if (!formName || !formData) return;
 
     const doctype = await getDocTypeFromLocal(formName);
     if (!doctype) {
@@ -127,23 +132,27 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
     };
 
     setLoading(true);
+    setConfirmModalVisible(false);
     try {
       await enqueue(newSubmission);
-      setFormData({});
+      isSubmittedRef.current = true;
       await AsyncStorage.removeItem("tempFormData");
+      setFormData({});
+      setTimeout(() => {
+        navigation.goBack();
+      }, 100);
     } catch (e) {
       Alert.alert(t("common.error"), t("formDetail.errorSaving"));
+      isSubmittedRef.current = false;
     } finally {
       setLoading(false);
-      setModalVisible(true);
     }
   };
 
-  //to remove the temp data after user uses naigation
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (e) => {
-      if (Object.keys(formData).length === 0) {
-        // no data to save, don't prompt
+      if (isSubmittedRef.current || Object.values(formData).length === 0) {
+        // no data to save or form was submitted, don't prompt
         return;
       }
       // Prevent default back action
@@ -168,7 +177,6 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
     return unsubscribe;
   }, [navigation, formData]);
 
-  //to restore the temp data when user losses internet and wants to continue filling the form 
   useEffect(() => {
     const restoreForm = async () => {
       const saved = await AsyncStorage.getItem("tempFormData");
@@ -178,6 +186,12 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
     };
     restoreForm();
   }, []);
+
+  useEffect(() => {
+    if (Object.keys(formData).length > 0) {
+      isSubmittedRef.current = false;
+    }
+  }, [formData]);
 
   const handleChange = async (fieldname: string, value: any) => {
     const updated = { ...formData, [fieldname]: value };
@@ -271,53 +285,47 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
                 )}
               </View>
             ))}
-            <TouchableOpacity className="w-full min-w-[80px] opacity-100 rounded-md p-4 gap-1 justify-center items-center bg-[#0F172A]" onPress={handleSubmit}>
+            <TouchableOpacity className="w-full min-w-[80px] opacity-100 rounded-md p-4 gap-1 justify-center items-center bg-[#0F172A]" onPress={handleSubmitConfirmation}>
               <Text className=" text-[#F8FAFC]">{t('formDetail.submit')}</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAwareScrollView >
+      
       <Modal
         animationType="fade"
         transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        visible={confirmModalVisible}
+        onRequestClose={() => setConfirmModalVisible(false)}
       >
         <View className="flex-1 bg-[#00000033] justify-center items-center p-[1.25rem]">
-          {/* Modal container */}
-          <View className="w-full h-[176px] max-w-[512px] opacity-100 gap-4 rounded-[6px] border p-6 border-[#E2E8F0] bg-white
-">
-            {/* Title */}
-            <Text className="font-inter font-semibold text-[18px] leading-[28px] tracking-[-0.006em] text-[#020617]
-">
-              {t('formDetail.modalTitle')}
+          <View className="w-full h-[176px] max-w-[512px] opacity-100 gap-4 rounded-[6px] border p-6 border-[#E2E8F0] bg-white">
+            <Text className="font-inter font-semibold text-[18px] leading-[28px] tracking-[-0.006em] text-[#020617]">
+              {t('formDetail.confirmSubmission') || 'Confirm Submission'}
             </Text>
 
-            {/* Description */}
             <Text className="font-inter font-normal text-[14px] leading-[20px] tracking-normal text-[#64748B]">
-              {t('formDetail.modalDescription')}
+              {t('formDetail.confirmSubmissionMessage') || 'Are you sure you want to submit this form? This action cannot be undone.'}
             </Text>
 
-            {/* Buttons */}
             <View className="flex-row justify-end gap-3">
               <TouchableOpacity
                 className="w-[78px] h-[36px] opacity-100 gap-2 rounded-md border px-4 items-center justify-center border-[#E2E8F0]"
-                onPress={() => setModalVisible(false)}
+                onPress={() => setConfirmModalVisible(false)}
               >
                 <Text className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle text-[#020617]">{t('common.cancel')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 className="py-2.5 px-4 rounded-lg bg-[#0F172A]"
-                onPress={() => setModalVisible(false)}
+                onPress={handleSubmit}
               >
-                <Text className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle text-[#F8FAFC] ">{t('common.ok')}</Text>
+                <Text className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle text-[#F8FAFC]">{t('common.ok')}</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
-
     </SafeAreaView >
 
   );
