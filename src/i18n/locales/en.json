@@ -52,7 +52,7 @@
     "formId": "FormId",
     "goBack": "Go Back",
     "deleteThisForm": "Delete This Form?",
-    "confirmDeleteMessage": "You are about to delete Form 1. This action cannot be undone."
+    "confirmDeleteMessage": "You are about to delete {{formName}}. This action cannot be undone."
   },
   "common": {
     "ok": "Upload",

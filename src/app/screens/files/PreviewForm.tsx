@@ -515,7 +515,7 @@ function PreviewForm() {
                         </Text>
 
                         <Text className="font-inter font-normal text-[14px] leading-[20px] tracking-normal text-[#64748B]">
-                            {t('previewForm.confirmDeleteMessage')}
+                            {t('previewForm.confirmDeleteMessage', { formName: formName })}
                         </Text>
 
                         <View className="flex-row justify-end gap-3">
