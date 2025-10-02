@@ -9,14 +9,12 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { enableScreens } from 'react-native-screens';
 import '../i18n';
 import '../../global.css';
-import Login from './public/Login';
-import ERP from './authenticated/Home';
-import FormsList from './authenticated/workflow/form/FormsList';
-import FormDetail from './authenticated/workflow/form/FormDetail';
+import Login from './screens/Login';
+import BottomTabs from './navigation/BottomTabs';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { RootStackParamList } from '@/shared/RootStackedList';
+import { RootStackParamList } from '@/app/navigation/RootStackedList';
 import { NetworkProvider } from '../context/NetworkProvider';
-import Downloads from './authenticated/workflow/downloads';
+import Home from './navigation/BottomTabs';
 
 enableScreens();
 
@@ -39,11 +37,7 @@ function App(): React.JSX.Element {
         <NavigationContainer>
           <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Login" component={Login} />
-            <Stack.Screen name="ERP" component={ERP} />
-            <Stack.Screen name="FormsList" component={FormsList} />
-            <Stack.Screen name="FormDetail" component={FormDetail} />
-            <Stack.Screen name="Downloads" component={Downloads} />
-
+            <Stack.Screen name="MainApp" component={Home} />
           </Stack.Navigator>
         </NavigationContainer>
       </NetworkProvider>

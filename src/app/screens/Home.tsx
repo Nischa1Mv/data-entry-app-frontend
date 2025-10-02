@@ -5,24 +5,22 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '@/shared/RootStackedList';
+import { useNavigation } from '@react-navigation/native';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { BottomTabsList } from '../navigation/BottomTabsList';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import LanguageControl from '../components/LanguageControl'
 import { ArrowRight } from 'lucide-react-native';
+import { HomeStackParamList } from '../navigation/HomeStackParamList';
 
-type LoginScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'ERP'
->;
-
-type Props = {
-  navigation: LoginScreenNavigationProp;
+type HomeNavigationProp = BottomTabNavigationProp<BottomTabsList, 'Home'> & {
+  navigate: (screen: keyof HomeStackParamList) => void;
 };
 
-const ERP: React.FC<Props> = ({ navigation }) => {
+const ERP: React.FC = () => {
   const { t } = useTranslation();
+  const navigation = useNavigation<HomeNavigationProp>();
 
   return (
     <SafeAreaView className="flex-1 bg-white gap-2">
@@ -62,7 +60,11 @@ const ERP: React.FC<Props> = ({ navigation }) => {
             <TouchableOpacity
               key={i}
               className="w-[173px] min-h-[100px] rounded-2xl border border-black items-center justify-center m-2"
-              onPress={() => i === 0 && navigation.navigate('FormsList')}
+              onPress={() => {
+                if (i === 0) {
+                  navigation.navigate('FormsList');
+                }
+              }}
             >
               <Text className="w-[42px] h-[28px] font-inter font-semibold text-base leading-7 tracking-[-0.006em]">
                 {label}
@@ -74,7 +76,7 @@ const ERP: React.FC<Props> = ({ navigation }) => {
         {/* Downloads */}
         <TouchableOpacity
           className="w-[35%] min-h-[100px] rounded-2xl border border-black items-center justify-center mx-auto mt-6"
-          onPress={() => navigation.navigate('Downloads')}
+          onPress={() => navigation.navigate('Files')}
         >
           <Text className="font-inter font-semibold text-sm leading-6 tracking-[-0.006em] text-gray-800">
             {t('navigation.downloads') || 'Downloads'}

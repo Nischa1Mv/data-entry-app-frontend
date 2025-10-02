@@ -2,26 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '@/shared/RootStackedList';
+import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNetwork } from "../../../../context/NetworkProvider";
+import { useNetwork } from "../../../context/NetworkProvider";
 import { useFocusEffect } from "@react-navigation/native";
-import { fetchDocType, fetchAllDocTypeNamess, saveDocTypeToLocal, getAllDocTypeNames } from '../../../../api';
-import { FormItem } from '../../../../types';
+import { fetchDocType, fetchAllDocTypeNamess, saveDocTypeToLocal, getAllDocTypeNames } from '../../../api';
+import { FormItem } from '../../../types';
 import { useTranslation } from 'react-i18next';
-import LanguageControl from "../../../components/LanguageControl"
-import { ArrowBigLeft, ArrowLeft, Download, Check } from 'lucide-react-native';
+import LanguageControl from "../../components/LanguageControl"
+import { ArrowLeft, Download, Check } from 'lucide-react-native';
+import { HomeStackParamList } from '@/app/navigation/HomeStackParamList';
 
-type LoginScreenNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'FormsList'
->;
+type FormsListNavigationProp = NativeStackNavigationProp<HomeStackParamList, 'FormsList'>;
 
-type Props = {
-  navigation: LoginScreenNavigationProp;
-};
+const FormsList=()=>{
 
-const FormsList: React.FC<Props> = ({ navigation }) => {
+  const navigation = useNavigation<FormsListNavigationProp>();
   const [forms, setForms] = useState<FormItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [downloadStates, setDownloadStates] = useState<{ [key: string]: { isDownloaded: boolean, isDownloading: boolean } }>({});

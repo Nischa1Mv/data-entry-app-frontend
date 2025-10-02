@@ -11,25 +11,22 @@ import React, { useState, useEffect, useRef } from 'react';
 import { SelectList } from 'react-native-dropdown-select-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '@/shared/RootStackedList';
+import { RootStackParamList } from '@/app/navigation/RootStackedList';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { useNetwork } from "../../../../context/NetworkProvider";
+import { useNetwork } from "../../../context/NetworkProvider";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { enqueue } from '../../../pendingQueue';
-import { fetchDocType, getDocTypeFromLocal, saveDocTypeToLocal, extractFields } from '../../../../api';
-import { RawField } from '../../../../types';
+import { enqueue } from '../../pendingQueue';
+import { fetchDocType, getDocTypeFromLocal, saveDocTypeToLocal, extractFields } from '../../../api';
+import { RawField } from '../../../types';
 import { useTranslation } from 'react-i18next';
-import LanguageControl from "../../../components/LanguageControl"
-import generateSchemaHash from "../../../../helper/hashFunction"
+import LanguageControl from "../../components/LanguageControl"
+import generateSchemaHash from "../../../helper/hashFunction"
 import { ArrowLeft } from 'lucide-react-native';
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"
+import { FilesStackParamList } from '../../navigation/FilesStackParamList'
 
-type FormDetailNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'FormDetail'
->;
-
-type FormDetailRouteProp = RouteProp<RootStackParamList, "FormDetail">;
+type FormDetailRouteProp = RouteProp<FilesStackParamList, 'FormDetail'>;
+type FormDetailNavigationProp = NativeStackNavigationProp<FilesStackParamList, 'FormDetail'>;
 
 type Props = {
   navigation: FormDetailNavigationProp;
@@ -150,7 +147,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
   };
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+    const unsubscribe = navigation.addListener("beforeRemove", (e: any) => {
       if (isSubmittedRef.current || Object.values(formData).length === 0) {
         // no data to save or form was submitted, don't prompt
         return;

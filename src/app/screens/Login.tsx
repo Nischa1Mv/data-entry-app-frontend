@@ -3,7 +3,7 @@ import auth from '@react-native-firebase/auth';
 import { useEffect } from 'react';
 import { View, Text, Image, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from './../../shared/RootStackedList'
+import { RootStackParamList } from '../navigation/RootStackedList'
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import LanguageControl from '../components/LanguageControl';
@@ -50,7 +50,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
 
       const data = await response.json();
       Alert.alert(t('login.successTitle'), t('login.welcomeMessage', { name: data.user.name }));
-      navigation.navigate('ERP');
+      navigation.replace("MainApp");
     } catch (error: any) {
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         Alert.alert(t('login.cancelledTitle'), t('login.cancelledMessage'));
@@ -72,7 +72,7 @@ const Login: React.FC<Props> = ({ navigation }) => {
       <Text className="text-sm text-center text-slate-500">
         {t('login.subtitle')}
       </Text>
-      <TouchableOpacity className="w-[85%] bg-slate-900 p-3 rounded-md items-center mt-2.5 border border-slate-200" onPress={() => navigation.navigate('ERP')}>
+      <TouchableOpacity className="w-[85%] bg-slate-900 p-3 rounded-md items-center mt-2.5 border border-slate-200" onPress={() =>  navigation.replace("MainApp") }>
         <Text className="text-white text-base">{t('login.signInWithGoogle')}</Text>
       </TouchableOpacity>
     </View>
