@@ -3,7 +3,7 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { House, Files, Settings as SettingsIcon } from "lucide-react-native";
 import HomeStack from "./HomeStack";
-import FilesStack from "./FilesStack";
+import FilesStack from "./FormStack";
 import Settings from "../screens/settings";
 import { BottomTabsList } from "./BottomTabsList";
 

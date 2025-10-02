@@ -23,10 +23,10 @@ import LanguageControl from "../../components/LanguageControl"
 import generateSchemaHash from "../../../helper/hashFunction"
 import { ArrowLeft } from 'lucide-react-native';
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"
-import { FilesStackParamList } from '../../navigation/FilesStackParamList'
+import { HomeStackParamList } from '@/app/navigation/HomeStackParamList';
 
-type FormDetailRouteProp = RouteProp<FilesStackParamList, 'FormDetail'>;
-type FormDetailNavigationProp = NativeStackNavigationProp<FilesStackParamList, 'FormDetail'>;
+type FormDetailRouteProp = RouteProp<HomeStackParamList, 'FormDetail'>;
+type FormDetailNavigationProp = NativeStackNavigationProp<RootStackParamList, 'MainApp'>;
 
 type Props = {
   navigation: FormDetailNavigationProp;
@@ -288,7 +288,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
           </View>
         </ScrollView>
       </KeyboardAwareScrollView >
-      
+
       <Modal
         animationType="fade"
         transparent={true}

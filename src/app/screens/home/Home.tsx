@@ -7,12 +7,12 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { BottomTabsList } from '../navigation/BottomTabsList';
+import { BottomTabsList } from '../../navigation/BottomTabsList';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import LanguageControl from '../components/LanguageControl'
+import LanguageControl from '../../components/LanguageControl'
 import { ArrowRight } from 'lucide-react-native';
-import { HomeStackParamList } from '../navigation/HomeStackParamList';
+import { HomeStackParamList } from '../../navigation/HomeStackParamList';
 
 type HomeNavigationProp = BottomTabNavigationProp<BottomTabsList, 'Home'> & {
   navigate: (screen: keyof HomeStackParamList) => void;

@@ -40,7 +40,19 @@
     "noData": "Please enter some data before submitting.",
     "missingDoctype": "Form configuration is missing. Please try again.",
     "confirmSubmission": "Confirm Submission",
-    "confirmSubmissionMessage": "Are you sure you want to submit this form? This action cannot be undone."
+    "confirmSubmissionMessage": "Are you sure you want to submit this form? This action cannot be undone.",
+    "deleteForm": "Delete the Form",
+    "confirmDeleteMessage": "Are you sure you want to delete this form? This action cannot be undone."
+  },
+  "previewForm": {
+    "title": "Preview Form",
+    "subtitle": "Review the form details before submission",
+    "loadingForm": "Loading form...",
+    "formNotFound": "Form not found",
+    "formId": "FormId",
+    "goBack": "Go Back",
+    "deleteThisForm": "Delete This Form?",
+    "confirmDeleteMessage": "You are about to delete Form 1. This action cannot be undone."
   },
   "common": {
     "ok": "Upload",
