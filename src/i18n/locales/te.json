@@ -54,6 +54,57 @@
     "deleteThisForm": "ఈ ఫారాన్ని తొలగించాలా?",
     "confirmDeleteMessage": "మీరు {{formName}}ను తొలగించబోతున్నారు. ఈ చర్యను రద్దు చేయలేరు।"
   },
+  "settings": {
+    "title": "సెట్టింగ్స్",
+    "notificationSettings": "నోటిఫికేషన్ సెట్టింగ్స్",
+    "privacySecurity": "గోప్యత మరియు భద్రత",
+    "supportHelp": "మద్దతు మరియు సహాయం",
+    "appInfo": "యాప్ సమాచారం",
+    "logout": "లాగ్అవుట్",
+    "logoutConfirmTitle": "మీరు నిజంగా లాగ్అవుట్ చేయాలనుకుంటున్నారా?",
+    "logoutConfirmMessage": "అన్ని ఫారాలు అప్‌లోడ్ అయ్యాయి, మీరు సురక్షితంగా లాగ్అవుట్ చేయవచ్చు।",
+    "pendingFormsTitle": "పెండింగ్ ఫారాలు అప్‌లోడ్ కాలేదు!",
+    "pendingFormsMessage": "దయచేసి ఇంటర్నెట్‌కు కనెక్ట్ అవ్వండి మరియు లాగ్అవుట్ చేసే ముందు వాటిని అప్‌లోడ్ చేయండి।",
+    "uploadNow": "ఇప్పుడే అప్‌లోడ్ చేయండి"
+  },
+  "home": {
+    "pendingForms": "{{count}} ఫారాలు పెండింగ్‌లో",
+    "viewPendingForms": "పెండింగ్ ఫారాలను చూడండి",
+    "submitAllForms": "అన్ని ఫారాలను సమర్పించండి",
+    "formCount": "{{count}} ఫారాలు"
+  },
+  "formsList": {
+    "title": "ERP 1",
+    "open": "తెరవండి"
+  },
+  "formsScreen": {
+    "title": "ఫారాలు",
+    "pendingForms": "పెండింగ్ ఫారాలు",
+    "loadingPendingForms": "పెండింగ్ ఫారాలు లోడ్ అవుతున్నాయి...",
+    "noPendingForms": "పెండింగ్ ఫారాలు కనుగొనబడలేదు",
+    "submitForm": "ఫారాన్ని సమర్పించండి",
+    "filledOn": "{{date}}న పూర్తి చేయబడింది",
+    "noFormsAlert": "ఫారాలు లేవు",
+    "noFormsMessage": "సమర్పించడానికి పెండింగ్ ఫారాలు లేవు।",
+    "submitAllFormsTitle": "అన్ని ఫారాలను సమర్పించండి",
+    "submitAllFormsMessage": "మీరు నిజంగా అన్ని {{count}} పెండింగ్ ఫారాలను సమర్పించాలనుకుంటున్నారా?",
+    "submitFormTitle": "ఫారాన్ని సమర్పించండి",
+    "submitFormMessage": "మీరు నిజంగా \"{{formName}}\"ను సమర్పించాలనుకుంటున్నారా?",
+    "submitError": "లోపం",
+    "submitErrorMessage": "ఫారాన్ని సమర్పించడంలో విఫలమైంది। దయచేసి మళ్లీ ప్రయత్నించండి।",
+    "submit": "సమర్పించండి"
+  },
+  "downloads": {
+    "title": "AsyncStorage మేనేజర్",
+    "noItems": "ఐటమ్‌లు లేవు",
+    "edit": "సవరించండి",
+    "remove": "తొలగించండి",
+    "editQueueItem": "క్యూ ఐటమ్‌ను సవరించండి",
+    "formDataFields": "ఫారం డేటా ఫీల్డ్‌లు",
+    "docTypeFields": "డాక్‌టైప్ ఫీల్డ్‌ల సూచన",
+    "rawJsonData": "రా JSON డేటా (చదవడానికి మాత్రమే)",
+    "autoUpdateNote": "మీరు పైన ఫారం ఫీల్డ్‌లను సవరించినప్పుడు ఇది స్వయంచాలకంగా అప్‌డేట్ అవుతుంది"
+  },
   "common": {
     "ok": "అప్‌లోడ్",
     "cancel": "రద్దు చేయండి",

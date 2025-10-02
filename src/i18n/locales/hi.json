@@ -54,6 +54,57 @@
     "deleteThisForm": "इस फॉर्म को डिलीट करें?",
     "confirmDeleteMessage": "आप {{formName}} को डिलीट करने वाले हैं। यह क्रिया पूर्ववत नहीं की जा सकती।"
   },
+  "settings": {
+    "title": "सेटिंग्स",
+    "notificationSettings": "सूचना सेटिंग्स",
+    "privacySecurity": "गोपनीयता और सुरक्षा",
+    "supportHelp": "सहायता और मदद",
+    "appInfo": "ऐप जानकारी",
+    "logout": "लॉगआउट",
+    "logoutConfirmTitle": "क्या आप वाकई लॉगआउट करना चाहते हैं?",
+    "logoutConfirmMessage": "सभी फॉर्म अपलोड हो गए हैं, आप सुरक्षित रूप से लॉगआउट कर सकते हैं।",
+    "pendingFormsTitle": "पेंडिंग फॉर्म अपलोड नहीं हुए!",
+    "pendingFormsMessage": "कृपया इंटरनेट से कनेक्ट करें और लॉगआउट करने से पहले उन्हें अपलोड करें।",
+    "uploadNow": "अभी अपलोड करें"
+  },
+  "home": {
+    "pendingForms": "{{count}} फॉर्म पेंडिंग",
+    "viewPendingForms": "पेंडिंग फॉर्म देखें",
+    "submitAllForms": "सभी फॉर्म जमा करें",
+    "formCount": "{{count}} फॉर्म"
+  },
+  "formsList": {
+    "title": "ERP 1",
+    "open": "खोलें"
+  },
+  "formsScreen": {
+    "title": "फॉर्म",
+    "pendingForms": "पेंडिंग फॉर्म",
+    "loadingPendingForms": "पेंडिंग फॉर्म लोड हो रहे हैं...",
+    "noPendingForms": "कोई पेंडिंग फॉर्म नहीं मिला",
+    "submitForm": "फॉर्म जमा करें",
+    "filledOn": "{{date}} को भरा गया",
+    "noFormsAlert": "कोई फॉर्म नहीं",
+    "noFormsMessage": "जमा करने के लिए कोई पेंडिंग फॉर्म नहीं है।",
+    "submitAllFormsTitle": "सभी फॉर्म जमा करें",
+    "submitAllFormsMessage": "क्या आप वाकई सभी {{count}} पेंडिंग फॉर्म जमा करना चाहते हैं?",
+    "submitFormTitle": "फॉर्म जमा करें",
+    "submitFormMessage": "क्या आप वाकई \"{{formName}}\" जमा करना चाहते हैं?",
+    "submitError": "त्रुटि",
+    "submitErrorMessage": "फॉर्म जमा करने में विफल। कृपया फिर से कोशिश करें।",
+    "submit": "जमा करें"
+  },
+  "downloads": {
+    "title": "AsyncStorage मैनेजर",
+    "noItems": "कोई आइटम नहीं",
+    "edit": "संपादित करें",
+    "remove": "हटाएं",
+    "editQueueItem": "क्यू आइटम संपादित करें",
+    "formDataFields": "फॉर्म डेटा फील्ड",
+    "docTypeFields": "डॉकटाइप फील्ड्स संदर्भ",
+    "rawJsonData": "रॉ JSON डेटा (केवल पढ़ने के लिए)",
+    "autoUpdateNote": "जब आप ऊपर फॉर्म फील्ड्स संपादित करते हैं तो यह स्वचालित रूप से अपडेट होता है"
+  },
   "common": {
     "ok": "अपलोड",
     "cancel": "रद्द करें",

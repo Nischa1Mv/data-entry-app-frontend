@@ -74,17 +74,17 @@ function Settings() {
     <SafeAreaView className="flex-1 bg-white">
       <View className="flex-row items-center justify-between px-4 py-3 pt-10 bg-white border-gray-200 border-b ">
         <View className="flex-1 items-center">
-          <Text className="font-inter font-semibold text-[18px] leading-[32px] tracking-[-0.006em] text-center">Settings</Text>
+          <Text className="font-inter font-semibold text-[18px] leading-[32px] tracking-[-0.006em] text-center">{t('settings.title')}</Text>
         </View>
         <LanguageControl />
       </View>
       <KeyboardAwareScrollView>
         {[
-          { title: 'Notification Settings', onPress: () => {} },
-          { title: 'Privacy & Security', onPress: () => {} },
-          { title: 'Support & Help', onPress: () => {} },
-          { title: 'App Info', onPress: () => {} },
-          { title: 'Logout', onPress: handleLogoutPress, isLogout: true }
+          { title: t('settings.notificationSettings'), onPress: () => {} },
+          { title: t('settings.privacySecurity'), onPress: () => {} },
+          { title: t('settings.supportHelp'), onPress: () => {} },
+          { title: t('settings.appInfo'), onPress: () => {} },
+          { title: t('settings.logout'), onPress: handleLogoutPress, isLogout: true }
         ].map((item, index) => (
           <TouchableOpacity 
             key={index} 
@@ -108,10 +108,10 @@ function Settings() {
         <View className="flex-1 bg-[#00000033] justify-center items-center p-[1.25rem]">
           <View className="w-full max-w-[400px] opacity-100 gap-4 rounded-[6px] border p-6 border-[#E2E8F0] bg-white">
             <Text className="font-inter font-semibold text-[18px] leading-[28px] tracking-[-0.006em] text-[#020617]">
-              Are you sure you want to logout?
+              {t('settings.logoutConfirmTitle')}
             </Text>
             <Text className="font-inter font-normal text-[14px] leading-[20px] tracking-normal text-[#64748B]">
-              All forms are uploaded, you can safely logout.
+              {t('settings.logoutConfirmMessage')}
             </Text>
             <View className="flex-row justify-end gap-3 mt-4">
               <TouchableOpacity
@@ -119,7 +119,7 @@ function Settings() {
                 onPress={handleLogoutCancel}
               >
                 <Text className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle text-[#020617]">
-                  Cancel
+                  {t('common.cancel')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -127,7 +127,7 @@ function Settings() {
                 onPress={handleLogoutConfirm}
               >
                 <Text className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle text-[#F8FAFC]">
-                  Logout
+                  {t('settings.logout')}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -143,10 +143,10 @@ function Settings() {
         <View className="flex-1 bg-[#00000033] justify-center items-center p-[1.25rem]">
           <View className="w-full max-w-[400px] opacity-100 gap-4 rounded-[6px] border p-6 border-[#E2E8F0] bg-white">
             <Text className="font-inter font-semibold text-[18px] leading-[28px] tracking-[-0.006em] text-[#020617]">
-              Pending forms not uploaded!
+              {t('settings.pendingFormsTitle')}
             </Text>
             <Text className="font-inter font-normal text-[14px] leading-[20px] tracking-normal text-[#64748B]">
-              Please connect to the internet and upload them before logging out.
+              {t('settings.pendingFormsMessage')}
             </Text>
             <View className="flex-row justify-end gap-3 mt-4">
               <TouchableOpacity
@@ -154,7 +154,7 @@ function Settings() {
                 onPress={handlePendingFormsCancel}
               >
                 <Text className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle text-[#020617]">
-                  Cancel
+                  {t('common.cancel')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -162,7 +162,7 @@ function Settings() {
                 onPress={handleUploadNow}
               >
                 <Text className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle text-[#F8FAFC]">
-                  Upload Now
+                  {t('settings.uploadNow')}
                 </Text>
               </TouchableOpacity>
             </View>

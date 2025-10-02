@@ -54,6 +54,57 @@
     "deleteThisForm": "Delete This Form?",
     "confirmDeleteMessage": "You are about to delete {{formName}}. This action cannot be undone."
   },
+  "settings": {
+    "title": "Settings",
+    "notificationSettings": "Notification Settings",
+    "privacySecurity": "Privacy & Security",
+    "supportHelp": "Support & Help",
+    "appInfo": "App Info",
+    "logout": "Logout",
+    "logoutConfirmTitle": "Are you sure you want to logout?",
+    "logoutConfirmMessage": "All forms are uploaded, you can safely logout.",
+    "pendingFormsTitle": "Pending forms not uploaded!",
+    "pendingFormsMessage": "Please connect to the internet and upload them before logging out.",
+    "uploadNow": "Upload Now"
+  },
+  "home": {
+    "pendingForms": "{{count}} Forms Pending",
+    "viewPendingForms": "View Pending Forms",
+    "submitAllForms": "Submit all forms",
+    "formCount": "{{count}} Forms"
+  },
+  "formsList": {
+    "title": "ERP 1",
+    "open": "Open"
+  },
+  "formsScreen": {
+    "title": "Forms",
+    "pendingForms": "Pending Forms",
+    "loadingPendingForms": "Loading pending forms...",
+    "noPendingForms": "No pending forms found",
+    "submitForm": "SubmitForm",
+    "filledOn": "Filled on {{date}}",
+    "noFormsAlert": "No Forms",
+    "noFormsMessage": "There are no pending forms to submit.",
+    "submitAllFormsTitle": "Submit All Forms",
+    "submitAllFormsMessage": "Are you sure you want to submit all {{count}} pending forms?",
+    "submitFormTitle": "Submit Form",
+    "submitFormMessage": "Are you sure you want to submit \"{{formName}}\"?",
+    "submitError": "Error",
+    "submitErrorMessage": "Failed to submit form. Please try again.",
+    "submit": "Submit"
+  },
+  "downloads": {
+    "title": "AsyncStorage Manager",
+    "noItems": "No items",
+    "edit": "Edit",
+    "remove": "Remove",
+    "editQueueItem": "Edit Queue Item",
+    "formDataFields": "Form Data Fields",
+    "docTypeFields": "DocType Fields Reference",
+    "rawJsonData": "Raw JSON Data (Read Only)",
+    "autoUpdateNote": "This updates automatically when you edit form fields above"
+  },
   "common": {
     "ok": "Upload",
     "cancel": "Cancel",

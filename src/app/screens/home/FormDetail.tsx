@@ -208,7 +208,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
           <ArrowLeft color="#020617" size={16} />
         </TouchableOpacity>
         <View className="flex-1 items-center">
-          <Text className="font-inter font-semibold text-[18px] leading-[32px] tracking-[-0.006em] text-center">ERP 1</Text>
+          <Text className="font-inter font-semibold text-[18px] leading-[32px] tracking-[-0.006em] text-center">{t('formsList.title')}</Text>
         </View>
         <LanguageControl />
       </View>

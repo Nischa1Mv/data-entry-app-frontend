@@ -38,17 +38,17 @@ const ERP: React.FC = () => {
       {/* Pending Forms Card */}
       <View className="mx-6 mb-5 p-4 w-[356px] h-[76px] border border-[##E2E8F0] rounded-lg bg-[#FFFCF0] flex-row justify-between items-center">
         <View>
-          <Text className="text-[#DC7609] text-2xl font-bold">15 Forms Pending</Text>
+          <Text className="text-[#DC7609] text-2xl font-bold">{t('home.pendingForms', { count: 15 })}</Text>
           <TouchableOpacity>
             <View className="flex-row items-center mt-2 gap-2">
-              <Text className="text-[#DC7609]">View Pending Forms</Text>
+              <Text className="text-[#DC7609]">{t('home.viewPendingForms')}</Text>
               <ArrowRight color="#DC7609" size={12} />
             </View>
           </TouchableOpacity>
         </View>
         <TouchableOpacity>
           <Text className="border border-[#DC7609] px-3 py-2 text-base text-[#DC7609] rounded-xl">
-            Submit all forms
+            {t('home.submitAllForms')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -69,7 +69,7 @@ const ERP: React.FC = () => {
               <Text className="w-[42px] h-[28px] font-inter font-semibold text-base leading-7 tracking-[-0.006em]">
                 {label}
               </Text>
-              <Text className='font-inter font-normal text-xs leading-5 tracking-normal text-center'>15 {t('navigation.forms') || 'Forms'}</Text>
+              <Text className='font-inter font-normal text-xs leading-5 tracking-normal text-center'>{t('home.formCount', { count: 15 })}</Text>
             </TouchableOpacity>
           ))}
         </View>

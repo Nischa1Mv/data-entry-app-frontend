@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, Modal, TextInput, Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ChevronDown, ChevronRight, Edit, Save, X, Trash2 } from "lucide-react-native"; // RN version
+import { useTranslation } from "react-i18next";
 
 interface StorageItem {
     key: string;
@@ -10,6 +11,7 @@ interface StorageItem {
 }
 
 const Downloads: React.FC = () => {
+    const { t } = useTranslation();
     const [downloadDoctypesData, setDownloadDoctypesData] = useState<StorageItem[]>([]);
     const [queueData, setQueueData] = useState<StorageItem[]>([]);
     const [editingQueue, setEditingQueue] = useState<{index: number, data: any} | null>(null);
@@ -280,7 +282,7 @@ const Downloads: React.FC = () => {
             {!collapsed[sectionKey] && (
                 <View>
                     {items.length === 0 ? (
-                        <Text style={styles.noItems}>No items</Text>
+                        <Text style={styles.noItems}>{t('downloads.noItems')}</Text>
                     ) : (
                         items.map((item, index) => (
                             <View key={index} style={styles.itemContainer}>
@@ -296,7 +298,7 @@ const Downloads: React.FC = () => {
                                                 style={styles.editButton}
                                             >
                                                 <Edit size={16} color="#0369a1" />
-                                                <Text style={styles.editButtonText}>Edit</Text>
+                                                <Text style={styles.editButtonText}>{t('downloads.edit')}</Text>
                                             </TouchableOpacity>
                                         )}
                                         {removeHandler && (
@@ -304,7 +306,7 @@ const Downloads: React.FC = () => {
                                                 onPress={() => removeHandler(index)}
                                                 style={styles.removeButton}
                                             >
-                                                <Text style={styles.removeButtonText}>Remove</Text>
+                                                <Text style={styles.removeButtonText}>{t('downloads.remove')}</Text>
                                             </TouchableOpacity>
                                         )}
                                     </View>
@@ -326,7 +328,7 @@ const Downloads: React.FC = () => {
 
     return (
         <ScrollView style={styles.container}>
-            <Text style={styles.title}>AsyncStorage Manager</Text>
+            <Text style={styles.title}>{t('downloads.title')}</Text>
             {renderSection(
                 " Download Doctypes",
                 downloadDoctypesData,
@@ -344,7 +346,7 @@ const Downloads: React.FC = () => {
                 <View style={styles.modalContainer}>
                     <View style={styles.modalHeader}>
                         <View>
-                            <Text style={styles.modalTitle}>Edit Queue Item</Text>
+                            <Text style={styles.modalTitle}>{t('downloads.editQueueItem')}</Text>
                             {relatedDocType && (
                                 <Text style={styles.modalSubtitle}>
                                     DocType: {relatedDocType.name || relatedDocType.doctype || 'Unknown'}
@@ -359,7 +361,7 @@ const Downloads: React.FC = () => {
                     <ScrollView style={styles.modalContent}>
                         {/* Form Fields Editor */}
                         <View style={styles.formSection}>
-                            <Text style={styles.sectionTitle}>Form Data Fields</Text>
+                            <Text style={styles.sectionTitle}>{t('downloads.formDataFields')}</Text>
                             
                             {Object.entries(formFields).map(([key, value]) => (
                                 <View key={key} style={styles.fieldContainer}>
@@ -381,7 +383,7 @@ const Downloads: React.FC = () => {
                         {/* DocType Structure Reference */}
                         {relatedDocType && relatedDocType.fields && (
                             <View style={styles.referenceSection}>
-                                <Text style={styles.sectionTitle}>DocType Fields Reference</Text>
+                                <Text style={styles.sectionTitle}>{t('downloads.docTypeFields')}</Text>
                                 <View style={styles.referenceContainer}>
                                     {relatedDocType.fields.map((field: any, index: number) => (
                                         <View key={index} style={styles.referenceField}>
@@ -408,13 +410,13 @@ const Downloads: React.FC = () => {
                                 onPress={() => setCollapsed(prev => ({ ...prev, json: !prev.json }))}
                                 style={styles.jsonToggle}
                             >
-                                <Text style={styles.sectionTitle}>Raw JSON Data (Read Only)</Text>
+                                <Text style={styles.sectionTitle}>{t('downloads.rawJsonData')}</Text>
                                 {collapsed.json ? <ChevronRight size={18} /> : <ChevronDown size={18} />}
                             </TouchableOpacity>
                             
                             {!collapsed.json && (
                                 <View style={styles.readOnlyContainer}>
-                                    <Text style={styles.readOnlyLabel}>This updates automatically when you edit form fields above</Text>
+                                    <Text style={styles.readOnlyLabel}>{t('downloads.autoUpdateNote')}</Text>
                                     <TextInput
                                         style={[styles.modalTextInput, styles.readOnlyTextInput]}
                                         value={editedData}
@@ -431,11 +433,11 @@ const Downloads: React.FC = () => {
 
                     <View style={styles.modalFooter}>
                         <TouchableOpacity onPress={cancelEdit} style={styles.modalCancelButton}>
-                            <Text style={styles.modalCancelText}>Cancel</Text>
+                            <Text style={styles.modalCancelText}>{t('common.cancel')}</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={saveQueueItem} style={styles.modalSaveButton}>
                             <Save size={16} color="white" />
-                            <Text style={styles.modalSaveText}>Save</Text>
+                            <Text style={styles.modalSaveText}>{t('common.save')}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

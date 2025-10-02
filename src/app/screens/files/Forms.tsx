@@ -49,17 +49,17 @@ function Forms() {
 
     const handleSubmitAllForms = async () => {
         if (pendingFormsCount === 0) {
-            Alert.alert("No Forms", "There are no pending forms to submit.");
+            Alert.alert(t('formsScreen.noFormsAlert'), t('formsScreen.noFormsMessage'));
             return;
         }
 
         Alert.alert(
-            "Submit All Forms",
-            `Are you sure you want to submit all ${pendingFormsCount} pending forms?`,
+            t('formsScreen.submitAllFormsTitle'),
+            t('formsScreen.submitAllFormsMessage', { count: pendingFormsCount }),
             [
-                { text: "Cancel", style: "cancel" },
+                { text: t('common.cancel'), style: "cancel" },
                 {
-                    text: "Submit",
+                    text: t('formsScreen.submit'),
                     onPress: async () => {
                         // Add your submission logic here
                         console.log("Submitting all forms:", queueData);
@@ -72,12 +72,12 @@ function Forms() {
 
     const handleSubmitSingleForm = async (index: number, formData: SubmissionItem) => {
         Alert.alert(
-            "Submit Form",
-            `Are you sure you want to submit "${formData?.formName || `Form ${index + 1}`}"?`,
+            t('formsScreen.submitFormTitle'),
+            t('formsScreen.submitFormMessage', { formName: formData?.formName || `Form ${index + 1}` }),
             [
-                { text: "Cancel", style: "cancel" },
+                { text: t('common.cancel'), style: "cancel" },
                 {
-                    text: "Submit",
+                    text: t('formsScreen.submit'),
                     onPress: async () => {
                         try {
                             // Add your single form submission logic here
@@ -86,7 +86,7 @@ function Forms() {
                             fetchPendingForms();
                         } catch (error) {
                             console.error("Error submitting form:", error);
-                            Alert.alert("Error", "Failed to submit form. Please try again.");
+                            Alert.alert(t('formsScreen.submitError'), t('formsScreen.submitErrorMessage'));
                         }
                     }
                 }
@@ -97,7 +97,7 @@ function Forms() {
         <SafeAreaView className="flex-1 bg-white">
             <View className="flex-row items-center justify-between px-4 py-3 pt-10 bg-white mb-5">
                 <View className="flex-1 items-center">
-                    <Text className="font-inter font-semibold text-[18px] leading-[32px] tracking-[-0.006em] text-center">Forms</Text>
+                    <Text className="font-inter font-semibold text-[18px] leading-[32px] tracking-[-0.006em] text-center">{t('formsScreen.title')}</Text>
                 </View>
                 <LanguageControl />
             </View>
@@ -107,7 +107,7 @@ function Forms() {
 
                         <FileWarningIcon color="#DC7609" size={16} />
                         <Text className="text-[#DC7609] font-inter font-medium text-sm leading-5 tracking-[-0.006em]">
-                            Pending Forms
+                            {t('formsScreen.pendingForms')}
                         </Text>
                     </View>
                     <Text className="text-[#DC7609] font-inter font-semibold text-2xl leading-8 tracking-[-0.006em]">
@@ -119,22 +119,22 @@ function Forms() {
                         ? 'text-[#64748B] border-[#64748B]'
                         : 'text-[#DC7609] border-[#DC7609]'
                         }`}>
-                        Submit all forms
+                        {t('home.submitAllForms')}
                     </Text>
                 </TouchableOpacity>
             </View>
             <View>
                 <Text className="font-inter font-semibold text-base leading-8 tracking-[-0.006em] text-center">
-                    Pending Forms
+                    {t('formsScreen.pendingForms')}
                 </Text>
             </View>
             {isLoading ? (
                 <View className="flex items-center justify-center py-8">
-                    <Text className="text-gray-500">Loading pending forms...</Text>
+                    <Text className="text-gray-500">{t('formsScreen.loadingPendingForms')}</Text>
                 </View>
             ) : queueData.length === 0 ? (
                 <View className="flex items-center justify-center py-8">
-                    <Text className="text-gray-500">No pending forms found</Text>
+                    <Text className="text-gray-500">{t('formsScreen.noPendingForms')}</Text>
                 </View>
             ) : (
                 queueData.map((item, index) => {
@@ -154,12 +154,12 @@ function Forms() {
                             }}>
                                 <View className="flex flex-col items-start">
                                     <Text className="font-inter font-normal text-sm leading-5 text-left">{formName}</Text>
-                                    <Text className="font-inter font-light text-[10px] leading-5 text-left">Filled on {formattedDate}, </Text>
+                                    <Text className="font-inter font-light text-[10px] leading-5 text-left">{t('formsScreen.filledOn', { date: formattedDate })}</Text>
                                 </View>
                             </TouchableOpacity>
                             <TouchableOpacity onPress={() => handleSubmitSingleForm(index, formData)}>
                                 <View className="flex w-[117px] h-[40px] items-center justify-center">
-                                    <Text className="font-inter font-medium text-sm leading-5 text-right">SubmitForm</Text>
+                                    <Text className="font-inter font-medium text-sm leading-5 text-right">{t('formsScreen.submitForm')}</Text>
                                 </View>
                             </TouchableOpacity>
                         </View>
