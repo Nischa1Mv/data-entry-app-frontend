@@ -38,7 +38,7 @@ export const clearQueue = async () => {
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify([]));
 };
 
-const removeFromQueue = async (id: number) => {
+export const removeFromQueue = async (id: string) => {
   const queue = await getQueue();
   const updated = queue.filter((item: any) => item.id !== id);
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));

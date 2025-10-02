@@ -8,7 +8,7 @@ import LanguageControl from '../../components/LanguageControl'
 import { useTranslation } from 'react-i18next'
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { SubmissionItem, RawField } from '../../../types'
-import { getQueue } from '../../pendingQueue'
+import { getQueue, removeFromQueue } from '../../pendingQueue'
 import { FormStackParamList } from '@/app/navigation/FormStackParamList'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import AsyncStorage from '@react-native-async-storage/async-storage'
@@ -24,7 +24,6 @@ function PreviewForm() {
     // State for form data
     const [formData, setFormData] = useState<Record<string, any>>({});
     const [submissionItem, setSubmissionItem] = useState<SubmissionItem | null>(null);
-    const [formSchema, setFormSchema] = useState<any>(null);
     const [formFields, setFormFields] = useState<RawField[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [confirmModalVisible, setConfirmModalVisible] = useState(false);
@@ -89,7 +88,6 @@ function PreviewForm() {
                 const doctypes = tryParseJSON(downloadDoctypesData);
                 if (doctypes && doctypes[formName]) {
                     console.log('Found form schema in downloadDoctypes:', doctypes[formName]);
-                    setFormSchema(doctypes[formName]);
                     if (doctypes[formName].fields) {
                         setFormFields(doctypes[formName].fields);
                     }
@@ -107,7 +105,6 @@ function PreviewForm() {
                     const parsedData = tryParseJSON(data);
                     if (parsedData && (parsedData.name === formName || parsedData.doctype === formName)) {
                         console.log('Found form schema in docType_:', parsedData);
-                        setFormSchema(parsedData);
                         if (parsedData.fields) {
                             setFormFields(parsedData.fields);
                         }
@@ -184,8 +181,10 @@ function PreviewForm() {
 
     const handleDelete = async () => {
         try {
-            // Add your deletion logic here
+            if (!submissionItem) return;
             console.log('Deleting form:', submissionItem);
+            await removeFromQueue(submissionItem.id);
+            console.log('Form deleted successfully');
             setDeleteModalVisible(false);
             navigation.goBack();
         } catch (error) {
