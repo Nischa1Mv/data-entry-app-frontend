@@ -41,7 +41,9 @@ const ERP: React.FC = () => {
           <Text className="text-[#DC7609] text-2xl font-bold">{t('home.pendingForms', { count: 15 })}</Text>
           <TouchableOpacity>
             <View className="flex-row items-center mt-2 gap-2">
-              <Text className="text-[#DC7609]">{t('home.viewPendingForms')}</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Files')}>
+                <Text className="text-[#DC7609]">{t('home.viewPendingForms')}</Text>
+              </TouchableOpacity>
               <ArrowRight color="#DC7609" size={12} />
             </View>
           </TouchableOpacity>
