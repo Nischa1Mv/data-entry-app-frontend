@@ -1,84 +1,129 @@
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
-import auth from '@react-native-firebase/auth';
-import { useEffect } from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, Alert } from 'react-native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/RootStackedList'
-import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  useColorScheme,
+} from 'react-native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../navigation/RootStackedList';
+import React, {useEffect} from 'react';
+import {useTranslation} from 'react-i18next';
+import {Mail} from 'lucide-react-native';
 import LanguageControl from '../components/LanguageControl';
-type LoginScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
+import {GOOGLE_WEB_CLIENT_ID} from '@env';
+type LoginScreenNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'Login'
+>;
 
 type Props = {
   navigation: LoginScreenNavigationProp;
 };
 
-const Login: React.FC<Props> = ({ navigation }) => {
-  const { t } = useTranslation();
+const Login: React.FC<Props> = ({navigation}) => {
+  const {t} = useTranslation();
+  const isDarkMode = useColorScheme() === 'dark';
+
+  // Theme-aware colors
+  const theme = {
+    background: isDarkMode ? '#000000' : '#ffffff',
+    text: isDarkMode ? '#ffffff' : '#000000',
+    subtext: isDarkMode ? '#cccccc' : '#666666',
+    buttonBackground: isDarkMode ? '#ffffff' : '#000000',
+    buttonText: isDarkMode ? '#000000' : '#ffffff',
+    iconColor: isDarkMode ? '#000000' : '#ffffff',
+  };
 
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId: '904251205616-f80brecsb4c6jebtjm8eebdbkfo0c5q4.apps.googleusercontent.com',
+      webClientId: GOOGLE_WEB_CLIENT_ID,
       offlineAccess: true,
+      hostedDomain: '',
+      forceCodeForRefreshToken: true,
     });
   }, []);
 
-  const handleGoogleLogin = async () => {
+  const signInWithGoogle = async () => {
     try {
-      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
 
-      // 👇 Fix: idToken may not be typed correctly
-      const idToken = (userInfo as any)?.idToken;
+      console.log('User Info:', userInfo);
 
-      if (!idToken) {
-        throw new Error('ID token not found in user info');
-      }
+      // Navigate to main app after successful sign-in
+      navigation.navigate('MainApp');
 
-      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-      await auth().signInWithCredential(googleCredential);
-
-      const response = await fetch('http://192.168.29.202:8000/auth/google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id_token: idToken }),
-      });
-
-      if (!response.ok) {
-        throw new Error(t('login.backendError'));
-      }
-
-      const data = await response.json();
-      Alert.alert(t('login.successTitle'), t('login.welcomeMessage', { name: data.user.name }));
-      navigation.replace("MainApp");
+      Alert.alert('Success', `Welcome ${userInfo.data?.user.name}!`);
     } catch (error: any) {
+      console.log('Google Sign-in Error:', error);
+
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        Alert.alert(t('login.cancelledTitle'), t('login.cancelledMessage'));
+        console.log('User cancelled the login flow');
+        // Don't show alert for user cancellation
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        console.log('Sign in is in progress already');
+        Alert.alert('Info', 'Sign in is already in progress');
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        console.log('Play services not available or outdated');
+        Alert.alert(
+          'Error',
+          'Google Play Services not available. Please update Google Play Services.',
+        );
+      } else if (error.code === 'DEVELOPER_ERROR') {
+        console.log('Developer error - check configuration');
+        Alert.alert(
+          'Configuration Error',
+          'Google Sign-in is not properly configured. Please check your Google Console settings.',
+        );
       } else {
-        console.error('Google Sign-In Error:', error);
-        Alert.alert(t('login.errorTitle'), error.message || t('login.errorMessage'));
+        console.log('Some other error happened:', error);
+        Alert.alert(
+          'Error',
+          `Failed to sign in with Google: ${error.message || 'Unknown error'}`,
+        );
       }
     }
   };
 
   return (
-    <View className="flex-1 items-center justify-center w-full">
-      <View className="flex-row justify-between items-center w-[85%]">
-        <View className="flex-row items-center justify-between w-full">
-          <Text className="text-xl font-bold mb-0.5 text-slate-900">{t('login.title')}</Text>
-          <LanguageControl />
-        </View>
+    <View
+      className="flex-1 items-center justify-center w-full"
+      style={{backgroundColor: theme.background}}>
+      {/* Language Control - Top Right Corner */}
+      <View className="absolute top-12 right-6">
+        <LanguageControl />
       </View>
-      <Text className="text-sm text-center text-slate-500">
-        {t('login.subtitle')}
-      </Text>
-      <TouchableOpacity className="w-[85%] bg-slate-900 p-3 rounded-md items-center mt-2.5 border border-slate-200" onPress={() =>  navigation.replace("MainApp") }>
-        <Text className="text-white text-base">{t('login.signInWithGoogle')}</Text>
-      </TouchableOpacity>
+
+      <View className="w-[85%] items-center">
+        <View className="items-start mb-8 w-full">
+          <Text
+            className="text-xl font-bold mb-0.5"
+            style={{color: theme.text}}>
+            {t('login.title')}
+          </Text>
+          <Text className="text-sm text-left" style={{color: theme.subtext}}>
+            {t('login.subtitle')}
+          </Text>
+        </View>
+        <TouchableOpacity
+          className="w-full p-3 rounded-lg items-center"
+          style={{backgroundColor: theme.buttonBackground}}
+          onPress={signInWithGoogle}>
+          <View className="flex-row items-center gap-2">
+            <Mail size={20} color={theme.iconColor} />
+            <Text className="text-base" style={{color: theme.buttonText}}>
+              {t('login.signInWithGoogle')}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
-
-
 
 export default Login;
