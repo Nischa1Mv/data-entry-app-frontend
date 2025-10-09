@@ -1,19 +1,15 @@
 import React from 'react';
-import {
-  StatusBar,
-  useColorScheme,
-  SafeAreaView,
-} from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { enableScreens } from 'react-native-screens';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import {StatusBar, useColorScheme, SafeAreaView} from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {enableScreens} from 'react-native-screens';
+import Login from './screens/Login';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
+import {RootStackParamList} from './navigation/RootStackedList';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import '../i18n';
 import '../../global.css';
-import Login from './screens/Login';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
-import { RootStackParamList } from '@/app/navigation/RootStackedList';
-import { NetworkProvider } from '../context/NetworkProvider';
+import {NetworkProvider} from '../context/NetworkProvider';
 import Home from './navigation/BottomTabs';
 
 enableScreens();
@@ -28,7 +24,7 @@ function App(): React.JSX.Element {
   };
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView style={{flex: 1}}>
       <SafeAreaView style={backgroundStyle}>
         <StatusBar
           barStyle={isDarkMode ? 'light-content' : 'dark-content'}
@@ -36,7 +32,9 @@ function App(): React.JSX.Element {
         />
         <NetworkProvider>
           <NavigationContainer>
-            <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+            <Stack.Navigator
+              initialRouteName="Login"
+              screenOptions={{headerShown: false}}>
               <Stack.Screen name="Login" component={Login} />
               <Stack.Screen name="MainApp" component={Home} />
             </Stack.Navigator>
