@@ -127,7 +127,7 @@
     "password": "Password",
     "passwordPlaceholder": "Password",
     "signIn": "Login",
-    "signInWithGoogle": "Login with Google",
+    "signInWithGoogle": "Sign in with Google",
     "forgotPassword": "Forgot password ?",
     "noAccount": "Don't have an account? Sign up",
     "welcomeMessage": "Welcome {{name}}",
