@@ -41,6 +41,13 @@ node_modules/
 npm-debug.log
 yarn-error.log
 
+# Environment variables
+.env
+
+# Google Services Configuration (contains API keys)
+android/app/google-services.json
+ios/erpForm/GoogleService-Info.plist
+
 # fastlane
 #
 # It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the
