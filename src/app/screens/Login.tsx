@@ -2,13 +2,7 @@ import {
   GoogleSignin,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-  useColorScheme,
-} from 'react-native';
+import {View, Text, TouchableOpacity, Alert} from 'react-native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigation/RootStackedList';
 import React, {useEffect} from 'react';
@@ -16,6 +10,7 @@ import {useTranslation} from 'react-i18next';
 import {Mail} from 'lucide-react-native';
 import LanguageControl from '../components/LanguageControl';
 import {GOOGLE_WEB_CLIENT_ID} from '@env';
+import {useTheme} from '../../context/ThemeContext';
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'Login'
@@ -27,17 +22,7 @@ type Props = {
 
 const Login: React.FC<Props> = ({navigation}) => {
   const {t} = useTranslation();
-  const isDarkMode = useColorScheme() === 'dark';
-
-  // Theme-aware colors
-  const theme = {
-    background: isDarkMode ? '#000000' : '#ffffff',
-    text: isDarkMode ? '#ffffff' : '#000000',
-    subtext: isDarkMode ? '#cccccc' : '#666666',
-    buttonBackground: isDarkMode ? '#ffffff' : '#000000',
-    buttonText: isDarkMode ? '#000000' : '#ffffff',
-    iconColor: isDarkMode ? '#000000' : '#ffffff',
-  };
+  const {theme} = useTheme();
 
   useEffect(() => {
     GoogleSignin.configure({
@@ -115,7 +100,7 @@ const Login: React.FC<Props> = ({navigation}) => {
           style={{backgroundColor: theme.buttonBackground}}
           onPress={signInWithGoogle}>
           <View className="flex-row items-center gap-2">
-            <Mail size={20} color={theme.iconColor} />
+            <Mail size={20} color={theme.buttonText} />
             <Text className="text-base" style={{color: theme.buttonText}}>
               {t('login.signInWithGoogle')}
             </Text>
