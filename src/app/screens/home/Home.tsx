@@ -85,14 +85,6 @@ const ERP: React.FC = () => {
             ),
           )}
         </View>
-        {/* Downloads */}
-        <TouchableOpacity
-          className="w-[35%] min-h-[100px] rounded-2xl border border-black items-center justify-center mx-auto mt-6"
-          onPress={() => navigation.navigate('Files')}>
-          <Text className="font-inter font-semibold text-sm leading-6 tracking-[-0.006em] text-gray-800">
-            {t('navigation.downloads') || 'Downloads'}
-          </Text>
-        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
