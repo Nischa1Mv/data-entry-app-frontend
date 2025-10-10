@@ -1,33 +1,18 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DocType, FormItem ,RawField} from "./types";
-
-const API_BASE = "https://erp.kisanmitra.net";
+import {BACKEND_URL} from '@env';
 
 // One axios instance to keep cookies
 const api = axios.create({
-  baseURL: API_BASE,
+  baseURL: BACKEND_URL,
   withCredentials: true,
 });
-
-// login function
-export async function login(username: string, password: string) {
-  await api.post("/api/method/login", { usr: username, pwd: password });
-}
 
 //fetch all doctypes
 export async function fetchAllDocTypeNamess(): Promise<FormItem[]> {
   try {
-    await axios.post(
-      `${API_BASE}/api/method/login`,
-      {
-        usr: 'ads@aegiondynamic.com',
-        pwd: 'Csa@2025',
-      },
-      { withCredentials: true }
-    );
-
-    const response = await axios.get(`${API_BASE}/api/resource/DocType`, {
+    const response = await axios.get(`${BACKEND_URL}/doctype/`, {
       withCredentials: true,
     });
 
@@ -42,16 +27,7 @@ export async function fetchAllDocTypeNamess(): Promise<FormItem[]> {
 // fetch doctypes
 export async function fetchDocType(docTypeName: string): Promise<DocType> {
   try {
-    await axios.post(
-      `${API_BASE}/api/method/login`,
-      {
-        usr: 'ads@aegiondynamic.com',
-        pwd: 'Csa@2025',
-      },
-      { withCredentials: true }
-    );
-
-    const response = await axios.get(`${API_BASE}/api/resource/DocType/${docTypeName}`, {
+    const response = await axios.get(`${BACKEND_URL}/docType/${docTypeName}`, {
       withCredentials: true,
     });
     if (!response.data || !response.data.data) {
