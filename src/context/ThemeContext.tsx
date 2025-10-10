@@ -20,6 +20,10 @@ export interface Theme {
   buttonBackground: string;
   buttonText: string;
 
+  // Modal colors
+  modalBackground: string;
+  modalOverlay: string;
+
   // Tab bar colors
   activeTint: string;
   inactiveTint: string;
@@ -49,6 +53,8 @@ const lightTheme: Theme = {
   iconColor: '#000000',
   buttonBackground: '#000000',
   buttonText: '#ffffff',
+  modalBackground: '#ffffff',
+  modalOverlay: '#00000033',
   activeTint: '#000000',
   inactiveTint: '#64748B',
   tabBarBackground: '#E4E5E5', // light grey
@@ -70,6 +76,8 @@ const darkTheme: Theme = {
   iconColor: '#ffffff',
   buttonBackground: '#ffffff',
   buttonText: '#000000',
+  modalBackground: '#1a1a1a',
+  modalOverlay: '#00000066',
   activeTint: '#ffffff',
   inactiveTint: '#808080',
   tabBarBackground: '#1a1a1a', // darker grey
