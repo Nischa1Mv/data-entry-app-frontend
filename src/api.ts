@@ -12,7 +12,7 @@ const api = axios.create({
 //fetch all doctypes
 export async function fetchAllDocTypeNamess(): Promise<FormItem[]> {
   try {
-    const response = await axios.get(`${BACKEND_URL}/doctype/`, {
+    const response = await axios.get(`${BACKEND_URL}/doctype`, {
       withCredentials: true,
     });
 
@@ -27,7 +27,7 @@ export async function fetchAllDocTypeNamess(): Promise<FormItem[]> {
 // fetch doctypes
 export async function fetchDocType(docTypeName: string): Promise<DocType> {
   try {
-    const response = await axios.get(`${BACKEND_URL}/docType/${docTypeName}`, {
+    const response = await axios.get(`${BACKEND_URL}/doctype/${docTypeName}`, {
       withCredentials: true,
     });
     if (!response.data || !response.data.data) {
