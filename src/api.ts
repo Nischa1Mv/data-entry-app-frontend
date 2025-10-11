@@ -1,7 +1,7 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DocType, FormItem ,RawField} from "./types";
-import {BACKEND_URL} from '@env';
+import { DocType, FormItem, RawField, SubmissionItem } from "./types";
+import { BACKEND_URL } from '@env';
 
 // One axios instance to keep cookies
 const api = axios.create({
@@ -37,6 +37,25 @@ export async function fetchDocType(docTypeName: string): Promise<DocType> {
   } catch (error) {
     console.error('Error fetching doctype data:', error);
     throw error as Error;
+  }
+}
+
+export async function SubmitForm(submissionItem: SubmissionItem) {
+  try {
+    const response = await axios.post(`${BACKEND_URL}/submit`, submissionItem, {
+      withCredentials: true,
+    });
+
+    if (response.status < 200 || response.status >= 300) {
+      throw new Error(`Submission failed with status ${response.status}`);
+    }
+
+    return response.data;
+
+  } catch (error: any) {
+    console.error("Error submitting form:", error);
+
+    return Promise.reject(error.response?.data || error.message || 'Submission failed');
   }
 }
 

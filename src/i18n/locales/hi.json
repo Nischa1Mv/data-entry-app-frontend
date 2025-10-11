@@ -92,7 +92,10 @@
     "submitFormMessage": "क्या आप वाकई \"{{formName}}\" जमा करना चाहते हैं?",
     "submitError": "त्रुटि",
     "submitErrorMessage": "फॉर्म जमा करने में विफल। कृपया फिर से कोशिश करें।",
-    "submit": "जमा करें"
+    "submit": "जमा करें",
+    "submissionSummaryTitle": "सबमिशन परिणाम",
+    "submissionSuccess": "सफल",
+    "submissionFailed": "असफल"
   },
   "downloads": {
     "title": "AsyncStorage मैनेजर",
@@ -113,6 +116,7 @@
     "save": "सेव",
     "delete": "डिलीट",
     "edit": "संपादित करें",
+    "close": "बंद करें",
     "loading": "लोड हो रहा है...",
     "retry": "फिर कोशिश करें",
     "error": "त्रुटि",
