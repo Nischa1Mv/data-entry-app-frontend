@@ -14,6 +14,7 @@ export interface Theme {
   dropdownBg: string;
   selectedBg: string;
   selectedText: string;
+  dropdownSelectedBg: string;
   iconColor: string;
 
   // Button colors
@@ -50,6 +51,7 @@ const lightTheme: Theme = {
   dropdownBg: '#ffffff',
   selectedBg: '#000000',
   selectedText: '#ffffff',
+  dropdownSelectedBg: '#1A1A1A', // darkerGrey for light mode
   iconColor: '#000000',
   buttonBackground: '#000000',
   buttonText: '#ffffff',
@@ -73,6 +75,7 @@ const darkTheme: Theme = {
   dropdownBg: '#000000',
   selectedBg: '#ffffff',
   selectedText: '#000000',
+  dropdownSelectedBg: '#E6E6E6', // lightGrey for dark mode
   iconColor: '#ffffff',
   buttonBackground: '#ffffff',
   buttonText: '#000000',
