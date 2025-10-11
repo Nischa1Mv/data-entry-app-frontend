@@ -1,18 +1,18 @@
-import {ArrowLeft, ChevronDown} from 'lucide-react-native';
-import React, {useCallback, useEffect, useState} from 'react';
-import {Modal, TouchableOpacity, View, Text} from 'react-native';
-import {ScrollView, TextInput} from 'react-native-gesture-handler';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import { ArrowLeft, ChevronDown } from 'lucide-react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { Modal, TouchableOpacity, View, Text } from 'react-native';
+import { ScrollView, TextInput } from 'react-native-gesture-handler';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import LanguageControl from '../../components/LanguageControl';
-import {useTranslation} from 'react-i18next';
-import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
-import {SubmissionItem, RawField} from '../../../types';
-import {getQueue, removeFromQueue} from '../../pendingQueue';
-import {FormStackParamList} from '@/app/navigation/FormStackParamList';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
+import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { SubmissionItem, RawField } from '../../../types';
+import { getQueue, removeFromQueue } from '../../pendingQueue';
+import { FormStackParamList } from '@/app/navigation/FormStackParamList';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useTheme} from '../../../context/ThemeContext';
+import { useTheme } from '../../../context/ThemeContext';
 
 type PreviewFormRouteProp = RouteProp<FormStackParamList, 'PreviewForm'>;
 type PreviewFormNavigationProp = NativeStackNavigationProp<
@@ -21,27 +21,27 @@ type PreviewFormNavigationProp = NativeStackNavigationProp<
 >;
 
 function PreviewForm() {
-  const {t} = useTranslation();
-  const {theme} = useTheme();
+  const { t } = useTranslation();
+  const { theme } = useTheme();
   const route = useRoute<PreviewFormRouteProp>();
   const navigation = useNavigation<PreviewFormNavigationProp>();
 
   // State for form data
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [submissionItem, setSubmissionItem] = useState<SubmissionItem | null>(
-    null,
+    null
   );
   const [formFields, setFormFields] = useState<RawField[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [dropdownStates, setDropdownStates] = useState<Record<string, boolean>>(
-    {},
+    {}
   );
   const [searchTerms, setSearchTerms] = useState<Record<string, string>>({});
 
   // Get the formId from route params
-  const {formId} = route.params;
+  const { formId } = route.params;
 
   // Helper function to parse JSON safely
   const tryParseJSON = (jsonString: string | null) => {
@@ -65,7 +65,7 @@ function PreviewForm() {
         if (doctypes && doctypes[formName]) {
           console.log(
             'Found form schema in downloadDoctypes:',
-            doctypes[formName],
+            doctypes[formName]
           );
           if (doctypes[formName].fields) {
             setFormFields(doctypes[formName].fields);
@@ -109,7 +109,7 @@ function PreviewForm() {
       console.log('Queue data:', queue);
 
       const foundForm = queue.find(
-        (item: SubmissionItem) => item.id === formId,
+        (item: SubmissionItem) => item.id === formId
       );
       console.log('Found form:', foundForm);
 
@@ -199,7 +199,9 @@ function PreviewForm() {
 
   const handleDelete = async () => {
     try {
-      if (!submissionItem) return;
+      if (!submissionItem) {
+        return;
+      }
       console.log('Deleting form:', submissionItem);
       await removeFromQueue(submissionItem.id);
       console.log('Form deleted successfully');
@@ -214,27 +216,30 @@ function PreviewForm() {
     return (
       <SafeAreaView
         className="flex-1"
-        style={{backgroundColor: theme.background}}>
+        style={{ backgroundColor: theme.background }}
+      >
         <View
-          className="flex-row items-center justify-between px-4 py-3 pt-10 border-b"
+          className="flex-row items-center justify-between border-b px-4 py-3 pt-10"
           style={{
             backgroundColor: theme.background,
             borderBottomColor: theme.border,
-          }}>
+          }}
+        >
           <TouchableOpacity className="p-2" onPress={() => navigation.goBack()}>
             <ArrowLeft color={theme.text} size={16} />
           </TouchableOpacity>
           <View className="flex-1 items-center">
             <Text
-              className="font-inter font-semibold text-[18px] leading-[32px] tracking-[-0.006em] text-center"
-              style={{color: theme.text}}>
+              className="font-inter text-center text-[18px] font-semibold leading-[32px] tracking-[-0.006em]"
+              style={{ color: theme.text }}
+            >
               {t('common.loading')}
             </Text>
           </View>
           <LanguageControl />
         </View>
-        <View className="flex-1 justify-center items-center">
-          <Text style={{color: theme.subtext}}>
+        <View className="flex-1 items-center justify-center">
+          <Text style={{ color: theme.subtext }}>
             {t('previewForm.loadingForm')}
           </Text>
         </View>
@@ -246,37 +251,41 @@ function PreviewForm() {
     return (
       <SafeAreaView
         className="flex-1"
-        style={{backgroundColor: theme.background}}>
+        style={{ backgroundColor: theme.background }}
+      >
         <View
-          className="flex-row items-center justify-between px-4 py-3 pt-10 border-b"
+          className="flex-row items-center justify-between border-b px-4 py-3 pt-10"
           style={{
             backgroundColor: theme.background,
             borderBottomColor: theme.border,
-          }}>
+          }}
+        >
           <TouchableOpacity className="p-2" onPress={() => navigation.goBack()}>
             <ArrowLeft color={theme.text} size={16} />
           </TouchableOpacity>
           <View className="flex-1 items-center">
             <Text
-              className="font-inter font-semibold text-[18px] leading-[32px] tracking-[-0.006em] text-center"
-              style={{color: theme.text}}>
+              className="font-inter text-center text-[18px] font-semibold leading-[32px] tracking-[-0.006em]"
+              style={{ color: theme.text }}
+            >
               {t('common.error')}
             </Text>
           </View>
           <LanguageControl />
         </View>
-        <View className="flex-1 justify-center items-center">
-          <Text className="text-center mb-4" style={{color: theme.subtext}}>
+        <View className="flex-1 items-center justify-center">
+          <Text className="mb-4 text-center" style={{ color: theme.subtext }}>
             {t('previewForm.formNotFound')}
           </Text>
-          <Text className="text-center mb-4" style={{color: theme.subtext}}>
+          <Text className="mb-4 text-center" style={{ color: theme.subtext }}>
             {t('previewForm.formId')}: {formId}
           </Text>
           <TouchableOpacity
-            className="mt-4 px-4 py-2 rounded"
-            style={{backgroundColor: theme.buttonBackground}}
-            onPress={() => navigation.goBack()}>
-            <Text style={{color: theme.buttonText}}>
+            className="mt-4 rounded px-4 py-2"
+            style={{ backgroundColor: theme.buttonBackground }}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={{ color: theme.buttonText }}>
               {t('previewForm.goBack')}
             </Text>
           </TouchableOpacity>
@@ -312,7 +321,7 @@ function PreviewForm() {
 
   // Helper function to render field based on type
   const renderField = (field: any, index: number = 0) => {
-    const {fieldname, label, fieldtype, options, value} = field;
+    const { fieldname, label, fieldtype, options, value } = field;
 
     switch (fieldtype) {
       case 'Select':
@@ -325,39 +334,43 @@ function PreviewForm() {
 
           // Filter options based on search term
           const filteredOptions = optionsList.filter((option: string) =>
-            option.trim().toLowerCase().includes(searchTerm.toLowerCase()),
+            option.trim().toLowerCase().includes(searchTerm.toLowerCase())
           );
 
           return (
             <View
               key={fieldname}
               className="mb-4"
-              style={{zIndex: 1000 - index}}>
+              style={{ zIndex: 1000 - index }}
+            >
               <Text
-                className="font-sans font-medium text-sm leading-5 tracking-normal mb-2"
-                style={{color: theme.text}}>
+                className="mb-2 font-sans text-sm font-medium leading-5 tracking-normal"
+                style={{ color: theme.text }}
+              >
                 {label}
               </Text>
 
-              <View style={{position: 'relative'}}>
+              <View style={{ position: 'relative' }}>
                 {/* Dropdown Toggle Button */}
                 <TouchableOpacity
-                  className="w-full h-[40px] flex-row items-center justify-between rounded-md border px-3"
+                  className="h-[40px] w-full flex-row items-center justify-between rounded-md border px-3"
                   style={{
                     borderColor: theme.border,
                     backgroundColor: theme.background,
                   }}
-                  onPress={() => toggleDropdown(fieldname)}>
+                  onPress={() => toggleDropdown(fieldname)}
+                >
                   <Text
                     className="flex-1"
-                    style={{color: value ? theme.text : theme.subtext}}>
+                    style={{ color: value ? theme.text : theme.subtext }}
+                  >
                     {value || `Select ${label}`}
                   </Text>
                   <ChevronDown
                     size={16}
                     color={theme.subtext}
                     style={{
-                      transform: [{rotate: isOpen ? '180deg' : '0deg'}],
+                      transform: [{ rotate: isOpen ? '180deg' : '0deg' }],
                     }}
                   />
                 </TouchableOpacity>
@@ -376,18 +389,20 @@ function PreviewForm() {
                       borderColor: theme.border,
                       borderRadius: 8,
                       shadowColor: theme.shadow,
-                      shadowOffset: {width: 0, height: 4},
+                      shadowOffset: { width: 0, height: 4 },
                       shadowOpacity: 0.15,
                       shadowRadius: 8,
                       elevation: 20,
                       maxHeight: 250,
-                    }}>
+                    }}
+                  >
                     {/* Search Input */}
                     <View
-                      className="p-2 border-b"
-                      style={{borderBottomColor: theme.border}}>
+                      className="border-b p-2"
+                      style={{ borderBottomColor: theme.border }}
+                    >
                       <TextInput
-                        className="w-full h-[35px] rounded border px-3 text-sm"
+                        className="h-[35px] w-full rounded border px-3 text-sm"
                         style={{
                           borderColor: theme.border,
                           backgroundColor: theme.background,
@@ -404,7 +419,8 @@ function PreviewForm() {
                     {/* Options List */}
                     <ScrollView
                       nestedScrollEnabled={true}
-                      style={{maxHeight: 180}}>
+                      style={{ maxHeight: 180 }}
+                    >
                       {filteredOptions.length > 0 ? (
                         filteredOptions.map(
                           (option: string, optIndex: number) => (
@@ -424,7 +440,8 @@ function PreviewForm() {
                               onPress={() => {
                                 handleChange(fieldname, option.trim());
                                 updateSearchTerm(fieldname, ''); // Clear search after selection
-                              }}>
+                              }}
+                            >
                               <Text
                                 style={{
                                   color:
@@ -433,17 +450,19 @@ function PreviewForm() {
                                       : theme.text,
                                   fontWeight:
                                     value === option.trim() ? '600' : 'normal',
-                                }}>
+                                }}
+                              >
                                 {option.trim()}
                               </Text>
                             </TouchableOpacity>
-                          ),
+                          )
                         )
                       ) : (
                         <View className="px-4 py-6">
                           <Text
                             className="text-center text-sm"
-                            style={{color: theme.subtext}}>
+                            style={{ color: theme.subtext }}
+                          >
                             No options found for "{searchTerm}"
                           </Text>
                         </View>
@@ -469,12 +488,13 @@ function PreviewForm() {
         return (
           <View key={fieldname} className="mb-4">
             <Text
-              className="font-sans font-medium text-sm leading-5 tracking-normal"
-              style={{color: theme.text}}>
+              className="font-sans text-sm font-medium leading-5 tracking-normal"
+              style={{ color: theme.text }}
+            >
               {label}
             </Text>
             <TextInput
-              className="w-full h-[40px] rotate-0 opacity-100 rounded-md border pt-2.5 pr-3 pb-2.5 pl-3"
+              className="h-[40px] w-full rotate-0 rounded-md border pb-2.5 pl-3 pr-3 pt-2.5 opacity-100"
               style={{
                 borderColor: theme.border,
                 backgroundColor: theme.background,
@@ -494,24 +514,27 @@ function PreviewForm() {
           <View key={fieldname} className="mb-4">
             <TouchableOpacity
               className="flex-row items-center"
-              onPress={() => handleChange(fieldname, !value)}>
+              onPress={() => handleChange(fieldname, !value)}
+            >
               <View
-                className="w-5 h-5 rounded border-2 mr-3 flex items-center justify-center"
+                className="mr-3 flex h-5 w-5 items-center justify-center rounded border-2"
                 style={{
                   backgroundColor: value
                     ? theme.buttonBackground
                     : 'transparent',
                   borderColor: value ? theme.buttonBackground : theme.border,
-                }}>
+                }}
+              >
                 {value && (
-                  <Text className="text-xs" style={{color: theme.buttonText}}>
+                  <Text className="text-xs" style={{ color: theme.buttonText }}>
                     ✓
                   </Text>
                 )}
               </View>
               <Text
-                className="font-sans font-medium text-sm leading-5 tracking-normal"
-                style={{color: theme.text}}>
+                className="font-sans text-sm font-medium leading-5 tracking-normal"
+                style={{ color: theme.text }}
+              >
                 {label}
               </Text>
             </TouchableOpacity>
@@ -522,12 +545,13 @@ function PreviewForm() {
         return (
           <View key={fieldname} className="mb-4">
             <Text
-              className="font-sans font-medium text-sm leading-5 tracking-normal"
-              style={{color: theme.text}}>
+              className="font-sans text-sm font-medium leading-5 tracking-normal"
+              style={{ color: theme.text }}
+            >
               {label}
             </Text>
             <TextInput
-              className="w-full min-h-[80px] rotate-0 opacity-100 rounded-md border pt-2.5 pr-3 pb-2.5 pl-3"
+              className="min-h-[80px] w-full rotate-0 rounded-md border pb-2.5 pl-3 pr-3 pt-2.5 opacity-100"
               style={{
                 borderColor: theme.border,
                 backgroundColor: theme.background,
@@ -549,12 +573,13 @@ function PreviewForm() {
         return (
           <View key={fieldname} className="mb-4">
             <Text
-              className="font-sans font-medium text-sm leading-5 tracking-normal"
-              style={{color: theme.text}}>
+              className="font-sans text-sm font-medium leading-5 tracking-normal"
+              style={{ color: theme.text }}
+            >
               {label}
             </Text>
             <TextInput
-              className="w-full h-[40px] rotate-0 opacity-100 rounded-md border pt-2.5 pr-3 pb-2.5 pl-3"
+              className="h-[40px] w-full rotate-0 rounded-md border pb-2.5 pl-3 pr-3 pt-2.5 opacity-100"
               style={{
                 borderColor: theme.border,
                 backgroundColor: theme.background,
@@ -574,20 +599,23 @@ function PreviewForm() {
   return (
     <SafeAreaView
       className="flex-1"
-      style={{backgroundColor: theme.background}}>
+      style={{ backgroundColor: theme.background }}
+    >
       <View
-        className="flex-row items-center justify-between px-4 py-3 pt-10 border-b"
+        className="flex-row items-center justify-between border-b px-4 py-3 pt-10"
         style={{
           backgroundColor: theme.background,
           borderBottomColor: theme.border,
-        }}>
+        }}
+      >
         <TouchableOpacity className="p-2" onPress={() => navigation.goBack()}>
           <ArrowLeft color={theme.text} size={16} />
         </TouchableOpacity>
         <View className="flex-1 items-center">
           <Text
-            className="font-inter font-semibold text-[18px] leading-[32px] tracking-[-0.006em] text-center"
-            style={{color: theme.text}}>
+            className="font-inter text-center text-[18px] font-semibold leading-[32px] tracking-[-0.006em]"
+            style={{ color: theme.text }}
+          >
             {t('previewForm.title')}
           </Text>
         </View>
@@ -597,36 +625,41 @@ function PreviewForm() {
       <KeyboardAwareScrollView
         // contentContainerStyle={{ padding: 24 }}
         extraScrollHeight={50}
-        enableOnAndroid={true}>
+        enableOnAndroid={true}
+      >
         <TouchableOpacity
           activeOpacity={1}
           onPress={handleOutsidePress}
-          className="flex-1">
-          <ScrollView className="p-6 gap-3">
+          className="flex-1"
+        >
+          <ScrollView className="gap-3 p-6">
             <Text
-              className="text-3xl font-bold mb-1"
-              style={{color: theme.text}}>
+              className="mb-1 text-3xl font-bold"
+              style={{ color: theme.text }}
+            >
               {formName}
             </Text>
-            <Text className="text-base mb-6" style={{color: theme.subtext}}>
+            <Text className="mb-6 text-base" style={{ color: theme.subtext }}>
               {t('previewForm.subtitle')}
             </Text>
 
             <View className="flex-col">
               {fieldsToRender.map((field, index) => renderField(field, index))}
-              <View className="flex flex-col gap-3 mt-8">
+              <View className="mt-8 flex flex-col gap-3">
                 <TouchableOpacity
-                  className="w-full min-w-[80px] opacity-100 rounded-md p-4 gap-1 justify-center items-center"
-                  style={{backgroundColor: theme.buttonBackground}}
-                  onPress={handleSubmitConfirmation}>
-                  <Text style={{color: theme.buttonText}}>
+                  className="w-full min-w-[80px] items-center justify-center gap-1 rounded-md p-4 opacity-100"
+                  style={{ backgroundColor: theme.buttonBackground }}
+                  onPress={handleSubmitConfirmation}
+                >
+                  <Text style={{ color: theme.buttonText }}>
                     {t('formDetail.submit')}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className="w-full min-w-[80px] opacity-100 rounded-md p-4 gap-1 justify-center items-center"
-                  style={{backgroundColor: '#EF2226'}}
-                  onPress={handleDeleteConfirmation}>
+                  className="w-full min-w-[80px] items-center justify-center gap-1 rounded-md p-4 opacity-100"
+                  style={{ backgroundColor: '#EF2226' }}
+                  onPress={handleDeleteConfirmation}
+                >
                   <Text className="text-white">
                     {t('formDetail.deleteForm')}
                   </Text>
@@ -641,47 +674,56 @@ function PreviewForm() {
         animationType="fade"
         transparent={true}
         visible={confirmModalVisible}
-        onRequestClose={() => setConfirmModalVisible(false)}>
+        onRequestClose={() => setConfirmModalVisible(false)}
+      >
         <View
-          className="flex-1 justify-center items-center p-[1.25rem]"
-          style={{backgroundColor: theme.modalOverlay}}>
+          className="flex-1 items-center justify-center p-[1.25rem]"
+          style={{ backgroundColor: theme.modalOverlay }}
+        >
           <View
-            className="w-full h-[176px] max-w-[512px] opacity-100 gap-4 rounded-[6px] border p-6"
+            className="h-[176px] w-full max-w-[512px] gap-4 rounded-[6px] border p-6 opacity-100"
             style={{
               backgroundColor: theme.modalBackground,
               borderColor: theme.border,
-            }}>
+            }}
+          >
             <Text
-              className="font-inter font-semibold text-[18px] leading-[28px] tracking-[-0.006em]"
-              style={{color: theme.text}}>
+              className="font-inter text-[18px] font-semibold leading-[28px] tracking-[-0.006em]"
+              style={{ color: theme.text }}
+            >
               {t('formDetail.confirmSubmission')}
             </Text>
 
             <Text
-              className="font-inter font-normal text-[14px] leading-[20px] tracking-normal"
-              style={{color: theme.subtext}}>
+              className="font-inter text-[14px] font-normal leading-[20px] tracking-normal"
+              style={{ color: theme.subtext }}
+            >
               {t('formDetail.confirmSubmissionMessage')}
             </Text>
 
             <View className="flex-row justify-end gap-3">
               <TouchableOpacity
-                className="w-[78px] h-[36px] opacity-100 gap-2 rounded-md border px-4 items-center justify-center"
-                style={{borderColor: theme.border}}
-                onPress={() => setConfirmModalVisible(false)}>
+                className="h-[36px] w-[78px] items-center justify-center gap-2 rounded-md border px-4 opacity-100"
+                style={{ borderColor: theme.border }}
+                onPress={() => setConfirmModalVisible(false)}
+              >
                 <Text
-                  className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle"
-                  style={{color: theme.text}}>
+                  className="font-inter align-middle text-[14px] font-medium leading-[20px] tracking-[-0.006em]"
+                  style={{ color: theme.text }}
+                >
                   {t('common.cancel')}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="py-2.5 px-4 rounded-lg"
-                style={{backgroundColor: theme.buttonBackground}}
-                onPress={handleSubmit}>
+                className="rounded-lg px-4 py-2.5"
+                style={{ backgroundColor: theme.buttonBackground }}
+                onPress={handleSubmit}
+              >
                 <Text
-                  className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle"
-                  style={{color: theme.buttonText}}>
+                  className="font-inter align-middle text-[14px] font-medium leading-[20px] tracking-[-0.006em]"
+                  style={{ color: theme.buttonText }}
+                >
                   {t('common.ok')}
                 </Text>
               </TouchableOpacity>
@@ -694,44 +736,52 @@ function PreviewForm() {
         animationType="fade"
         transparent={true}
         visible={deleteModalVisible}
-        onRequestClose={() => setDeleteModalVisible(false)}>
+        onRequestClose={() => setDeleteModalVisible(false)}
+      >
         <View
-          className="flex-1 justify-center items-center p-[1.25rem]"
-          style={{backgroundColor: theme.modalOverlay}}>
+          className="flex-1 items-center justify-center p-[1.25rem]"
+          style={{ backgroundColor: theme.modalOverlay }}
+        >
           <View
-            className="w-full h-[176px] max-w-[512px] opacity-100 gap-4 rounded-[6px] border p-6"
+            className="h-[176px] w-full max-w-[512px] gap-4 rounded-[6px] border p-6 opacity-100"
             style={{
               backgroundColor: theme.modalBackground,
               borderColor: theme.border,
-            }}>
+            }}
+          >
             <Text
-              className="font-inter font-semibold text-[18px] leading-[28px] tracking-[-0.006em]"
-              style={{color: theme.text}}>
+              className="font-inter text-[18px] font-semibold leading-[28px] tracking-[-0.006em]"
+              style={{ color: theme.text }}
+            >
               {t('previewForm.deleteThisForm')}
             </Text>
 
             <Text
-              className="font-inter font-normal text-[14px] leading-[20px] tracking-normal"
-              style={{color: theme.subtext}}>
-              {t('previewForm.confirmDeleteMessage', {formName: formName})}
+              className="font-inter text-[14px] font-normal leading-[20px] tracking-normal"
+              style={{ color: theme.subtext }}
+            >
+              {t('previewForm.confirmDeleteMessage', { formName: formName })}
             </Text>
 
             <View className="flex-row justify-end gap-3">
               <TouchableOpacity
-                className="w-[78px] h-[36px] opacity-100 gap-2 rounded-md border px-4 items-center justify-center"
-                style={{borderColor: theme.border}}
-                onPress={() => setDeleteModalVisible(false)}>
+                className="h-[36px] w-[78px] items-center justify-center gap-2 rounded-md border px-4 opacity-100"
+                style={{ borderColor: theme.border }}
+                onPress={() => setDeleteModalVisible(false)}
+              >
                 <Text
-                  className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle"
-                  style={{color: theme.text}}>
+                  className="font-inter align-middle text-[14px] font-medium leading-[20px] tracking-[-0.006em]"
+                  style={{ color: theme.text }}
+                >
                   {t('common.cancel')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className="py-2.5 px-4 rounded-lg"
-                style={{backgroundColor: '#EF2226'}}
-                onPress={handleDelete}>
-                <Text className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle text-white">
+                className="rounded-lg px-4 py-2.5"
+                style={{ backgroundColor: '#EF2226' }}
+                onPress={handleDelete}
+              >
+                <Text className="font-inter align-middle text-[14px] font-medium leading-[20px] tracking-[-0.006em] text-white">
                   {t('common.delete')}
                 </Text>
               </TouchableOpacity>

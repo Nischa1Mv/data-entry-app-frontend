@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -18,8 +18,8 @@ import {
   X,
   Trash2,
 } from 'lucide-react-native'; // RN version
-import {useTranslation} from 'react-i18next';
-import {useTheme} from '../../../context/ThemeContext';
+import { useTranslation } from 'react-i18next';
+import { useTheme } from '../../../context/ThemeContext';
 
 interface StorageItem {
   key: string;
@@ -28,8 +28,8 @@ interface StorageItem {
 }
 
 const Downloads: React.FC = () => {
-  const {t} = useTranslation();
-  const {theme} = useTheme();
+  const { t } = useTranslation();
+  const { theme } = useTheme();
   const [downloadDoctypesData, setDownloadDoctypesData] = useState<
     StorageItem[]
   >([]);
@@ -40,7 +40,7 @@ const Downloads: React.FC = () => {
   } | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editedData, setEditedData] = useState<string>('');
-  const [formFields, setFormFields] = useState<{[key: string]: any}>({});
+  const [formFields, setFormFields] = useState<{ [key: string]: any }>({});
   const [relatedDocType, setRelatedDocType] = useState<any>(null);
 
   const [collapsed, setCollapsed] = useState({
@@ -96,12 +96,11 @@ const Downloads: React.FC = () => {
                   key: `${key}.${doctypeName}`,
                   value: doctypeData,
                   size: formatBytes(
-                    new TextEncoder().encode(JSON.stringify(doctypeData))
-                      .length,
+                    new TextEncoder().encode(JSON.stringify(doctypeData)).length
                   ),
                 };
                 downloadDoctypes.push(subItem);
-              },
+              }
             );
           } else {
             downloadDoctypes.push(item);
@@ -114,7 +113,7 @@ const Downloads: React.FC = () => {
                 key: `${key}[${idx}]`,
                 value: val,
                 size: formatBytes(
-                  new TextEncoder().encode(JSON.stringify(val)).length,
+                  new TextEncoder().encode(JSON.stringify(val)).length
                 ),
               };
               queue.push(subItem);
@@ -181,7 +180,7 @@ const Downloads: React.FC = () => {
       // Extract doctype name from key (format: "downloadDoctypes.doctypeName")
       const doctypeName = downloadDoctypeItem.key.replace(
         'downloadDoctypes.',
-        '',
+        ''
       );
 
       // Remove the specific doctype from the record
@@ -196,12 +195,12 @@ const Downloads: React.FC = () => {
 
   // Edit queue item
   const editQueueItem = (index: number, data: any) => {
-    setEditingQueue({index, data});
+    setEditingQueue({ index, data });
     setEditedData(JSON.stringify(data, null, 2));
 
     // Extract form data from the data.data field
     if (data && data.data) {
-      setFormFields({...data.data});
+      setFormFields({ ...data.data });
     } else {
       setFormFields({});
     }
@@ -293,7 +292,7 @@ const Downloads: React.FC = () => {
   };
 
   const toggleCollapse = (section: keyof typeof collapsed) => {
-    setCollapsed(prev => ({...prev, [section]: !prev[section]}));
+    setCollapsed(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
   const renderSection = (
@@ -302,27 +301,32 @@ const Downloads: React.FC = () => {
     sectionKey: keyof typeof collapsed,
     removeHandler?: (index: number) => void,
     removeByNameHandler?: (name: string) => void,
-    editHandler?: (index: number, data: any) => void,
+    editHandler?: (index: number, data: any) => void
   ) => (
     <View
       style={[
         styles.section,
-        {backgroundColor: theme.cardBackground, borderColor: theme.border},
-      ]}>
+        { backgroundColor: theme.cardBackground, borderColor: theme.border },
+      ]}
+    >
       <TouchableOpacity
         onPress={() => toggleCollapse(sectionKey)}
-        style={[styles.sectionHeader, {backgroundColor: theme.cardBackground}]}>
+        style={[
+          styles.sectionHeader,
+          { backgroundColor: theme.cardBackground },
+        ]}
+      >
         <View style={styles.headerLeft}>
           {collapsed[sectionKey] ? (
             <ChevronRight size={18} color={theme.text} />
           ) : (
             <ChevronDown size={18} color={theme.text} />
           )}
-          <Text style={[styles.sectionTitle, {color: theme.text}]}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>
             {title}
           </Text>
         </View>
-        <Text style={[styles.itemCount, {color: theme.subtext}]}>
+        <Text style={[styles.itemCount, { color: theme.subtext }]}>
           {items.length} items
         </Text>
       </TouchableOpacity>
@@ -330,20 +334,21 @@ const Downloads: React.FC = () => {
       {!collapsed[sectionKey] && (
         <View>
           {items.length === 0 ? (
-            <Text style={[styles.noItems, {color: theme.subtext}]}>
+            <Text style={[styles.noItems, { color: theme.subtext }]}>
               {t('downloads.noItems')}
             </Text>
           ) : (
             items.map((item, index) => (
               <View
                 key={index}
-                style={[styles.itemContainer, {borderTopColor: theme.border}]}>
+                style={[styles.itemContainer, { borderTopColor: theme.border }]}
+              >
                 <View style={styles.itemHeader}>
-                  <View style={{flex: 1}}>
-                    <Text style={[styles.itemKey, {color: theme.text}]}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={[styles.itemKey, { color: theme.text }]}>
                       {item.key}
                     </Text>
-                    <Text style={[styles.itemSize, {color: theme.subtext}]}>
+                    <Text style={[styles.itemSize, { color: theme.subtext }]}>
                       Size: {item.size}
                     </Text>
                   </View>
@@ -351,13 +356,15 @@ const Downloads: React.FC = () => {
                     {editHandler && (
                       <TouchableOpacity
                         onPress={() => editHandler(index, item.value)}
-                        style={styles.editButton}>
+                        style={styles.editButton}
+                      >
                         <Edit size={16} color={theme.buttonBackground} />
                         <Text
                           style={[
                             styles.editButtonText,
-                            {color: theme.buttonBackground},
-                          ]}>
+                            { color: theme.buttonBackground },
+                          ]}
+                        >
                           {t('downloads.edit')}
                         </Text>
                       </TouchableOpacity>
@@ -365,10 +372,15 @@ const Downloads: React.FC = () => {
                     {removeHandler && (
                       <TouchableOpacity
                         onPress={() => removeHandler(index)}
-                        style={styles.removeButton}>
+                        style={styles.removeButton}
+                      >
                         <Trash2 size={16} color="#b91c1c" />
                         <Text
-                          style={[styles.removeButtonText, {color: '#b91c1c'}]}>
+                          style={[
+                            styles.removeButtonText,
+                            { color: '#b91c1c' },
+                          ]}
+                        >
                           {t('downloads.remove')}
                         </Text>
                       </TouchableOpacity>
@@ -378,9 +390,10 @@ const Downloads: React.FC = () => {
                 <View
                   style={[
                     styles.itemValueBox,
-                    {backgroundColor: theme.background},
-                  ]}>
-                  <Text style={[styles.itemValue, {color: theme.text}]}>
+                    { backgroundColor: theme.background },
+                  ]}
+                >
+                  <Text style={[styles.itemValue, { color: theme.text }]}>
                     {typeof item.value === 'object'
                       ? JSON.stringify(item.value, null, 2)
                       : String(item.value)}
@@ -395,15 +408,17 @@ const Downloads: React.FC = () => {
   );
 
   return (
-    <ScrollView style={[styles.container, {backgroundColor: theme.background}]}>
-      <Text style={[styles.title, {color: theme.text}]}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: theme.background }]}
+    >
+      <Text style={[styles.title, { color: theme.text }]}>
         {t('downloads.title')}
       </Text>
       {renderSection(
         ' Download Doctypes',
         downloadDoctypesData,
         'downloadDoctypes',
-        removeDownloadDoctypeItem,
+        removeDownloadDoctypeItem
       )}
       {renderSection(
         '⏳ Pending Queue',
@@ -411,16 +426,18 @@ const Downloads: React.FC = () => {
         'queue',
         removeQueueItem,
         undefined,
-        editQueueItem,
+        editQueueItem
       )}
 
       {/* Edit Modal */}
       <Modal
         visible={editModalVisible}
         animationType="slide"
-        presentationStyle="pageSheet">
+        presentationStyle="pageSheet"
+      >
         <View
-          style={[styles.modalContainer, {backgroundColor: theme.background}]}>
+          style={[styles.modalContainer, { backgroundColor: theme.background }]}
+        >
           <View
             style={[
               styles.modalHeader,
@@ -428,13 +445,14 @@ const Downloads: React.FC = () => {
                 backgroundColor: theme.cardBackground,
                 borderBottomColor: theme.border,
               },
-            ]}>
+            ]}
+          >
             <View>
-              <Text style={[styles.modalTitle, {color: theme.text}]}>
+              <Text style={[styles.modalTitle, { color: theme.text }]}>
                 {t('downloads.editQueueItem')}
               </Text>
               {relatedDocType && (
-                <Text style={[styles.modalSubtitle, {color: theme.subtext}]}>
+                <Text style={[styles.modalSubtitle, { color: theme.subtext }]}>
                   DocType:{' '}
                   {relatedDocType.name || relatedDocType.doctype || 'Unknown'}
                 </Text>
@@ -448,7 +466,7 @@ const Downloads: React.FC = () => {
           <ScrollView style={styles.modalContent}>
             {/* Form Fields Editor */}
             <View style={styles.formSection}>
-              <Text style={[styles.sectionTitle, {color: theme.text}]}>
+              <Text style={[styles.sectionTitle, { color: theme.text }]}>
                 {t('downloads.formDataFields')}
               </Text>
 
@@ -461,9 +479,10 @@ const Downloads: React.FC = () => {
                       backgroundColor: theme.cardBackground,
                       borderColor: theme.border,
                     },
-                  ]}>
+                  ]}
+                >
                   <View style={styles.fieldHeader}>
-                    <Text style={[styles.fieldName, {color: theme.text}]}>
+                    <Text style={[styles.fieldName, { color: theme.text }]}>
                       {key}
                     </Text>
                   </View>
@@ -490,41 +509,46 @@ const Downloads: React.FC = () => {
             {/* DocType Structure Reference */}
             {relatedDocType && relatedDocType.fields && (
               <View style={styles.referenceSection}>
-                <Text style={[styles.sectionTitle, {color: theme.text}]}>
+                <Text style={[styles.sectionTitle, { color: theme.text }]}>
                   {t('downloads.docTypeFields')}
                 </Text>
                 <View
                   style={[
                     styles.referenceContainer,
-                    {backgroundColor: theme.cardBackground},
-                  ]}>
+                    { backgroundColor: theme.cardBackground },
+                  ]}
+                >
                   {relatedDocType.fields.map((field: any, index: number) => (
                     <View
                       key={index}
                       style={[
                         styles.referenceField,
-                        {backgroundColor: theme.background},
-                      ]}>
+                        { backgroundColor: theme.background },
+                      ]}
+                    >
                       <Text
                         style={[
                           styles.referenceFieldName,
-                          {color: theme.text},
-                        ]}>
+                          { color: theme.text },
+                        ]}
+                      >
                         {field.fieldname || field.label || `Field ${index}`}
                       </Text>
                       <Text
                         style={[
                           styles.referenceFieldType,
-                          {color: theme.subtext},
-                        ]}>
+                          { color: theme.subtext },
+                        ]}
+                      >
                         Type: {field.fieldtype || 'Unknown'}
                       </Text>
                       {field.options && (
                         <Text
                           style={[
                             styles.referenceFieldOptions,
-                            {color: theme.subtext},
-                          ]}>
+                            { color: theme.subtext },
+                          ]}
+                        >
                           Options: {field.options}
                         </Text>
                       )}
@@ -538,10 +562,11 @@ const Downloads: React.FC = () => {
             <View style={styles.jsonSection}>
               <TouchableOpacity
                 onPress={() =>
-                  setCollapsed(prev => ({...prev, json: !prev.json}))
+                  setCollapsed(prev => ({ ...prev, json: !prev.json }))
                 }
-                style={styles.jsonToggle}>
-                <Text style={[styles.sectionTitle, {color: theme.text}]}>
+                style={styles.jsonToggle}
+              >
+                <Text style={[styles.sectionTitle, { color: theme.text }]}>
                   {t('downloads.rawJsonData')}
                 </Text>
                 {collapsed.json ? (
@@ -559,8 +584,11 @@ const Downloads: React.FC = () => {
                       backgroundColor: theme.cardBackground,
                       borderColor: theme.border,
                     },
-                  ]}>
-                  <Text style={[styles.readOnlyLabel, {color: theme.subtext}]}>
+                  ]}
+                >
+                  <Text
+                    style={[styles.readOnlyLabel, { color: theme.subtext }]}
+                  >
                     {t('downloads.autoUpdateNote')}
                   </Text>
                   <TextInput
@@ -586,14 +614,15 @@ const Downloads: React.FC = () => {
             </View>
           </ScrollView>
 
-          <View style={[styles.modalFooter, {borderTopColor: theme.border}]}>
+          <View style={[styles.modalFooter, { borderTopColor: theme.border }]}>
             <TouchableOpacity
               onPress={cancelEdit}
               style={[
                 styles.modalCancelButton,
-                {backgroundColor: theme.cardBackground},
-              ]}>
-              <Text style={[styles.modalCancelText, {color: theme.subtext}]}>
+                { backgroundColor: theme.cardBackground },
+              ]}
+            >
+              <Text style={[styles.modalCancelText, { color: theme.subtext }]}>
                 {t('common.cancel')}
               </Text>
             </TouchableOpacity>
@@ -601,10 +630,11 @@ const Downloads: React.FC = () => {
               onPress={saveQueueItem}
               style={[
                 styles.modalSaveButton,
-                {backgroundColor: theme.buttonBackground},
-              ]}>
+                { backgroundColor: theme.buttonBackground },
+              ]}
+            >
               <Save size={16} color={theme.buttonText} />
-              <Text style={[styles.modalSaveText, {color: theme.buttonText}]}>
+              <Text style={[styles.modalSaveText, { color: theme.buttonText }]}>
                 {t('common.save')}
               </Text>
             </TouchableOpacity>

@@ -1,5 +1,5 @@
-import React, {createContext, useContext, ReactNode} from 'react';
-import {useColorScheme} from 'react-native';
+import React, { createContext, useContext, ReactNode } from 'react';
+import { useColorScheme } from 'react-native';
 
 // Define the theme interface
 export interface Theme {
@@ -103,13 +103,13 @@ interface ThemeProviderProps {
   children: ReactNode;
 }
 
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({children}) => {
+export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
   const theme = isDarkMode ? darkTheme : lightTheme;
 
   return (
-    <ThemeContext.Provider value={{theme, isDarkMode}}>
+    <ThemeContext.Provider value={{ theme, isDarkMode }}>
       {children}
     </ThemeContext.Provider>
   );

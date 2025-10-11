@@ -7,29 +7,29 @@ import {
   Modal,
   Alert,
 } from 'react-native';
-import React, {useState, useEffect, useRef} from 'react';
-import {SelectList} from 'react-native-dropdown-select-list';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '@/app/navigation/RootStackedList';
-import {RouteProp, useRoute} from '@react-navigation/native';
-import {useNetwork} from '../../../context/NetworkProvider';
+import React, { useState, useEffect, useRef } from 'react';
+import { SelectList } from 'react-native-dropdown-select-list';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '@/app/navigation/RootStackedList';
+import { RouteProp, useRoute } from '@react-navigation/native';
+import { useNetwork } from '../../../context/NetworkProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {enqueue} from '../../pendingQueue';
+import { enqueue } from '../../pendingQueue';
 import {
   fetchDocType,
   getDocTypeFromLocal,
   saveDocTypeToLocal,
   extractFields,
 } from '../../../api';
-import {RawField} from '../../../types';
-import {useTranslation} from 'react-i18next';
+import { RawField } from '../../../types';
+import { useTranslation } from 'react-i18next';
 import LanguageControl from '../../components/LanguageControl';
 import generateSchemaHash from '../../../helper/hashFunction';
-import {ArrowLeft} from 'lucide-react-native';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {HomeStackParamList} from '@/app/navigation/HomeStackParamList';
-import {useTheme} from '../../../context/ThemeContext';
+import { ArrowLeft } from 'lucide-react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { HomeStackParamList } from '@/app/navigation/HomeStackParamList';
+import { useTheme } from '../../../context/ThemeContext';
 
 type FormDetailRouteProp = RouteProp<HomeStackParamList, 'FormDetail'>;
 type FormDetailNavigationProp = NativeStackNavigationProp<
@@ -41,17 +41,17 @@ type Props = {
   navigation: FormDetailNavigationProp;
 };
 
-const FormDetail: React.FC<Props> = ({navigation}) => {
+const FormDetail: React.FC<Props> = ({ navigation }) => {
   //this is the network status , make it true/false to simulate offline/online
-  const {isConnected} = useNetwork();
+  const { isConnected } = useNetwork();
   const route = useRoute<FormDetailRouteProp>();
-  const {formName} = route.params;
+  const { formName } = route.params;
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
   const [fields, setFields] = useState<RawField[]>([]);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
-  const {t} = useTranslation();
-  const {theme} = useTheme();
+  const { t } = useTranslation();
+  const { theme } = useTheme();
   const isSubmittedRef = useRef(false);
 
   useEffect(() => {
@@ -80,7 +80,7 @@ const FormDetail: React.FC<Props> = ({navigation}) => {
       }
 
       const inputFields = allFields.filter(field =>
-        ['Data', 'Select', 'Text', 'Int', 'Link'].includes(field.fieldtype),
+        ['Data', 'Select', 'Text', 'Int', 'Link'].includes(field.fieldtype)
       );
 
       const defaults: Record<string, any> = {};
@@ -105,7 +105,7 @@ const FormDetail: React.FC<Props> = ({navigation}) => {
     const missingFields = fields.filter(
       field =>
         !formData[field.fieldname] ||
-        formData[field.fieldname].toString().trim() === '',
+        formData[field.fieldname].toString().trim() === ''
     );
 
     if (missingFields.length > 0) {
@@ -114,7 +114,7 @@ const FormDetail: React.FC<Props> = ({navigation}) => {
         .join(', ');
       Alert.alert(
         t('common.error'),
-        t('formDetail.requiredFields', {fields: fieldNames}),
+        t('formDetail.requiredFields', { fields: fieldNames })
       );
       return;
     }
@@ -174,7 +174,7 @@ const FormDetail: React.FC<Props> = ({navigation}) => {
         t('formDetail.discardChanges'),
         t('formDetail.unsavedDataMessage'),
         [
-          {text: t('common.cancel'), style: 'cancel', onPress: () => {}},
+          { text: t('common.cancel'), style: 'cancel', onPress: () => {} },
           {
             text: t('formDetail.discard'),
             style: 'destructive',
@@ -183,7 +183,7 @@ const FormDetail: React.FC<Props> = ({navigation}) => {
               navigation.dispatch(e.data.action); // continue with back navigation
             },
           },
-        ],
+        ]
       );
     });
 
@@ -207,7 +207,7 @@ const FormDetail: React.FC<Props> = ({navigation}) => {
   }, [formData]);
 
   const handleChange = async (fieldname: string, value: any) => {
-    const updated = {...formData, [fieldname]: value};
+    const updated = { ...formData, [fieldname]: value };
     setFormData(updated);
     //store the temp data on every change
     await AsyncStorage.setItem('tempFormData', JSON.stringify(updated));
@@ -217,8 +217,12 @@ const FormDetail: React.FC<Props> = ({navigation}) => {
     return (
       <SafeAreaView
         className="flex-1"
-        style={{backgroundColor: theme.background}}>
-        <Text className="text-lg text-center mt-12" style={{color: theme.text}}>
+        style={{ backgroundColor: theme.background }}
+      >
+        <Text
+          className="mt-12 text-center text-lg"
+          style={{ color: theme.text }}
+        >
           {t('formDetail.loading')}
         </Text>
       </SafeAreaView>
@@ -228,20 +232,23 @@ const FormDetail: React.FC<Props> = ({navigation}) => {
   return (
     <SafeAreaView
       className="flex-1"
-      style={{backgroundColor: theme.background}}>
+      style={{ backgroundColor: theme.background }}
+    >
       <View
-        className="flex-row items-center justify-between px-4 py-3 pt-10 border-b"
+        className="flex-row items-center justify-between border-b px-4 py-3 pt-10"
         style={{
           backgroundColor: theme.background,
           borderBottomColor: theme.border,
-        }}>
+        }}
+      >
         <TouchableOpacity className="p-2" onPress={() => navigation.goBack()}>
           <ArrowLeft color={theme.text} size={16} />
         </TouchableOpacity>
         <View className="flex-1 items-center">
           <Text
-            className="font-inter font-semibold text-[18px] leading-[32px] tracking-[-0.006em] text-center"
-            style={{color: theme.text}}>
+            className="font-inter text-center text-[18px] font-semibold leading-[32px] tracking-[-0.006em]"
+            style={{ color: theme.text }}
+          >
             {t('formsList.title')}
           </Text>
         </View>
@@ -251,26 +258,32 @@ const FormDetail: React.FC<Props> = ({navigation}) => {
       <KeyboardAwareScrollView
         // contentContainerStyle={{ padding: 24 }}
         extraScrollHeight={50}
-        enableOnAndroid={true}>
-        <ScrollView className="p-6 gap-3">
-          <Text className="text-3xl font-bold mb-1" style={{color: theme.text}}>
+        enableOnAndroid={true}
+      >
+        <ScrollView className="gap-3 p-6">
+          <Text
+            className="mb-1 text-3xl font-bold"
+            style={{ color: theme.text }}
+          >
             {formName}
           </Text>
-          <Text className="text-base mb-6" style={{color: theme.subtext}}>
+          <Text className="mb-6 text-base" style={{ color: theme.subtext }}>
             {t('formDetail.subtitle')}
           </Text>
           <View className="flex-col">
             {fields.map(field => (
               <View key={field.fieldname} className="mb-4">
                 <Text
-                  className="font-sans font-medium text-sm leading-5 tracking-normal"
-                  style={{color: theme.text}}>
+                  className="font-sans text-sm font-medium leading-5 tracking-normal"
+                  style={{ color: theme.text }}
+                >
                   {field.label || field.fieldname}
                 </Text>
                 {field.fieldtype === 'Select' && field.options ? (
                   <View
-                    className="w-full rounded-md overflow-hidden z-50"
-                    style={{backgroundColor: theme.background}}>
+                    className="z-50 w-full overflow-hidden rounded-md"
+                    style={{ backgroundColor: theme.background }}
+                  >
                     <SelectList
                       setSelected={(val: string) =>
                         handleChange(field.fieldname, val)
@@ -278,12 +291,12 @@ const FormDetail: React.FC<Props> = ({navigation}) => {
                       data={
                         field.options
                           ?.split('\n')
-                          .map(opt => ({key: opt, value: opt})) || []
+                          .map(opt => ({ key: opt, value: opt })) || []
                       }
                       save="value"
                       defaultOption={
                         field.default
-                          ? {key: field.default, value: field.default}
+                          ? { key: field.default, value: field.default }
                           : undefined
                       }
                       placeholder={t('formDetail.selectPlaceholder', {
@@ -304,7 +317,7 @@ const FormDetail: React.FC<Props> = ({navigation}) => {
                         borderRadius: 10,
                         backgroundColor: theme.dropdownBg,
                         shadowColor: theme.shadow,
-                        shadowOffset: {width: 0, height: 2},
+                        shadowOffset: { width: 0, height: 2 },
                         shadowOpacity: 0.05,
                         shadowRadius: 5,
                         zIndex: 1000,
@@ -321,7 +334,7 @@ const FormDetail: React.FC<Props> = ({navigation}) => {
                   </View>
                 ) : (
                   <TextInput
-                    className="w-full h-[40px] rotate-0 opacity-100 rounded-md border pt-2.5 pr-3 pb-2.5 pl-3"
+                    className="h-[40px] w-full rotate-0 rounded-md border pb-2.5 pl-3 pr-3 pt-2.5 opacity-100"
                     style={{
                       borderColor: theme.border,
                       backgroundColor: theme.background,
@@ -338,10 +351,11 @@ const FormDetail: React.FC<Props> = ({navigation}) => {
               </View>
             ))}
             <TouchableOpacity
-              className="w-full min-w-[80px] opacity-100 rounded-md p-4 gap-1 justify-center items-center"
-              style={{backgroundColor: theme.buttonBackground}}
-              onPress={handleSubmitConfirmation}>
-              <Text className="" style={{color: theme.buttonText}}>
+              className="w-full min-w-[80px] items-center justify-center gap-1 rounded-md p-4 opacity-100"
+              style={{ backgroundColor: theme.buttonBackground }}
+              onPress={handleSubmitConfirmation}
+            >
+              <Text className="" style={{ color: theme.buttonText }}>
                 {t('formDetail.submit')}
               </Text>
             </TouchableOpacity>
@@ -353,48 +367,57 @@ const FormDetail: React.FC<Props> = ({navigation}) => {
         animationType="fade"
         transparent={true}
         visible={confirmModalVisible}
-        onRequestClose={() => setConfirmModalVisible(false)}>
+        onRequestClose={() => setConfirmModalVisible(false)}
+      >
         <View
-          className="flex-1 justify-center items-center p-[1.25rem]"
-          style={{backgroundColor: theme.modalOverlay}}>
+          className="flex-1 items-center justify-center p-[1.25rem]"
+          style={{ backgroundColor: theme.modalOverlay }}
+        >
           <View
-            className="w-full h-[176px] max-w-[512px] opacity-100 gap-4 rounded-[6px] border p-6"
+            className="h-[176px] w-full max-w-[512px] gap-4 rounded-[6px] border p-6 opacity-100"
             style={{
               backgroundColor: theme.modalBackground,
               borderColor: theme.border,
-            }}>
+            }}
+          >
             <Text
-              className="font-inter font-semibold text-[18px] leading-[28px] tracking-[-0.006em]"
-              style={{color: theme.text}}>
+              className="font-inter text-[18px] font-semibold leading-[28px] tracking-[-0.006em]"
+              style={{ color: theme.text }}
+            >
               {t('formDetail.confirmSubmission') || 'Confirm Submission'}
             </Text>
 
             <Text
-              className="font-inter font-normal text-[14px] leading-[20px] tracking-normal"
-              style={{color: theme.subtext}}>
+              className="font-inter text-[14px] font-normal leading-[20px] tracking-normal"
+              style={{ color: theme.subtext }}
+            >
               {t('formDetail.confirmSubmissionMessage') ||
                 'Are you sure you want to submit this form? This action cannot be undone.'}
             </Text>
 
             <View className="flex-row justify-end gap-3">
               <TouchableOpacity
-                className="w-[78px] h-[36px] opacity-100 gap-2 rounded-md border px-4 items-center justify-center"
-                style={{borderColor: theme.border}}
-                onPress={() => setConfirmModalVisible(false)}>
+                className="h-[36px] w-[78px] items-center justify-center gap-2 rounded-md border px-4 opacity-100"
+                style={{ borderColor: theme.border }}
+                onPress={() => setConfirmModalVisible(false)}
+              >
                 <Text
-                  className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle"
-                  style={{color: theme.text}}>
+                  className="font-inter align-middle text-[14px] font-medium leading-[20px] tracking-[-0.006em]"
+                  style={{ color: theme.text }}
+                >
                   {t('common.cancel')}
                 </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="py-2.5 px-4 rounded-lg"
-                style={{backgroundColor: theme.buttonBackground}}
-                onPress={handleSubmit}>
+                className="rounded-lg px-4 py-2.5"
+                style={{ backgroundColor: theme.buttonBackground }}
+                onPress={handleSubmit}
+              >
                 <Text
-                  className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle"
-                  style={{color: theme.buttonText}}>
+                  className="font-inter align-middle text-[14px] font-medium leading-[20px] tracking-[-0.006em]"
+                  style={{ color: theme.buttonText }}
+                >
                   {t('common.ok')}
                 </Text>
               </TouchableOpacity>
