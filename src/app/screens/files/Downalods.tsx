@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -20,6 +20,27 @@ import {
 } from 'lucide-react-native'; // RN version
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../../context/ThemeContext';
+
+// Simple text encoder for React Native
+const getTextSize = (text: string): number => {
+  // Simple approximation: each character is roughly 1-4 bytes in UTF-8
+  let size = 0;
+  for (let i = 0; i < text.length; i++) {
+    const charCode = text.charCodeAt(i);
+    if (charCode < 0x80) {
+      size += 1;
+    } else if (charCode < 0x800) {
+      size += 2;
+    } else if (charCode < 0xd800 || charCode >= 0xe000) {
+      size += 3;
+    } else {
+      // Surrogate pair
+      i++;
+      size += 4;
+    }
+  }
+  return size;
+};
 
 interface StorageItem {
   key: string;
@@ -49,10 +70,6 @@ const Downloads: React.FC = () => {
     json: true,
   });
 
-  useEffect(() => {
-    fetchAsyncStorageData();
-  }, []);
-
   // Sync editedData with formFields changes
   useEffect(() => {
     if (editingQueue && Object.keys(formFields).length > 0) {
@@ -64,7 +81,7 @@ const Downloads: React.FC = () => {
     }
   }, [formFields, editingQueue]);
 
-  const fetchAsyncStorageData = async () => {
+  const fetchAsyncStorageData = useCallback(async () => {
     try {
       const downloadDoctypes: StorageItem[] = [];
       const queue: StorageItem[] = [];
@@ -73,10 +90,12 @@ const Downloads: React.FC = () => {
       const entries = await AsyncStorage.multiGet(keys);
 
       for (const [key, value] of entries) {
-        if (!key) continue;
+        if (!key) {
+          continue;
+        }
 
         const parsedValue = tryParseJSON(value);
-        const size = new TextEncoder().encode(value || '').length;
+        const size = getTextSize(value || '');
         const item = {
           key,
           value: parsedValue,
@@ -95,9 +114,7 @@ const Downloads: React.FC = () => {
                 const subItem = {
                   key: `${key}.${doctypeName}`,
                   value: doctypeData,
-                  size: formatBytes(
-                    new TextEncoder().encode(JSON.stringify(doctypeData)).length
-                  ),
+                  size: formatBytes(getTextSize(JSON.stringify(doctypeData))),
                 };
                 downloadDoctypes.push(subItem);
               }
@@ -112,9 +129,7 @@ const Downloads: React.FC = () => {
               const subItem = {
                 key: `${key}[${idx}]`,
                 value: val,
-                size: formatBytes(
-                  new TextEncoder().encode(JSON.stringify(val)).length
-                ),
+                size: formatBytes(getTextSize(JSON.stringify(val))),
               };
               queue.push(subItem);
             });
@@ -129,7 +144,11 @@ const Downloads: React.FC = () => {
     } catch (e) {
       console.error('Error fetching AsyncStorage data:', e);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchAsyncStorageData();
+  }, [fetchAsyncStorageData]);
 
   const tryParseJSON = (jsonString: string | null) => {
     try {
@@ -140,7 +159,9 @@ const Downloads: React.FC = () => {
   };
 
   const formatBytes = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) {
+      return '0 Bytes';
+    }
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -150,10 +171,14 @@ const Downloads: React.FC = () => {
   const removeQueueItem = async (indexToRemove: number) => {
     try {
       const raw = await AsyncStorage.getItem('pendingSubmissions');
-      if (!raw) return;
+      if (!raw) {
+        return;
+      }
 
       const queue = JSON.parse(raw);
-      if (!Array.isArray(queue)) return;
+      if (!Array.isArray(queue)) {
+        return;
+      }
 
       queue.splice(indexToRemove, 1);
       await AsyncStorage.setItem('pendingSubmissions', JSON.stringify(queue));
@@ -168,14 +193,20 @@ const Downloads: React.FC = () => {
   const removeDownloadDoctypeItem = async (index: number) => {
     try {
       const raw = await AsyncStorage.getItem('downloadDoctypes');
-      if (!raw) return;
+      if (!raw) {
+        return;
+      }
 
       const data = JSON.parse(raw);
-      if (typeof data !== 'object' || Array.isArray(data)) return;
+      if (typeof data !== 'object' || Array.isArray(data)) {
+        return;
+      }
 
       // Get the doctype name from the displayed item
       const downloadDoctypeItem = downloadDoctypesData[index];
-      if (!downloadDoctypeItem) return;
+      if (!downloadDoctypeItem) {
+        return;
+      }
 
       // Extract doctype name from key (format: "downloadDoctypes.doctypeName")
       const doctypeName = downloadDoctypeItem.key.replace(
@@ -253,7 +284,9 @@ const Downloads: React.FC = () => {
   };
 
   const saveQueueItem = async () => {
-    if (!editingQueue) return;
+    if (!editingQueue) {
+      return;
+    }
 
     try {
       // Reconstruct the queue item with updated form data
@@ -263,10 +296,14 @@ const Downloads: React.FC = () => {
       };
 
       const raw = await AsyncStorage.getItem('pendingSubmissions');
-      if (!raw) return;
+      if (!raw) {
+        return;
+      }
 
       const queue = JSON.parse(raw);
-      if (!Array.isArray(queue)) return;
+      if (!Array.isArray(queue)) {
+        return;
+      }
 
       queue[editingQueue.index] = updatedQueueItem;
       await AsyncStorage.setItem('pendingSubmissions', JSON.stringify(queue));
@@ -344,7 +381,7 @@ const Downloads: React.FC = () => {
                 style={[styles.itemContainer, { borderTopColor: theme.border }]}
               >
                 <View style={styles.itemHeader}>
-                  <View style={{ flex: 1 }}>
+                  <View style={styles.flexOne}>
                     <Text style={[styles.itemKey, { color: theme.text }]}>
                       {item.key}
                     </Text>
@@ -376,10 +413,7 @@ const Downloads: React.FC = () => {
                       >
                         <Trash2 size={16} color="#b91c1c" />
                         <Text
-                          style={[
-                            styles.removeButtonText,
-                            { color: '#b91c1c' },
-                          ]}
+                          style={[styles.removeButtonText, styles.errorColor]}
                         >
                           {t('downloads.remove')}
                         </Text>
@@ -931,6 +965,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#f1f5f9',
     color: '#475569',
     borderColor: '#cbd5e1',
+  },
+  flexOne: {
+    flex: 1,
+  },
+  errorColor: {
+    color: '#b91c1c',
   },
 });
 

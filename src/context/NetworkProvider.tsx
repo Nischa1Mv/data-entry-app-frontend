@@ -1,6 +1,5 @@
 import React, { createContext, useEffect, useState, useContext } from 'react';
 import NetInfo from '@react-native-community/netinfo';
-import { TreeDeciduous } from 'lucide-react-native';
 
 interface NetworkContextProps {
   isConnected: boolean;

@@ -7,7 +7,7 @@ import {
   Modal,
   Alert,
 } from 'react-native';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SelectList } from 'react-native-dropdown-select-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -54,15 +54,11 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
   const { theme } = useTheme();
   const isSubmittedRef = useRef(false);
 
-  useEffect(() => {
-    isConnected != null && loginAndFetchFields();
-  }, [formName]);
-
   //what is happening here
   // When online → login → fetch → save for offline.
   // When offline → load from AsyncStorage.
 
-  const loginAndFetchFields = async () => {
+  const loginAndFetchFields = useCallback(async () => {
     let allFields: RawField[] = [];
 
     try {
@@ -97,10 +93,18 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [formName, isConnected]);
+
+  useEffect(() => {
+    if (isConnected != null) {
+      loginAndFetchFields();
+    }
+  }, [formName, isConnected, loginAndFetchFields]);
 
   const handleSubmitConfirmation = () => {
-    if (!formName || !formData) return;
+    if (!formName || !formData) {
+      return;
+    }
 
     const missingFields = fields.filter(
       field =>
@@ -127,7 +131,9 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
   };
 
   const handleSubmit = async () => {
-    if (!formName || !formData) return;
+    if (!formName || !formData) {
+      return;
+    }
 
     const doctype = await getDocTypeFromLocal(formName);
     if (!doctype) {
@@ -188,7 +194,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
     });
 
     return unsubscribe;
-  }, [navigation, formData]);
+  }, [navigation, formData, t]);
 
   useEffect(() => {
     const restoreForm = async () => {

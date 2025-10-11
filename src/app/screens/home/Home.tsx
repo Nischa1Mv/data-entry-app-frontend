@@ -96,7 +96,7 @@ const ERP: React.FC = () => {
       </View>
 
       {/* ERP Systems */}
-      <ScrollView contentContainerStyle={{ paddingBottom: 30 }}>
+      <ScrollView className="pb-8">
         <View className="flex-row flex-wrap justify-center px-4">
           {['ERP 1', 'ERP 2', 'ERP 3', 'ERP 4', 'ERP 5', 'ERP 6'].map(
             (label, i) => (

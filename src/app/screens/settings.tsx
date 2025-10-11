@@ -114,8 +114,10 @@ function Settings() {
             onPress={item.onPress}
           >
             <Text
-              className="font-inter text-center text-[16px] font-normal leading-[100%]"
-              style={{ color: item.isLogout ? '#FF0000' : theme.text }}
+              className={`font-inter text-center text-[16px] font-normal leading-[100%] ${
+                item.isLogout ? 'text-red-500' : ''
+              }`}
+              style={item.isLogout ? {} : { color: theme.text }}
             >
               {item.title}
             </Text>
@@ -167,8 +169,7 @@ function Settings() {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className="rounded-lg px-4 py-2"
-                style={{ backgroundColor: '#EF2226' }}
+                className="rounded-lg bg-red-600 px-4 py-2"
                 onPress={handleLogoutConfirm}
               >
                 <Text className="font-inter align-middle text-[14px] font-medium leading-[20px] tracking-[-0.006em] text-white">
