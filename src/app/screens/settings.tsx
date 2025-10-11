@@ -13,6 +13,7 @@ import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { BottomTabsList } from '../navigation/BottomTabsList';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootStackedList';
+import { useTheme } from '../../context/ThemeContext';
 
 type SettingsNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<BottomTabsList, 'Settings'>,
@@ -22,8 +23,10 @@ type SettingsNavigationProp = CompositeNavigationProp<
 function Settings() {
   const navigation = useNavigation<SettingsNavigationProp>();
   const { t } = useTranslation();
+  const { theme } = useTheme();
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
-  const [pendingFormsModalVisible, setPendingFormsModalVisible] = useState(false);
+  const [pendingFormsModalVisible, setPendingFormsModalVisible] =
+    useState(false);
 
   const handleLogoutPress = async () => {
     const hasPendingForms = await checkForPendingForms();
@@ -36,14 +39,14 @@ function Settings() {
 
   const checkForPendingForms = async (): Promise<boolean> => {
     try {
-      const pendingSubmissions = await getQueue() as SubmissionItem[];
-      
+      const pendingSubmissions = (await getQueue()) as SubmissionItem[];
+
       if (Array.isArray(pendingSubmissions) && pendingSubmissions.length > 0) {
         return true;
       }
       return false;
     } catch (error) {
-      console.error("Error checking for pending forms:", error);
+      console.error('Error checking for pending forms:', error);
       return false;
     }
   };
@@ -71,10 +74,24 @@ function Settings() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-row items-center justify-between px-4 py-3 pt-10 bg-white border-gray-200 border-b ">
+    <SafeAreaView
+      className="flex-1"
+      style={{ backgroundColor: theme.background }}
+    >
+      <View
+        className="flex-row items-center justify-between border-b px-4 py-3 pt-10"
+        style={{
+          backgroundColor: theme.background,
+          borderBottomColor: theme.border,
+        }}
+      >
         <View className="flex-1 items-center">
-          <Text className="font-inter font-semibold text-[18px] leading-[32px] tracking-[-0.006em] text-center">{t('settings.title')}</Text>
+          <Text
+            className="font-inter text-center text-[18px] font-semibold leading-[32px] tracking-[-0.006em]"
+            style={{ color: theme.text }}
+          >
+            {t('settings.title')}
+          </Text>
         </View>
         <LanguageControl />
       </View>
@@ -84,19 +101,29 @@ function Settings() {
           { title: t('settings.privacySecurity'), onPress: () => {} },
           { title: t('settings.supportHelp'), onPress: () => {} },
           { title: t('settings.appInfo'), onPress: () => {} },
-          { title: t('settings.logout'), onPress: handleLogoutPress, isLogout: true }
+          {
+            title: t('settings.logout'),
+            onPress: handleLogoutPress,
+            isLogout: true,
+          },
         ].map((item, index) => (
-          <TouchableOpacity 
-            key={index} 
-            className='border-1 border-b border-[#E2E8F0] px-4 py-6 flex-row items-center gap-2'
+          <TouchableOpacity
+            key={index}
+            className="border-1 flex-row items-center gap-2 border-b px-4 py-6"
+            style={{ borderBottomColor: theme.border }}
             onPress={item.onPress}
           >
-            <Text className={`font-inter font-normal text-[16px] leading-[100%] text-center ${item.isLogout ? 'text-[#FF0000]' : ''}`}>
+            <Text
+              className={`font-inter text-center text-[16px] font-normal leading-[100%] ${
+                item.isLogout ? 'text-red-500' : ''
+              }`}
+              style={item.isLogout ? {} : { color: theme.text }}
+            >
               {item.title}
             </Text>
           </TouchableOpacity>
         ))}
-      </KeyboardAwareScrollView >
+      </KeyboardAwareScrollView>
 
       {/* Logout Confirmation Modal */}
       <Modal
@@ -105,28 +132,47 @@ function Settings() {
         visible={logoutModalVisible}
         onRequestClose={handleLogoutCancel}
       >
-        <View className="flex-1 bg-[#00000033] justify-center items-center p-[1.25rem]">
-          <View className="w-full max-w-[400px] opacity-100 gap-4 rounded-[6px] border p-6 border-[#E2E8F0] bg-white">
-            <Text className="font-inter font-semibold text-[18px] leading-[28px] tracking-[-0.006em] text-[#020617]">
+        <View
+          className="flex-1 items-center justify-center p-[1.25rem]"
+          style={{ backgroundColor: theme.modalOverlay }}
+        >
+          <View
+            className="w-full max-w-[400px] gap-4 rounded-[6px] border p-6 opacity-100"
+            style={{
+              backgroundColor: theme.modalBackground,
+              borderColor: theme.border,
+            }}
+          >
+            <Text
+              className="font-inter text-[18px] font-semibold leading-[28px] tracking-[-0.006em]"
+              style={{ color: theme.text }}
+            >
               {t('settings.logoutConfirmTitle')}
             </Text>
-            <Text className="font-inter font-normal text-[14px] leading-[20px] tracking-normal text-[#64748B]">
+            <Text
+              className="font-inter text-[14px] font-normal leading-[20px] tracking-normal"
+              style={{ color: theme.subtext }}
+            >
               {t('settings.logoutConfirmMessage')}
             </Text>
-            <View className="flex-row justify-end gap-3 mt-4">
+            <View className="mt-4 flex-row justify-end gap-3">
               <TouchableOpacity
-                className="px-4 py-2 opacity-100 gap-2 rounded-md border border-[#E2E8F0] items-center justify-center"
+                className="items-center justify-center gap-2 rounded-md border px-4 py-2 opacity-100"
+                style={{ borderColor: theme.border }}
                 onPress={handleLogoutCancel}
               >
-                <Text className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle text-[#020617]">
+                <Text
+                  className="font-inter align-middle text-[14px] font-medium leading-[20px] tracking-[-0.006em]"
+                  style={{ color: theme.text }}
+                >
                   {t('common.cancel')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className="px-4 py-2 rounded-lg bg-[#EF2226]"
+                className="rounded-lg bg-red-600 px-4 py-2"
                 onPress={handleLogoutConfirm}
               >
-                <Text className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle text-[#F8FAFC]">
+                <Text className="font-inter align-middle text-[14px] font-medium leading-[20px] tracking-[-0.006em] text-white">
                   {t('settings.logout')}
                 </Text>
               </TouchableOpacity>
@@ -140,28 +186,51 @@ function Settings() {
         visible={pendingFormsModalVisible}
         onRequestClose={handlePendingFormsCancel}
       >
-        <View className="flex-1 bg-[#00000033] justify-center items-center p-[1.25rem]">
-          <View className="w-full max-w-[400px] opacity-100 gap-4 rounded-[6px] border p-6 border-[#E2E8F0] bg-white">
-            <Text className="font-inter font-semibold text-[18px] leading-[28px] tracking-[-0.006em] text-[#020617]">
+        <View
+          className="flex-1 items-center justify-center p-[1.25rem]"
+          style={{ backgroundColor: theme.modalOverlay }}
+        >
+          <View
+            className="w-full max-w-[400px] gap-4 rounded-[6px] border p-6 opacity-100"
+            style={{
+              backgroundColor: theme.modalBackground,
+              borderColor: theme.border,
+            }}
+          >
+            <Text
+              className="font-inter text-[18px] font-semibold leading-[28px] tracking-[-0.006em]"
+              style={{ color: theme.text }}
+            >
               {t('settings.pendingFormsTitle')}
             </Text>
-            <Text className="font-inter font-normal text-[14px] leading-[20px] tracking-normal text-[#64748B]">
+            <Text
+              className="font-inter text-[14px] font-normal leading-[20px] tracking-normal"
+              style={{ color: theme.subtext }}
+            >
               {t('settings.pendingFormsMessage')}
             </Text>
-            <View className="flex-row justify-end gap-3 mt-4">
+            <View className="mt-4 flex-row justify-end gap-3">
               <TouchableOpacity
-                className="px-4 py-2 opacity-100 gap-2 rounded-md border border-[#E2E8F0] items-center justify-center"
+                className="items-center justify-center gap-2 rounded-md border px-4 py-2 opacity-100"
+                style={{ borderColor: theme.border }}
                 onPress={handlePendingFormsCancel}
               >
-                <Text className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle text-[#020617]">
+                <Text
+                  className="font-inter align-middle text-[14px] font-medium leading-[20px] tracking-[-0.006em]"
+                  style={{ color: theme.text }}
+                >
                   {t('common.cancel')}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className="px-4 py-2 rounded-lg bg-[#0F172A]"
+                className="rounded-lg px-4 py-2"
+                style={{ backgroundColor: theme.buttonBackground }}
                 onPress={handleUploadNow}
               >
-                <Text className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle text-[#F8FAFC]">
+                <Text
+                  className="font-inter align-middle text-[14px] font-medium leading-[20px] tracking-[-0.006em]"
+                  style={{ color: theme.buttonText }}
+                >
                   {t('settings.uploadNow')}
                 </Text>
               </TouchableOpacity>

@@ -1,8 +1,8 @@
-import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { DocType, FormItem ,RawField} from "./types";
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DocType, FormItem, RawField } from './types';
 
-const API_BASE = "https://erp.kisanmitra.net";
+const API_BASE = 'https://erp.kisanmitra.net';
 
 // One axios instance to keep cookies
 const api = axios.create({
@@ -12,7 +12,7 @@ const api = axios.create({
 
 // login function
 export async function login(username: string, password: string) {
-  await api.post("/api/method/login", { usr: username, pwd: password });
+  await api.post('/api/method/login', { usr: username, pwd: password });
 }
 
 //fetch all doctypes
@@ -51,9 +51,12 @@ export async function fetchDocType(docTypeName: string): Promise<DocType> {
       { withCredentials: true }
     );
 
-    const response = await axios.get(`${API_BASE}/api/resource/DocType/${docTypeName}`, {
-      withCredentials: true,
-    });
+    const response = await axios.get(
+      `${API_BASE}/api/resource/DocType/${docTypeName}`,
+      {
+        withCredentials: true,
+      }
+    );
     if (!response.data || !response.data.data) {
       throw new Error(`No data found for doctype: ${docTypeName}`);
     }
@@ -64,16 +67,18 @@ export async function fetchDocType(docTypeName: string): Promise<DocType> {
   }
 }
 
-export async function getAllDoctypesFromLocal(): Promise<Record<string, DocType>> {
+export async function getAllDoctypesFromLocal(): Promise<
+  Record<string, DocType>
+> {
   try {
-    const stored = await AsyncStorage.getItem("downloadDoctypes");
+    const stored = await AsyncStorage.getItem('downloadDoctypes');
     if (stored) {
       return JSON.parse(stored) as Record<string, DocType>;
     } else {
       return {};
     }
   } catch (error) {
-    console.error("Error fetching local doctypes:", error);
+    console.error('Error fetching local doctypes:', error);
     throw error as Error;
   }
 }
@@ -82,19 +87,23 @@ export async function getAllDocTypeNames(): Promise<FormItem[]> {
   try {
     const allDoctypes = await getAllDoctypesFromLocal();
 
-    return Object.keys(allDoctypes).map((docTypeName) => ({
+    return Object.keys(allDoctypes).map(docTypeName => ({
       name: docTypeName,
     }));
   } catch (error) {
-    console.error("Error fetching docType names:", error);
+    console.error('Error fetching docType names:', error);
     throw error as Error;
   }
 }
 
-export async function getDocTypeFromLocal(docTypeName: string): Promise<DocType | null> {
+export async function getDocTypeFromLocal(
+  docTypeName: string
+): Promise<DocType | null> {
   try {
-    const stored = await AsyncStorage.getItem("downloadDoctypes");
-    if (!stored) return null;
+    const stored = await AsyncStorage.getItem('downloadDoctypes');
+    if (!stored) {
+      return null;
+    }
     const docTypeData = JSON.parse(stored)[docTypeName] as DocType;
     return docTypeData;
   } catch (error) {
@@ -103,12 +112,20 @@ export async function getDocTypeFromLocal(docTypeName: string): Promise<DocType 
   }
 }
 
-export async function saveDocTypeToLocal(docTypeName: string, docTypeData: DocType): Promise<boolean> {
+export async function saveDocTypeToLocal(
+  docTypeName: string,
+  docTypeData: DocType
+): Promise<boolean> {
   try {
-    const existingDoctypeData = await AsyncStorage.getItem("downloadDoctypes");
-    let allDocTypeStorage: Record<string, DocType> = existingDoctypeData ? JSON.parse(existingDoctypeData) : {};
+    const existingDoctypeData = await AsyncStorage.getItem('downloadDoctypes');
+    let allDocTypeStorage: Record<string, DocType> = existingDoctypeData
+      ? JSON.parse(existingDoctypeData)
+      : {};
     allDocTypeStorage[docTypeName] = docTypeData;
-    await AsyncStorage.setItem("downloadDoctypes", JSON.stringify(allDocTypeStorage));
+    await AsyncStorage.setItem(
+      'downloadDoctypes',
+      JSON.stringify(allDocTypeStorage)
+    );
     return true;
   } catch (error) {
     console.error(`Error saving local doctype: ${docTypeName}:`, error);
@@ -123,6 +140,5 @@ export function extractFields(docType: DocType): RawField[] {
     options: field.options,
   }));
 }
-
 
 export default api;

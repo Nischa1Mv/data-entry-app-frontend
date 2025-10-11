@@ -1,8 +1,8 @@
-import React from "react";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import React from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-import Login from "../screens/Login";
-import BottomTabs from "./BottomTabs";
+import Login from '../screens/Login';
+import BottomTabs from './BottomTabs';
 
 const Stack = createNativeStackNavigator();
 
