@@ -1,7 +1,7 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import {SubmissionItem} from "../types"
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { SubmissionItem } from '../types';
 
-const STORAGE_KEY = "pendingSubmissions";
+const STORAGE_KEY = 'pendingSubmissions';
 
 export const initQueue = async () => {
   const raw = await AsyncStorage.getItem(STORAGE_KEY);
@@ -16,7 +16,7 @@ export const getQueue = async () => {
     const parsed = raw ? JSON.parse(raw) : [];
     return Array.isArray(parsed) ? parsed : [];
   } catch (e) {
-    console.error("Error parsing queue", e);
+    console.error('Error parsing queue', e);
     return [];
   }
 };
@@ -26,9 +26,9 @@ export const enqueue = async (submission: SubmissionItem) => {
   const updatedQueue = [...queue, submission];
   try {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedQueue));
-    console.log("Enqueued submission:", submission);
+    console.log('Enqueued submission:', submission);
   } catch (e) {
-    console.error("Failed to save submission:", e);
+    console.error('Failed to save submission:', e);
     throw e;
   }
   return submission;

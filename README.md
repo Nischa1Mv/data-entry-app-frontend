@@ -96,15 +96,13 @@ To learn more about React Native, take a look at the following resources:
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
 
-
 # TODO for me (nischal)
 
 - refactor the downloads .tsx - its an ai generated mess
 
 - if any form is in the pending queue, then the corresponding doctypeData/docType needed to be present so they cant be deleted when a corresponding form is in pending queue - this needs to be included
-(this is so that it becomes easy to edit , without it the user can just type what ever he wants and not the options present in the form)
+  (this is so that it becomes easy to edit , without it the user can just type what ever he wants and not the options present in the form)
 
 - better ui ofcourse
 
 - swap out async storage with better db storage (later on for long run)
-

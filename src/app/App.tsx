@@ -1,40 +1,40 @@
 import React from 'react';
-import {StatusBar, useColorScheme, SafeAreaView} from 'react-native';
-import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import {enableScreens} from 'react-native-screens';
+import { StatusBar, SafeAreaView } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { enableScreens } from 'react-native-screens';
 import Login from './screens/Login';
-import {Colors} from 'react-native/Libraries/NewAppScreen';
-import {RootStackParamList} from './navigation/RootStackedList';
-import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import { RootStackParamList } from './navigation/RootStackedList';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import '../i18n';
 import '../../global.css';
-import {NetworkProvider} from '../context/NetworkProvider';
+import { NetworkProvider } from '../context/NetworkProvider';
+import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import Home from './navigation/BottomTabs';
 
 enableScreens();
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+// Inner component that uses theme
+function AppContent(): React.JSX.Element {
+  const { theme } = useTheme();
   const Stack = createNativeStackNavigator<RootStackParamList>();
 
-  const backgroundStyle = {
-    flex: 1,
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
   return (
-    <GestureHandlerRootView style={{flex: 1}}>
-      <SafeAreaView style={backgroundStyle}>
+    <GestureHandlerRootView className="flex-1">
+      <SafeAreaView
+        className="flex-1"
+        style={{ backgroundColor: theme.background }}
+      >
         <StatusBar
-          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-          backgroundColor={backgroundStyle.backgroundColor}
+          barStyle={theme.statusBarStyle}
+          backgroundColor={theme.background}
         />
         <NetworkProvider>
           <NavigationContainer>
             <Stack.Navigator
               initialRouteName="Login"
-              screenOptions={{headerShown: false}}>
+              screenOptions={{ headerShown: false }}
+            >
               <Stack.Screen name="Login" component={Login} />
               <Stack.Screen name="MainApp" component={Home} />
             </Stack.Navigator>
@@ -42,6 +42,14 @@ function App(): React.JSX.Element {
         </NetworkProvider>
       </SafeAreaView>
     </GestureHandlerRootView>
+  );
+}
+
+function App(): React.JSX.Element {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }
 

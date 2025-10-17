@@ -7,26 +7,35 @@ import {
   Modal,
   Alert,
 } from 'react-native';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SelectList } from 'react-native-dropdown-select-list';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '@/app/navigation/RootStackedList';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { useNetwork } from "../../../context/NetworkProvider";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNetwork } from '../../../context/NetworkProvider';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { enqueue } from '../../pendingQueue';
-import { fetchDocType, getDocTypeFromLocal, saveDocTypeToLocal, extractFields } from '../../../api';
+import {
+  fetchDocType,
+  getDocTypeFromLocal,
+  saveDocTypeToLocal,
+  extractFields,
+} from '../../../api';
 import { RawField } from '../../../types';
 import { useTranslation } from 'react-i18next';
-import LanguageControl from "../../components/LanguageControl"
-import generateSchemaHash from "../../../helper/hashFunction"
+import LanguageControl from '../../components/LanguageControl';
+import generateSchemaHash from '../../../helper/hashFunction';
 import { ArrowLeft } from 'lucide-react-native';
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view"
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { HomeStackParamList } from '@/app/navigation/HomeStackParamList';
+import { useTheme } from '../../../context/ThemeContext';
 
 type FormDetailRouteProp = RouteProp<HomeStackParamList, 'FormDetail'>;
-type FormDetailNavigationProp = NativeStackNavigationProp<RootStackParamList, 'MainApp'>;
+type FormDetailNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  'MainApp'
+>;
 
 type Props = {
   navigation: FormDetailNavigationProp;
@@ -38,22 +47,18 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
   const route = useRoute<FormDetailRouteProp>();
   const { formName } = route.params;
   const [confirmModalVisible, setConfirmModalVisible] = useState(false);
-  const [fields, setFields] = useState<RawField[]>([])
+  const [fields, setFields] = useState<RawField[]>([]);
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [loading, setLoading] = useState(true);
   const { t } = useTranslation();
+  const { theme } = useTheme();
   const isSubmittedRef = useRef(false);
-
-  useEffect(() => {
-    (isConnected != null) &&
-      loginAndFetchFields();
-  }, [formName]);
 
   //what is happening here
   // When online → login → fetch → save for offline.
   // When offline → load from AsyncStorage.
 
-  const loginAndFetchFields = async () => {
+  const loginAndFetchFields = useCallback(async () => {
     let allFields: RawField[] = [];
 
     try {
@@ -67,7 +72,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
       if (savedDoctypeData) {
         allFields = extractFields(savedDoctypeData);
       } else {
-        console.warn("No cached data available for offline use");
+        console.warn('No cached data available for offline use');
       }
 
       const inputFields = allFields.filter(field =>
@@ -84,38 +89,55 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
       setFields(inputFields);
       setLoading(false);
     } catch (error: any) {
-      console.error("Error in loginAndFetchFields:", error);
+      console.error('Error in loginAndFetchFields:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [formName, isConnected]);
+
+  useEffect(() => {
+    if (isConnected != null) {
+      loginAndFetchFields();
+    }
+  }, [formName, isConnected, loginAndFetchFields]);
 
   const handleSubmitConfirmation = () => {
-    if (!formName || !formData) return;
+    if (!formName || !formData) {
+      return;
+    }
 
-    const missingFields = fields.filter(field =>
-      (!formData[field.fieldname] || formData[field.fieldname].toString().trim() === '')
+    const missingFields = fields.filter(
+      field =>
+        !formData[field.fieldname] ||
+        formData[field.fieldname].toString().trim() === ''
     );
 
     if (missingFields.length > 0) {
-      const fieldNames = missingFields.map(field => field.label || field.fieldname).join(', ');
-      Alert.alert(t("common.error"), t("formDetail.requiredFields", { fields: fieldNames }));
+      const fieldNames = missingFields
+        .map(field => field.label || field.fieldname)
+        .join(', ');
+      Alert.alert(
+        t('common.error'),
+        t('formDetail.requiredFields', { fields: fieldNames })
+      );
       return;
     }
 
     if (Object.keys(formData).length === 0) {
-      Alert.alert(t("common.error"), t("formDetail.noData"));
+      Alert.alert(t('common.error'), t('formDetail.noData'));
       return;
     }
     setConfirmModalVisible(true);
   };
 
   const handleSubmit = async () => {
-    if (!formName || !formData) return;
+    if (!formName || !formData) {
+      return;
+    }
 
     const doctype = await getDocTypeFromLocal(formName);
     if (!doctype) {
-      Alert.alert(t("common.error"), t("formDetail.missingDoctype"));
+      Alert.alert(t('common.error'), t('formDetail.missingDoctype'));
       return;
     }
     const schemaHash = generateSchemaHash(doctype.fields);
@@ -125,7 +147,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
       formName,
       data: formData,
       schemaHash,
-      status: "pending" as 'pending' | 'submitted' | 'failed',
+      status: 'pending' as 'pending' | 'submitted' | 'failed',
     };
 
     setLoading(true);
@@ -133,13 +155,13 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
     try {
       await enqueue(newSubmission);
       isSubmittedRef.current = true;
-      await AsyncStorage.removeItem("tempFormData");
+      await AsyncStorage.removeItem('tempFormData');
       setFormData({});
       setTimeout(() => {
         navigation.goBack();
       }, 100);
     } catch (e) {
-      Alert.alert(t("common.error"), t("formDetail.errorSaving"));
+      Alert.alert(t('common.error'), t('formDetail.errorSaving'));
       isSubmittedRef.current = false;
     } finally {
       setLoading(false);
@@ -147,7 +169,7 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
   };
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener("beforeRemove", (e: any) => {
+    const unsubscribe = navigation.addListener('beforeRemove', (e: any) => {
       if (isSubmittedRef.current || Object.values(formData).length === 0) {
         // no data to save or form was submitted, don't prompt
         return;
@@ -158,12 +180,12 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
         t('formDetail.discardChanges'),
         t('formDetail.unsavedDataMessage'),
         [
-          { text: t('common.cancel'), style: "cancel", onPress: () => { } },
+          { text: t('common.cancel'), style: 'cancel', onPress: () => {} },
           {
             text: t('formDetail.discard'),
-            style: "destructive",
+            style: 'destructive',
             onPress: async () => {
-              await AsyncStorage.removeItem("tempFormData"); // clear saved draft
+              await AsyncStorage.removeItem('tempFormData'); // clear saved draft
               navigation.dispatch(e.data.action); // continue with back navigation
             },
           },
@@ -172,11 +194,11 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
     });
 
     return unsubscribe;
-  }, [navigation, formData]);
+  }, [navigation, formData, t]);
 
   useEffect(() => {
     const restoreForm = async () => {
-      const saved = await AsyncStorage.getItem("tempFormData");
+      const saved = await AsyncStorage.getItem('tempFormData');
       if (saved) {
         setFormData(JSON.parse(saved));
       }
@@ -194,21 +216,47 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
     const updated = { ...formData, [fieldname]: value };
     setFormData(updated);
     //store the temp data on every change
-    await AsyncStorage.setItem("tempFormData", JSON.stringify(updated));
+    await AsyncStorage.setItem('tempFormData', JSON.stringify(updated));
   };
 
   if (loading) {
-    return <Text className="text-lg text-center mt-12">{t('formDetail.loading')}</Text>;
+    return (
+      <SafeAreaView
+        className="flex-1"
+        style={{ backgroundColor: theme.background }}
+      >
+        <Text
+          className="mt-12 text-center text-lg"
+          style={{ color: theme.text }}
+        >
+          {t('formDetail.loading')}
+        </Text>
+      </SafeAreaView>
+    );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-row items-center justify-between px-4 py-3 pt-10 bg-white border-gray-200">
+    <SafeAreaView
+      className="flex-1"
+      style={{ backgroundColor: theme.background }}
+    >
+      <View
+        className="flex-row items-center justify-between border-b px-4 py-3 pt-10"
+        style={{
+          backgroundColor: theme.background,
+          borderBottomColor: theme.border,
+        }}
+      >
         <TouchableOpacity className="p-2" onPress={() => navigation.goBack()}>
-          <ArrowLeft color="#020617" size={16} />
+          <ArrowLeft color={theme.text} size={16} />
         </TouchableOpacity>
         <View className="flex-1 items-center">
-          <Text className="font-inter font-semibold text-[18px] leading-[32px] tracking-[-0.006em] text-center">{t('formsList.title')}</Text>
+          <Text
+            className="font-inter text-center text-[18px] font-semibold leading-[32px] tracking-[-0.006em]"
+            style={{ color: theme.text }}
+          >
+            {t('formsList.title')}
+          </Text>
         </View>
         <LanguageControl />
       </View>
@@ -218,20 +266,38 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
         extraScrollHeight={50}
         enableOnAndroid={true}
       >
-        <ScrollView className="p-6 gap-3">
-
-          <Text className="text-3xl font-bold text-gray-800 mb-1">{formName}</Text>
-          <Text className="text-base text-gray-500 mb-6">{t('formDetail.subtitle')}</Text>
-          <View className='flex-col'>
-            {fields.map((field) => (
+        <ScrollView className="gap-3 p-6">
+          <Text
+            className="mb-1 text-3xl font-bold"
+            style={{ color: theme.text }}
+          >
+            {formName}
+          </Text>
+          <Text className="mb-6 text-base" style={{ color: theme.subtext }}>
+            {t('formDetail.subtitle')}
+          </Text>
+          <View className="flex-col">
+            {fields.map(field => (
               <View key={field.fieldname} className="mb-4">
-                <Text className="font-sans font-medium text-sm leading-5 tracking-normal text-[#020617]">{field.label || field.fieldname}</Text>
+                <Text
+                  className="font-sans text-sm font-medium leading-5 tracking-normal"
+                  style={{ color: theme.text }}
+                >
+                  {field.label || field.fieldname}
+                </Text>
                 {field.fieldtype === 'Select' && field.options ? (
-                  <View className="w-full bg-white rounded-md overflow-hidden z-50">
+                  <View
+                    className="z-50 w-full overflow-hidden rounded-md"
+                    style={{ backgroundColor: theme.background }}
+                  >
                     <SelectList
-                      setSelected={(val: string) => handleChange(field.fieldname, val)}
+                      setSelected={(val: string) =>
+                        handleChange(field.fieldname, val)
+                      }
                       data={
-                        field.options?.split('\n').map(opt => ({ key: opt, value: opt })) || []
+                        field.options
+                          ?.split('\n')
+                          .map(opt => ({ key: opt, value: opt })) || []
                       }
                       save="value"
                       defaultOption={
@@ -247,16 +313,16 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
                         justifyContent: 'space-between',
                         paddingHorizontal: 12,
                         borderWidth: 1,
-                        borderColor: '#E2E8F0',
+                        borderColor: theme.border,
                         borderRadius: 6,
-                        backgroundColor: '#FFFFFF',
+                        backgroundColor: theme.background,
                       }}
                       dropdownStyles={{
                         borderWidth: 1,
-                        borderColor: '#E5E7EB',
+                        borderColor: theme.border,
                         borderRadius: 10,
-                        backgroundColor: '#FFFFFF',
-                        shadowColor: '#000',
+                        backgroundColor: theme.dropdownBg,
+                        shadowColor: theme.shadow,
                         shadowOffset: { width: 0, height: 2 },
                         shadowOpacity: 0.05,
                         shadowRadius: 5,
@@ -268,26 +334,40 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
                       }}
                       dropdownTextStyles={{
                         fontSize: 16,
-                        color: '#111827',
+                        color: theme.text,
                       }}
                     />
                   </View>
                 ) : (
                   <TextInput
-                    className="w-full h-[40px] rotate-0 opacity-100 rounded-md border pt-2.5 pr-3 pb-2.5 pl-3  border-[#E2E8F0]"
-                    placeholder={t('formDetail.enterPlaceholder', { label: field.label || field.fieldname })}
+                    className="h-[40px] w-full rotate-0 rounded-md border pb-2.5 pl-3 pr-3 pt-2.5 opacity-100"
+                    style={{
+                      borderColor: theme.border,
+                      backgroundColor: theme.background,
+                      color: theme.text,
+                    }}
+                    placeholder={t('formDetail.enterPlaceholder', {
+                      label: field.label || field.fieldname,
+                    })}
+                    placeholderTextColor={theme.subtext}
                     value={formData[field.fieldname] || ''}
-                    onChangeText={(text) => handleChange(field.fieldname, text)}
+                    onChangeText={text => handleChange(field.fieldname, text)}
                   />
                 )}
               </View>
             ))}
-            <TouchableOpacity className="w-full min-w-[80px] opacity-100 rounded-md p-4 gap-1 justify-center items-center bg-[#0F172A]" onPress={handleSubmitConfirmation}>
-              <Text className=" text-[#F8FAFC]">{t('formDetail.submit')}</Text>
+            <TouchableOpacity
+              className="w-full min-w-[80px] items-center justify-center gap-1 rounded-md p-4 opacity-100"
+              style={{ backgroundColor: theme.buttonBackground }}
+              onPress={handleSubmitConfirmation}
+            >
+              <Text className="" style={{ color: theme.buttonText }}>
+                {t('formDetail.submit')}
+              </Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
-      </KeyboardAwareScrollView >
+      </KeyboardAwareScrollView>
 
       <Modal
         animationType="fade"
@@ -295,36 +375,63 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
         visible={confirmModalVisible}
         onRequestClose={() => setConfirmModalVisible(false)}
       >
-        <View className="flex-1 bg-[#00000033] justify-center items-center p-[1.25rem]">
-          <View className="w-full h-[176px] max-w-[512px] opacity-100 gap-4 rounded-[6px] border p-6 border-[#E2E8F0] bg-white">
-            <Text className="font-inter font-semibold text-[18px] leading-[28px] tracking-[-0.006em] text-[#020617]">
+        <View
+          className="flex-1 items-center justify-center p-[1.25rem]"
+          style={{ backgroundColor: theme.modalOverlay }}
+        >
+          <View
+            className="h-[176px] w-full max-w-[512px] gap-4 rounded-[6px] border p-6 opacity-100"
+            style={{
+              backgroundColor: theme.modalBackground,
+              borderColor: theme.border,
+            }}
+          >
+            <Text
+              className="font-inter text-[18px] font-semibold leading-[28px] tracking-[-0.006em]"
+              style={{ color: theme.text }}
+            >
               {t('formDetail.confirmSubmission') || 'Confirm Submission'}
             </Text>
 
-            <Text className="font-inter font-normal text-[14px] leading-[20px] tracking-normal text-[#64748B]">
-              {t('formDetail.confirmSubmissionMessage') || 'Are you sure you want to submit this form? This action cannot be undone.'}
+            <Text
+              className="font-inter text-[14px] font-normal leading-[20px] tracking-normal"
+              style={{ color: theme.subtext }}
+            >
+              {t('formDetail.confirmSubmissionMessage') ||
+                'Are you sure you want to submit this form? This action cannot be undone.'}
             </Text>
 
             <View className="flex-row justify-end gap-3">
               <TouchableOpacity
-                className="w-[78px] h-[36px] opacity-100 gap-2 rounded-md border px-4 items-center justify-center border-[#E2E8F0]"
+                className="h-[36px] w-[78px] items-center justify-center gap-2 rounded-md border px-4 opacity-100"
+                style={{ borderColor: theme.border }}
                 onPress={() => setConfirmModalVisible(false)}
               >
-                <Text className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle text-[#020617]">{t('common.cancel')}</Text>
+                <Text
+                  className="font-inter align-middle text-[14px] font-medium leading-[20px] tracking-[-0.006em]"
+                  style={{ color: theme.text }}
+                >
+                  {t('common.cancel')}
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="py-2.5 px-4 rounded-lg bg-[#0F172A]"
+                className="rounded-lg px-4 py-2.5"
+                style={{ backgroundColor: theme.buttonBackground }}
                 onPress={handleSubmit}
               >
-                <Text className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle text-[#F8FAFC]">{t('common.ok')}</Text>
+                <Text
+                  className="font-inter align-middle text-[14px] font-medium leading-[20px] tracking-[-0.006em]"
+                  style={{ color: theme.buttonText }}
+                >
+                  {t('common.ok')}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       </Modal>
-    </SafeAreaView >
-
+    </SafeAreaView>
   );
 };
 

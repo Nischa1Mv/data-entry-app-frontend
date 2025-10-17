@@ -2,20 +2,15 @@ import {
   GoogleSignin,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Alert,
-  useColorScheme,
-} from 'react-native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../navigation/RootStackedList';
-import React, {useEffect} from 'react';
-import {useTranslation} from 'react-i18next';
-import {Mail} from 'lucide-react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/RootStackedList';
+import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Mail } from 'lucide-react-native';
 import LanguageControl from '../components/LanguageControl';
-import {GOOGLE_WEB_CLIENT_ID} from '@env';
+import { GOOGLE_WEB_CLIENT_ID } from '@env';
+import { useTheme } from '../../context/ThemeContext';
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'Login'
@@ -25,19 +20,9 @@ type Props = {
   navigation: LoginScreenNavigationProp;
 };
 
-const Login: React.FC<Props> = ({navigation}) => {
-  const {t} = useTranslation();
-  const isDarkMode = useColorScheme() === 'dark';
-
-  // Theme-aware colors
-  const theme = {
-    background: isDarkMode ? '#000000' : '#ffffff',
-    text: isDarkMode ? '#ffffff' : '#000000',
-    subtext: isDarkMode ? '#cccccc' : '#666666',
-    buttonBackground: isDarkMode ? '#ffffff' : '#000000',
-    buttonText: isDarkMode ? '#000000' : '#ffffff',
-    iconColor: isDarkMode ? '#000000' : '#ffffff',
-  };
+const Login: React.FC<Props> = ({ navigation }) => {
+  const { t } = useTranslation();
+  const { theme } = useTheme();
 
   useEffect(() => {
     GoogleSignin.configure({
@@ -72,19 +57,19 @@ const Login: React.FC<Props> = ({navigation}) => {
         console.log('Play services not available or outdated');
         Alert.alert(
           'Error',
-          'Google Play Services not available. Please update Google Play Services.',
+          'Google Play Services not available. Please update Google Play Services.'
         );
       } else if (error.code === 'DEVELOPER_ERROR') {
         console.log('Developer error - check configuration');
         Alert.alert(
           'Configuration Error',
-          'Google Sign-in is not properly configured. Please check your Google Console settings.',
+          'Google Sign-in is not properly configured. Please check your Google Console settings.'
         );
       } else {
         console.log('Some other error happened:', error);
         Alert.alert(
           'Error',
-          `Failed to sign in with Google: ${error.message || 'Unknown error'}`,
+          `Failed to sign in with Google: ${error.message || 'Unknown error'}`
         );
       }
     }
@@ -92,31 +77,34 @@ const Login: React.FC<Props> = ({navigation}) => {
 
   return (
     <View
-      className="flex-1 items-center justify-center w-full"
-      style={{backgroundColor: theme.background}}>
+      className="w-full flex-1 items-center justify-center"
+      style={{ backgroundColor: theme.background }}
+    >
       {/* Language Control - Top Right Corner */}
-      <View className="absolute top-12 right-6">
+      <View className="absolute right-6 top-12">
         <LanguageControl />
       </View>
 
       <View className="w-[85%] items-center">
-        <View className="items-start mb-8 w-full">
+        <View className="mb-8 w-full items-start">
           <Text
-            className="text-xl font-bold mb-0.5"
-            style={{color: theme.text}}>
+            className="mb-0.5 text-xl font-bold"
+            style={{ color: theme.text }}
+          >
             {t('login.title')}
           </Text>
-          <Text className="text-sm text-left" style={{color: theme.subtext}}>
+          <Text className="text-left text-sm" style={{ color: theme.subtext }}>
             {t('login.subtitle')}
           </Text>
         </View>
         <TouchableOpacity
-          className="w-full p-3 rounded-lg items-center"
-          style={{backgroundColor: theme.buttonBackground}}
-          onPress={signInWithGoogle}>
+          className="w-full items-center rounded-lg p-3"
+          style={{ backgroundColor: theme.buttonBackground }}
+          onPress={signInWithGoogle}
+        >
           <View className="flex-row items-center gap-2">
-            <Mail size={20} color={theme.iconColor} />
-            <Text className="text-base" style={{color: theme.buttonText}}>
+            <Mail size={20} color={theme.buttonText} />
+            <Text className="text-base" style={{ color: theme.buttonText }}>
               {t('login.signInWithGoogle')}
             </Text>
           </View>
