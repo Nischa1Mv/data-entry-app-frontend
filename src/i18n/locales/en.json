@@ -92,7 +92,10 @@
     "submitFormMessage": "Are you sure you want to submit \"{{formName}}\"?",
     "submitError": "Error",
     "submitErrorMessage": "Failed to submit form. Please try again.",
-    "submit": "Submit"
+    "submit": "Submit",
+    "submissionSummaryTitle": "Submission Results",
+    "submissionSuccess": "SUCCESS",
+    "submissionFailed": "FAILED"
   },
   "downloads": {
     "title": "AsyncStorage Manager",
@@ -108,6 +111,7 @@
   "common": {
     "ok": "Upload",
     "cancel": "Cancel",
+    "close": "Close",
     "yes": "Yes",
     "no": "No",
     "save": "Save",
