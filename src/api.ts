@@ -1,34 +1,18 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { DocType, FormItem, RawField } from './types';
+import { DocType, FormItem, RawField,SubmissionItem  } from './types';
 
-const API_BASE = 'https://erp.kisanmitra.net';
+import { BACKEND_URL } from '@env';
 
 // One axios instance to keep cookies
 const api = axios.create({
-  baseURL: API_BASE,
-  withCredentials: true,
+  baseURL: BACKEND_URL,
 });
-
-// login function
-export async function login(username: string, password: string) {
-  await api.post('/api/method/login', { usr: username, pwd: password });
-}
 
 //fetch all doctypes
 export async function fetchAllDocTypeNamess(): Promise<FormItem[]> {
   try {
-    await axios.post(
-      `${API_BASE}/api/method/login`,
-      {
-        usr: 'ads@aegiondynamic.com',
-        pwd: 'Csa@2025',
-      },
-      { withCredentials: true }
-    );
-
-    const response = await axios.get(`${API_BASE}/api/resource/DocType`, {
-      withCredentials: true,
+    const response = await axios.get(`${BACKEND_URL}/doctype`, {
     });
 
     const data = response.data.data;
@@ -42,19 +26,7 @@ export async function fetchAllDocTypeNamess(): Promise<FormItem[]> {
 // fetch doctypes
 export async function fetchDocType(docTypeName: string): Promise<DocType> {
   try {
-    await axios.post(
-      `${API_BASE}/api/method/login`,
-      {
-        usr: 'ads@aegiondynamic.com',
-        pwd: 'Csa@2025',
-      },
-      { withCredentials: true }
-    );
-
-    const response = await axios.get(
-      `${API_BASE}/api/resource/DocType/${docTypeName}`,
-      {
-        withCredentials: true,
+    const response = await axios.get(`${BACKEND_URL}/doctype/${docTypeName}`, {
       }
     );
     if (!response.data || !response.data.data) {
@@ -66,6 +38,25 @@ export async function fetchDocType(docTypeName: string): Promise<DocType> {
     throw error as Error;
   }
 }
+
+export async function SubmitForm(submissionItem: SubmissionItem) {
+  try {
+    const response = await axios.post(`${BACKEND_URL}/submit`, submissionItem, {
+    });
+
+    if (response.status < 200 || response.status >= 300) {
+      throw new Error(`Submission failed with status ${response.status}`);
+    }
+
+    return response.data;
+
+  } catch (error: any) {
+    console.error("Error submitting form:", error);
+
+    return Promise.reject(error.response?.data || error.message || 'Submission failed');
+  }
+}
+
 
 export async function getAllDoctypesFromLocal(): Promise<
   Record<string, DocType>

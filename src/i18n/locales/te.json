@@ -92,7 +92,10 @@
     "submitFormMessage": "మీరు నిజంగా \"{{formName}}\"ను సమర్పించాలనుకుంటున్నారా?",
     "submitError": "లోపం",
     "submitErrorMessage": "ఫారాన్ని సమర్పించడంలో విఫలమైంది। దయచేసి మళ్లీ ప్రయత్నించండి।",
-    "submit": "సమర్పించండి"
+    "submit": "సమర్పించండి",
+    "submissionSummaryTitle": "సమర్పణ ఫలితాలు",
+    "submissionSuccess": "విజయవంతం",
+    "submissionFailed": "విఫలమైంది"
   },
   "downloads": {
     "title": "AsyncStorage మేనేజర్",
@@ -108,6 +111,7 @@
   "common": {
     "ok": "అప్‌లోడ్",
     "cancel": "రద్దు చేయండి",
+    "close": "మూసివేయండి",
     "yes": "అవును",
     "no": "లేదు",
     "save": "సేవ్",

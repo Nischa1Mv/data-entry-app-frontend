@@ -4,16 +4,19 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import { BottomTabsList } from '../../navigation/BottomTabsList';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import LanguageControl from '../../components/LanguageControl';
 import { ArrowRight } from 'lucide-react-native';
 import { HomeStackParamList } from '../../navigation/HomeStackParamList';
 import { useTheme } from '../../../context/ThemeContext';
+import axios from 'axios';
+import { BACKEND_URL } from '@env';
 
 type HomeNavigationProp = BottomTabNavigationProp<BottomTabsList, 'Home'> & {
   navigate: (screen: keyof HomeStackParamList) => void;
@@ -23,6 +26,31 @@ const ERP: React.FC = () => {
   const { t } = useTranslation();
   const navigation = useNavigation<HomeNavigationProp>();
   const { theme } = useTheme();
+  const [erpSystems, setErpSystems] = useState([{}]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchERPSystems = async () => {
+      try {
+        const response = await axios.get(`${BACKEND_URL}/api/erp-systems`);
+        setErpSystems(response.data);
+      } catch (error) {
+        console.error('Error fetching ERP systems:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchERPSystems();
+  }, []);
+
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <ActivityIndicator size="large" color={theme.text} />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView
@@ -98,47 +126,32 @@ const ERP: React.FC = () => {
       {/* ERP Systems */}
       <ScrollView className="pb-8">
         <View className="flex-row flex-wrap justify-center px-4">
-          {['ERP 1', 'ERP 2', 'ERP 3', 'ERP 4', 'ERP 5', 'ERP 6'].map(
-            (label, i) => (
-              <TouchableOpacity
-                key={i}
-                className="m-2 min-h-[100px] w-[45%] items-center justify-center rounded-2xl border"
-                style={{ borderColor: theme.border }}
-                onPress={() => {
-                  if (i === 0) {
-                    navigation.navigate('FormsList');
-                  }
-                }}
+          {erpSystems.map((erp: any, i) => (
+            <TouchableOpacity
+              key={i}
+              className="m-2 min-h-[100px] w-[45%] items-center justify-center rounded-2xl border"
+              style={{ borderColor: theme.border }}
+              onPress={() => {
+                if (i === 0) {
+                  navigation.navigate('FormsList');
+                }
+              }}
+            >
+              <Text
+                className="font-inter text-base font-semibold leading-7 tracking-[-0.006em]"
+                style={{ color: theme.text }}
               >
-                <Text
-                  className="font-inter text-base font-semibold leading-7 tracking-[-0.006em]"
-                  style={{ color: theme.text }}
-                >
-                  {label}
-                </Text>
-                <Text
-                  className="font-inter text-center text-xs font-normal leading-5 tracking-normal"
-                  style={{ color: theme.subtext }}
-                >
-                  {t('home.formCount', { count: 15 })}
-                </Text>
-              </TouchableOpacity>
-            )
-          )}
+                {erp.name}
+              </Text>
+              <Text
+                className="font-inter text-center text-xs font-normal leading-5 tracking-normal"
+                style={{ color: theme.subtext }}
+              >
+                {t('home.formCount', { count: erp.formCount })}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
-        {/* Downloads */}
-        <TouchableOpacity
-          className="mx-auto mt-6 min-h-[100px] w-[35%] items-center justify-center rounded-2xl border"
-          style={{ borderColor: theme.border }}
-          onPress={() => navigation.navigate('Files')}
-        >
-          <Text
-            className="font-inter text-sm font-semibold leading-6 tracking-[-0.006em]"
-            style={{ color: theme.text }}
-          >
-            {t('navigation.downloads') || 'Downloads'}
-          </Text>
-        </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
   );
