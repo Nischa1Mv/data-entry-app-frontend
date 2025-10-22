@@ -17,6 +17,7 @@ import { HomeStackParamList } from '../../navigation/HomeStackParamList';
 import { useTheme } from '../../../context/ThemeContext';
 import axios from 'axios';
 import { BACKEND_URL } from '@env';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type HomeNavigationProp = BottomTabNavigationProp<BottomTabsList, 'Home'> & {
   navigate: (screen: keyof HomeStackParamList) => void;
@@ -32,9 +33,28 @@ const ERP: React.FC = () => {
   useEffect(() => {
     const fetchERPSystems = async () => {
       try {
-        const response = await axios.get(`${BACKEND_URL}/api/erp-systems`);
+        // Get the ID token from AsyncStorage
+        const idToken = await AsyncStorage.getItem('idToken');
+
+        if (!idToken) {
+          console.error('No ID token found. User needs to login again.');
+          setLoading(false);
+          return;
+        }
+
+        console.log(`${BACKEND_URL}/api/erp-systems`);
+
+        // Make API call with Authorization header
+        const response = await axios.get(`${BACKEND_URL}/api/erp-systems`, {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
         setErpSystems(response.data);
-      } catch (error) {
+        console.log('ERP Systems:', response.data);
+      } catch (error: any) {
         console.error('Error fetching ERP systems:', error);
       } finally {
         setLoading(false);
