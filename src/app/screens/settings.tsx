@@ -14,6 +14,8 @@ import { BottomTabsList } from '../navigation/BottomTabsList';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootStackedList';
 import { useTheme } from '../../context/ThemeContext';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type SettingsNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<BottomTabsList, 'Settings'>,
@@ -51,11 +53,30 @@ function Settings() {
     }
   };
 
-  const handleLogoutConfirm = () => {
-    // Add your logout logic here
-    console.log('User logged out');
-    setLogoutModalVisible(false);
-    navigation.getParent()?.navigate('Login');
+  const handleLogoutConfirm = async () => {
+    try {
+      // Sign out from Google
+      await GoogleSignin.signOut();
+
+      // Clear all user-related data from AsyncStorage
+      await AsyncStorage.multiRemove([
+        'idToken',
+        'userInfo',
+        'downloadDoctypes', // Clear downloaded forms
+        'pendingSubmissions', // Clear pending submissions
+        'tempFormData', // Clear any temporary form data
+      ]);
+
+      console.log('User logged out successfully');
+      setLogoutModalVisible(false);
+
+      // Navigate to Login screen
+      navigation.getParent()?.navigate('Login');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      setLogoutModalVisible(false);
+      navigation.getParent()?.navigate('Login');
+    }
   };
 
   const handleLogoutCancel = () => {
