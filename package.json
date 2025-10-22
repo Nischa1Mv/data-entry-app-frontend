@@ -10,7 +10,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest",
+    "openapi-ts": "openapi-ts"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.1.2",
@@ -46,6 +47,7 @@
     "@babel/core": "^7.25.2",
     "@babel/preset-env": "^7.25.3",
     "@babel/runtime": "^7.25.0",
+    "@hey-api/openapi-ts": "0.86.1",
     "@react-native-community/cli": "18.0.0",
     "@react-native-community/cli-platform-android": "18.0.0",
     "@react-native-community/cli-platform-ios": "18.0.0",
