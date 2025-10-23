@@ -12,6 +12,7 @@ import LanguageControl from '../components/LanguageControl';
 import { GOOGLE_WEB_CLIENT_ID } from '@env';
 import { useTheme } from '../../context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'Login'

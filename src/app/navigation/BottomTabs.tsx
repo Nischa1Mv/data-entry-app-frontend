@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { House, FileText, Settings as SettingsIcon } from 'lucide-react-native';
 import HomeStack from './HomeStack';
 import FilesStack from './FormStack';
-import Settings from '../screens/settings';
+import Settings from '../screens/settings/Settings';
 import { BottomTabsList } from './BottomTabsList';
 import { useTheme } from '../../context/ThemeContext';
 
