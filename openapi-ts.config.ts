@@ -7,6 +7,7 @@ export default defineConfig({
     {
       baseUrl: false,
       name: '@hey-api/client-fetch',
+      runtimeConfigPath: './src/lib/hey-api/hey-api.ts',
     },
   ],
 });
