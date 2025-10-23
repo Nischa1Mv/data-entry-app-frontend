@@ -106,3 +106,7 @@ To learn more about React Native, take a look at the following resources:
 - better ui ofcourse
 
 - swap out async storage with better db storage (later on for long run)
+
+### Connected Backend
+
+- adb reverse tcp:8000 tcp:8000
