@@ -15,44 +15,30 @@ import LanguageControl from '../../components/LanguageControl';
 import { ArrowRight } from 'lucide-react-native';
 import { HomeStackParamList } from '../../navigation/HomeStackParamList';
 import { useTheme } from '../../../context/ThemeContext';
-import axios from 'axios';
-import { BACKEND_URL } from '@env';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getErpSystems } from '../../../lib/hey-api/client/sdk.gen';
 
 type HomeNavigationProp = BottomTabNavigationProp<BottomTabsList, 'Home'> & {
   navigate: (screen: keyof HomeStackParamList) => void;
 };
 
+export interface ErpSystem {
+  id: string;
+  name: string;
+  formCount: number;
+}
+
 const ERP: React.FC = () => {
   const { t } = useTranslation();
   const navigation = useNavigation<HomeNavigationProp>();
   const { theme } = useTheme();
-  const [erpSystems, setErpSystems] = useState([{}]);
+  const [erpSystems, setErpSystems] = useState<ErpSystem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchERPSystems = async () => {
       try {
-        // Get the ID token from AsyncStorage
-        const idToken = await AsyncStorage.getItem('idToken');
-
-        if (!idToken) {
-          console.error('No ID token found. User needs to login again.');
-          setLoading(false);
-          return;
-        }
-
-        console.log(`${BACKEND_URL}/api/erp-systems`);
-
-        // Make API call with Authorization header
-        const response = await axios.get(`${BACKEND_URL}/api/erp-systems`, {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        setErpSystems(response.data);
+        const response = await getErpSystems();
+        setErpSystems(response.data as ErpSystem[]);
         console.log('ERP Systems:', response.data);
       } catch (error: any) {
         console.error('Error fetching ERP systems:', error);
@@ -146,7 +132,7 @@ const ERP: React.FC = () => {
       {/* ERP Systems */}
       <ScrollView className="pb-8">
         <View className="flex-row flex-wrap justify-center px-4">
-          {erpSystems.map((erp: any, i) => (
+          {erpSystems.map((erp: ErpSystem, i) => (
             <TouchableOpacity
               key={i}
               className="m-2 min-h-[100px] w-[45%] items-center justify-center rounded-2xl border"

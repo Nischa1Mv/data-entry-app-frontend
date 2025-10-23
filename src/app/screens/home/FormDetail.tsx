@@ -17,12 +17,12 @@ import { useNetwork } from '../../../context/NetworkProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { enqueue } from '../../pendingQueue';
 import {
-  fetchDocType,
   getDocTypeFromLocal,
   saveDocTypeToLocal,
   extractFields,
 } from '../../../api';
-import { RawField } from '../../../types';
+import { getDoctypeByName } from '../../../lib/hey-api/client/sdk.gen';
+import { DocType, RawField } from '../../../types';
 import { useTranslation } from 'react-i18next';
 import LanguageControl from '../../components/LanguageControl';
 import generateSchemaHash from '../../../helper/hashFunction';
@@ -54,10 +54,6 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
   const { theme } = useTheme();
   const isSubmittedRef = useRef(false);
 
-  //what is happening here
-  // When online → login → fetch → save for offline.
-  // When offline → load from AsyncStorage.
-
   const loginAndFetchFields = useCallback(async () => {
     let allFields: RawField[] = [];
 
@@ -65,7 +61,12 @@ const FormDetail: React.FC<Props> = ({ navigation }) => {
       let savedDoctypeData = await getDocTypeFromLocal(formName);
       if (!savedDoctypeData && isConnected) {
         // fetch + save if not available locally
-        const fetched = await fetchDocType(formName);
+        const response = await getDoctypeByName({
+          path: { form_name: formName },
+        });
+        const responseData = response.data as { data: DocType };
+        const fetched = responseData.data;
+        console.log('fetched', fetched);
         await saveDocTypeToLocal(formName, fetched);
         savedDoctypeData = fetched;
       }

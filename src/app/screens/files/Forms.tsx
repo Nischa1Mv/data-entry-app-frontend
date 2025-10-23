@@ -1,5 +1,12 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, TouchableOpacity, Alert, Modal, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Alert,
+  Modal,
+  ScrollView,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LanguageControl from '../../components/LanguageControl';
 import { getQueue, removeFromQueue } from '../../pendingQueue';
@@ -9,24 +16,39 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { FormStackParamList } from '../../navigation/FormStackParamList';
 import { useTheme } from '../../../context/ThemeContext';
-import { SubmitForm } from "../../../api";
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { submitFormData } from '../../../lib/hey-api/client/sdk.gen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type FormsNavigationProp = NativeStackNavigationProp<
   FormStackParamList,
   'Forms'
 >;
 
+interface SubmissionResult {
+  success: boolean;
+  form: SubmissionItem;
+  result?: any;
+  reason?: string;
+}
+
+interface ApiResponse {
+  success?: boolean;
+  error?: string;
+}
+
 function Forms() {
   const [queueData, setQueueData] = useState<SubmissionItem[]>([]);
   const [pendingFormsCount, setPendingFormsCount] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [showSubmissionSummary, setShowSubmissionSummary] = useState<boolean>(false);
-  const [submissionResults, setSubmissionResults] = useState<any[]>([]);
+  const [showSubmissionSummary, setShowSubmissionSummary] =
+    useState<boolean>(false);
+  const [submissionResults, setSubmissionResults] = useState<
+    SubmissionResult[]
+  >([]);
   const { t } = useTranslation();
   const { theme } = useTheme();
   const navigation = useNavigation<FormsNavigationProp>();
-  const STORAGE_KEY = "pendingSubmissions";
+  const STORAGE_KEY = 'pendingSubmissions';
 
   useFocusEffect(
     useCallback(() => {
@@ -76,16 +98,29 @@ function Forms() {
             (async () => {
               try {
                 const results = await Promise.allSettled(
-                  queueData.map(submissionItem => SubmitForm(submissionItem))
+                  queueData.map(submissionItem =>
+                    submitFormData({ body: submissionItem })
+                  )
                 );
 
                 const processedResults = results.map((res, index) => {
                   const currentSubmissionItem = queueData[index];
 
                   if (res.status === 'fulfilled') {
-                    return { success: true, form: currentSubmissionItem, result: res.value };
+                    const responseData = res.value.data as ApiResponse;
+                    const isSuccess =
+                      responseData && responseData.success === true;
+                    return {
+                      success: isSuccess,
+                      form: currentSubmissionItem,
+                      result: responseData,
+                    };
                   } else {
-                    return { success: false, form: currentSubmissionItem, reason: res.reason };
+                    return {
+                      success: false,
+                      form: currentSubmissionItem,
+                      reason: res.reason,
+                    };
                   }
                 });
 
@@ -94,31 +129,33 @@ function Forms() {
                   .map(r => r.form.id);
 
                 const queue = await getQueue();
-                const updatedQueue = queue.filter((item: any) => !successfulIds.includes(item.id));
-                await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updatedQueue));
+                const updatedQueue = queue.filter(
+                  item => !successfulIds.includes(item.id)
+                );
+                await AsyncStorage.setItem(
+                  STORAGE_KEY,
+                  JSON.stringify(updatedQueue)
+                );
 
                 setQueueData(updatedQueue);
 
                 setSubmissionResults(processedResults);
                 setShowSubmissionSummary(true);
-
               } catch (error) {
-                console.error("Unexpected error submitting forms:", error);
+                console.error('Unexpected error submitting forms:', error);
                 Alert.alert(
                   t('formsScreen.submitError'),
                   t('formsScreen.submitErrorMessage')
                 );
               }
             })();
-          }
-        }
+          },
+        },
       ]
     );
   };
 
-  const handleSubmitSingleForm = async (
-    formData: SubmissionItem
-  ) => {
+  const handleSubmitSingleForm = async (formData: SubmissionItem) => {
     Alert.alert(
       t('formsScreen.submitFormTitle'),
       t('formsScreen.submitFormMessage', { formName: formData?.formName }),
@@ -128,14 +165,19 @@ function Forms() {
           text: t('formsScreen.submit'),
           onPress: async () => {
             try {
-              const response = await SubmitForm(formData);
+              const response = await submitFormData({ body: formData });
+              const responseData = response.data as ApiResponse;
 
               // Check if the response indicates success
-              const isSuccess = response && response.success === true;
+              const isSuccess = responseData && responseData.success === true;
 
               const processedResult = isSuccess
-                ? { success: true, form: formData, result: response }
-                : { success: false, form: formData, reason: response?.error || 'Submission failed' };
+                ? { success: true, form: formData, result: responseData }
+                : {
+                    success: false,
+                    form: formData,
+                    reason: responseData?.error || 'Submission failed',
+                  };
 
               // Remove from queue & local storage if successful
               if (processedResult.success) {
@@ -146,9 +188,8 @@ function Forms() {
               // Set modal results using the same state as "Submit All"
               setSubmissionResults([processedResult]); // single-item array
               setShowSubmissionSummary(true);
-
             } catch (error: any) {
-              console.error("Error submitting form:", error);
+              console.error('Error submitting form:', error);
 
               // Handle HTTP errors (like 500 status)
               let errorMessage = 'Submission failed';
@@ -161,14 +202,14 @@ function Forms() {
               const processedResult = {
                 success: false,
                 form: formData,
-                reason: errorMessage
+                reason: errorMessage,
               };
 
               setSubmissionResults([processedResult]);
               setShowSubmissionSummary(true);
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -177,6 +218,24 @@ function Forms() {
       className="flex-1"
       style={{ backgroundColor: theme.background }}
     >
+      <View
+        className="flex-row items-center justify-between border-b px-4 py-3 pt-10"
+        style={{
+          backgroundColor: theme.background,
+          borderBottomColor: theme.border,
+        }}
+      >
+        <View className="flex-1 items-center">
+          <Text
+            className="font-inter text-center text-[18px] font-semibold leading-[32px] tracking-[-0.006em]"
+            style={{ color: theme.text }}
+          >
+            {t('formsScreen.title')}
+          </Text>
+        </View>
+        <LanguageControl />
+      </View>
+
       {showSubmissionSummary && (
         <Modal
           animationType="fade"
@@ -184,9 +243,9 @@ function Forms() {
           visible={showSubmissionSummary}
           onRequestClose={() => setShowSubmissionSummary(false)}
         >
-          <View className="flex-1 bg-[#00000033] justify-center items-center p-[1.25rem]">
-            <View className="w-full max-w-[400px] opacity-100 gap-4 rounded-[6px] border p-6 border-[#E2E8F0] bg-white">
-              <Text className="font-inter font-semibold text-[18px] leading-[28px] tracking-[-0.006em] text-[#020617]">
+          <View className="flex-1 items-center justify-center bg-[#00000033] p-[1.25rem]">
+            <View className="w-full max-w-[400px] gap-4 rounded-[6px] border border-[#E2E8F0] bg-white p-6 opacity-100">
+              <Text className="font-inter text-[18px] font-semibold leading-[28px] tracking-[-0.006em] text-[#020617]">
                 {t('formsScreen.submissionSummaryTitle')}
               </Text>
               {/* output for error */}
@@ -209,24 +268,27 @@ function Forms() {
                 {submissionResults.map((res, idx) => (
                   <View key={idx} className="mb-2">
                     <Text
-                      className={`font-inter font-normal text-[14px] leading-[20px] tracking-normal ${res.success ? 'text-[#16a34a]' : 'text-[#EF2226]'
-                        }`}
+                      className={`font-inter text-[14px] font-normal leading-[20px] tracking-normal ${
+                        res.success ? 'text-[#16a34a]' : 'text-[#EF2226]'
+                      }`}
                     >
-                      {res.form?.formName || res.form?.id || `Form ${idx + 1}`} —{' '}
-                      {res.success ? t('formsScreen.submissionSuccess') : t('formsScreen.submissionFailed')}
+                      {res.form?.formName || res.form?.id || `Form ${idx + 1}`}{' '}
+                      —{' '}
+                      {res.success
+                        ? t('formsScreen.submissionSuccess')
+                        : t('formsScreen.submissionFailed')}
                       {!res.success && res.reason ? ` (${res.reason})` : ''}
                     </Text>
-
                   </View>
                 ))}
               </ScrollView>
 
-              <View className="flex-row justify-end gap-3 mt-4">
+              <View className="mt-4 flex-row justify-end gap-3">
                 <TouchableOpacity
-                  className="px-4 py-2 opacity-100 gap-2 rounded-md border border-[#E2E8F0] items-center justify-center"
+                  className="items-center justify-center gap-2 rounded-md border border-[#E2E8F0] px-4 py-2 opacity-100"
                   onPress={() => setShowSubmissionSummary(false)}
                 >
-                  <Text className="font-inter font-medium text-[14px] leading-[20px] tracking-[-0.006em] align-middle text-[#020617]">
+                  <Text className="font-inter align-middle text-[14px] font-medium leading-[20px] tracking-[-0.006em] text-[#020617]">
                     {t('common.close')}
                   </Text>
                 </TouchableOpacity>
@@ -236,7 +298,7 @@ function Forms() {
         </Modal>
       )}
 
-      <View className="mx-6 mb-5">
+      <View className="p-4">
         <View
           className="flex-row items-start justify-between rounded-lg border p-4"
           style={{
@@ -344,7 +406,9 @@ function Forms() {
                     </Text>
                   </View>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => handleSubmitSingleForm(formData)}>
+                <TouchableOpacity
+                  onPress={() => handleSubmitSingleForm(formData)}
+                >
                   <View className="flex h-[40px] w-[117px] items-center justify-center">
                     <Text
                       className="font-inter text-right text-sm font-medium leading-5"
