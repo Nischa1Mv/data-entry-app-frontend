@@ -4,16 +4,18 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
-import LanguageControl from '../components/LanguageControl';
+import LanguageControl from '../../components/LanguageControl';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { getQueue } from '../pendingQueue';
-import { SubmissionItem } from '../../types';
+import { getQueue } from '../../pendingQueue';
+import { SubmissionItem } from '../../../types';
 import { CompositeNavigationProp } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
-import { BottomTabsList } from '../navigation/BottomTabsList';
+import { BottomTabsList } from '../../navigation/BottomTabsList';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/RootStackedList';
-import { useTheme } from '../../context/ThemeContext';
+import { RootStackParamList } from '../../navigation/RootStackedList';
+import { useTheme } from '../../../context/ThemeContext';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type SettingsNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<BottomTabsList, 'Settings'>,
@@ -51,11 +53,30 @@ function Settings() {
     }
   };
 
-  const handleLogoutConfirm = () => {
-    // Add your logout logic here
-    console.log('User logged out');
-    setLogoutModalVisible(false);
-    navigation.getParent()?.navigate('Login');
+  const handleLogoutConfirm = async () => {
+    try {
+      // Sign out from Google
+      await GoogleSignin.signOut();
+
+      // Clear all user-related data from AsyncStorage
+      await AsyncStorage.multiRemove([
+        'idToken',
+        'userInfo',
+        'downloadDoctypes', // Clear downloaded forms
+        'pendingSubmissions', // Clear pending submissions
+        'tempFormData', // Clear any temporary form data
+      ]);
+
+      console.log('User logged out successfully');
+      setLogoutModalVisible(false);
+
+      // Navigate to Login screen
+      navigation.getParent()?.navigate('Login');
+    } catch (error) {
+      console.error('Error during logout:', error);
+      setLogoutModalVisible(false);
+      navigation.getParent()?.navigate('Login');
+    }
   };
 
   const handleLogoutCancel = () => {

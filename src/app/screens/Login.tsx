@@ -11,6 +11,8 @@ import { Mail } from 'lucide-react-native';
 import LanguageControl from '../components/LanguageControl';
 import { GOOGLE_WEB_CLIENT_ID } from '@env';
 import { useTheme } from '../../context/ThemeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 type LoginScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'Login'
@@ -39,6 +41,16 @@ const Login: React.FC<Props> = ({ navigation }) => {
       const userInfo = await GoogleSignin.signIn();
 
       console.log('User Info:', userInfo);
+
+      // Store user info and ID token in AsyncStorage
+      if (userInfo.data?.user && userInfo.data?.idToken) {
+        await AsyncStorage.setItem(
+          'userInfo',
+          JSON.stringify(userInfo.data.user)
+        );
+        await AsyncStorage.setItem('idToken', userInfo.data.idToken);
+        console.log('User info and ID token stored successfully');
+      }
 
       // Navigate to main app after successful sign-in
       navigation.navigate('MainApp');

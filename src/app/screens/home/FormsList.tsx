@@ -12,13 +12,12 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNetwork } from '../../../context/NetworkProvider';
 import { useFocusEffect } from '@react-navigation/native';
+import { saveDocTypeToLocal, getAllDocTypeNames } from '../../../api';
 import {
-  fetchDocType,
-  fetchAllDocTypeNamess,
-  saveDocTypeToLocal,
-  getAllDocTypeNames,
-} from '../../../api';
-import { FormItem } from '../../../types';
+  getAllDoctypes,
+  getDoctypeByName,
+} from '../../../lib/hey-api/client/sdk.gen';
+import { DocType } from '../../../types';
 import { useTranslation } from 'react-i18next';
 import LanguageControl from '../../components/LanguageControl';
 import { ArrowLeft, Download, Check } from 'lucide-react-native';
@@ -29,6 +28,10 @@ type FormsListNavigationProp = NativeStackNavigationProp<
   HomeStackParamList,
   'FormsList'
 >;
+
+export interface FormItem {
+  name: string;
+}
 
 const FormsList = () => {
   const navigation = useNavigation<FormsListNavigationProp>();
@@ -43,14 +46,15 @@ const FormsList = () => {
 
   useEffect(() => {
     const loadForms = async () => {
-      // if connected fetch from server
       setLoading(true);
       try {
         if (isConnected) {
-          const docTypeNames = (await loginAndFetchForms()) as FormItem[];
-          setForms(docTypeNames);
+          const response = await getAllDoctypes();
+          console.log('response', response);
+          const responseData = response.data as { data: FormItem[] };
+          const data = responseData.data;
+          setForms(data);
         } else {
-          // else get form local storage
           const stored = (await getAllDocTypeNames()) as FormItem[];
           setForms(stored);
         }
@@ -64,16 +68,6 @@ const FormsList = () => {
       loadForms();
     }
   }, [isConnected]);
-
-  const loginAndFetchForms = async (): Promise<FormItem[]> => {
-    try {
-      const data = (await fetchAllDocTypeNamess()) as FormItem[];
-      return data;
-    } catch (error) {
-      console.error('Error fetching forms:', error);
-      throw error;
-    }
-  };
 
   useFocusEffect(() => {
     const checkDownloadStatus = async () => {
@@ -108,7 +102,12 @@ const FormsList = () => {
     }));
 
     try {
-      const docTypeData = await fetchDocType(docTypeName);
+      const response = await getDoctypeByName({
+        path: { form_name: docTypeName },
+      });
+
+      // Handle SDK response structure
+      const docTypeData = response.data as DocType;
 
       //saves the doctype data
       await saveDocTypeToLocal(docTypeName, docTypeData);

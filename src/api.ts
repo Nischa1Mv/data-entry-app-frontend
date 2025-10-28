@@ -1,62 +1,5 @@
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { DocType, FormItem, RawField,SubmissionItem  } from './types';
-
-import { BACKEND_URL } from '@env';
-
-// One axios instance to keep cookies
-const api = axios.create({
-  baseURL: BACKEND_URL,
-});
-
-//fetch all doctypes
-export async function fetchAllDocTypeNamess(): Promise<FormItem[]> {
-  try {
-    const response = await axios.get(`${BACKEND_URL}/doctype`, {
-    });
-
-    const data = response.data.data;
-    return data;
-  } catch (error) {
-    console.error('Error while online:', error);
-    throw error as Error;
-  }
-}
-
-// fetch doctypes
-export async function fetchDocType(docTypeName: string): Promise<DocType> {
-  try {
-    const response = await axios.get(`${BACKEND_URL}/doctype/${docTypeName}`, {
-      }
-    );
-    if (!response.data || !response.data.data) {
-      throw new Error(`No data found for doctype: ${docTypeName}`);
-    }
-    return response.data.data as DocType;
-  } catch (error) {
-    console.error('Error fetching doctype data:', error);
-    throw error as Error;
-  }
-}
-
-export async function SubmitForm(submissionItem: SubmissionItem) {
-  try {
-    const response = await axios.post(`${BACKEND_URL}/submit`, submissionItem, {
-    });
-
-    if (response.status < 200 || response.status >= 300) {
-      throw new Error(`Submission failed with status ${response.status}`);
-    }
-
-    return response.data;
-
-  } catch (error: any) {
-    console.error("Error submitting form:", error);
-
-    return Promise.reject(error.response?.data || error.message || 'Submission failed');
-  }
-}
-
+import { DocType, FormItem, RawField } from './types';
 
 export async function getAllDoctypesFromLocal(): Promise<
   Record<string, DocType>
@@ -131,5 +74,3 @@ export function extractFields(docType: DocType): RawField[] {
     options: field.options,
   }));
 }
-
-export default api;
