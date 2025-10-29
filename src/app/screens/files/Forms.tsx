@@ -34,6 +34,12 @@ interface SubmissionResult {
 interface ApiResponse {
   success?: boolean;
   error?: string;
+  message?: string;
+  latest_schema_hash?: string;
+  schemaHash?: string;
+  form_name?: string;
+  submission_id?: string;
+  status?: string;
 }
 
 function Forms() {
@@ -165,6 +171,7 @@ function Forms() {
           text: t('formsScreen.submit'),
           onPress: async () => {
             try {
+              console.log(formData);
               const response = await submitFormData({ body: formData });
               const responseData = response.data as ApiResponse;
 
