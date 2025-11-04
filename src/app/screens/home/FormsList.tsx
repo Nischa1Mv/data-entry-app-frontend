@@ -49,11 +49,32 @@ const FormsList = () => {
       setLoading(true);
       try {
         if (isConnected) {
+          /* For testing purposes, to add the test form manually */
+          
+          // const testDoctype = "" ;
+          // const [doctypesResponse, materialRequestResponse] = await Promise.all([
+          //   getAllDoctypes(),
+          //   fetch(`https://data-entry-app-backend.onrender.com/doctype/${testDoctype}`)
+          //     .then(res => res.json())
+          // ]);
+
+          // const responseData = doctypesResponse.data as { data: FormItem[] };
+          // const data = responseData.data;
+
+          // // Add Material Request to the forms list if it exists in the response
+          // const testDoctypeItem: FormItem = { name: `${testDoctype}` };
+          // const combinedData = [...data, testDoctypeItem];
+          // setForms(combinedData);
+
+          /* --------------------------- */
+
+          /* For production use the line below */
           const response = await getAllDoctypes();
           console.log('response', response);
           const responseData = response.data as { data: FormItem[] };
           const data = responseData.data;
           setForms(data);
+          // /* --------------------------- */
         } else {
           const stored = (await getAllDocTypeNames()) as FormItem[];
           setForms(stored);
