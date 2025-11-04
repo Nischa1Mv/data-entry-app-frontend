@@ -18,6 +18,7 @@ import { FormStackParamList } from '../../navigation/FormStackParamList';
 import { useTheme } from '../../../context/ThemeContext';
 import { submitFormData } from '../../../lib/hey-api/client/sdk.gen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 type FormsNavigationProp = NativeStackNavigationProp<
   FormStackParamList,
@@ -105,8 +106,10 @@ function Forms() {
               try {
                 const results = await Promise.allSettled(
                   queueData.map(submissionItem =>
-                    submitFormData({ body: submissionItem })
-                  )
+                    axios.post(
+                      'http://127.0.0.1:8000/submit',
+                      submissionItem
+                    ))
                 );
 
                 const processedResults = results.map((res, index) => {
@@ -172,7 +175,10 @@ function Forms() {
           onPress: async () => {
             try {
               console.log(formData);
-              const response = await submitFormData({ body: formData });
+              const response = await axios.post(
+                'http://127.0.0.1:8000/submit',
+                formData
+              );
               const responseData = response.data as ApiResponse;
 
               // Check if the response indicates success
@@ -181,10 +187,10 @@ function Forms() {
               const processedResult = isSuccess
                 ? { success: true, form: formData, result: responseData }
                 : {
-                    success: false,
-                    form: formData,
-                    reason: responseData?.error || 'Submission failed',
-                  };
+                  success: false,
+                  form: formData,
+                  reason: responseData?.error || 'Submission failed',
+                };
 
               // Remove from queue & local storage if successful
               if (processedResult.success) {
@@ -275,9 +281,8 @@ function Forms() {
                 {submissionResults.map((res, idx) => (
                   <View key={idx} className="mb-2">
                     <Text
-                      className={`font-inter text-[14px] font-normal leading-[20px] tracking-normal ${
-                        res.success ? 'text-[#16a34a]' : 'text-[#EF2226]'
-                      }`}
+                      className={`font-inter text-[14px] font-normal leading-[20px] tracking-normal ${res.success ? 'text-[#16a34a]' : 'text-[#EF2226]'
+                        }`}
                     >
                       {res.form?.formName || res.form?.id || `Form ${idx + 1}`}{' '}
                       —{' '}
