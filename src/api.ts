@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { DocType, FormItem, RawField } from './types';
+import { DocType, FormItem, RawField, documentList } from './types';
 
 export async function getAllDoctypesFromLocal(): Promise<
   Record<string, DocType>
@@ -73,4 +73,43 @@ export function extractFields(docType: DocType): RawField[] {
     label: field.label,
     options: field.options,
   }));
+}
+
+export async function saveDocumentToLocal(
+  documentName: string,
+  document: documentList
+): Promise<boolean> {
+  try {
+    const existingDocument = await AsyncStorage.getItem('downloadedDocuments');
+    let allDocumentStorage: Record<string, documentList> = existingDocument
+      ? JSON.parse(existingDocument)
+      : {};
+    allDocumentStorage[documentName] = document;
+    await AsyncStorage.setItem(
+      'downlaodedDocuments',
+      JSON.stringify(allDocumentStorage)
+    );
+  }
+  catch (error) {
+    console.error(`Error saving local document: ${documentName}:`, error);
+    throw error as Error;
+  }
+  return true;
+}
+
+
+export async function getDocumentFromLocal(
+  documentName: string
+): Promise<documentList | null> {
+  try {
+    const stored = await AsyncStorage.getItem('downloadedDocuments');
+    if (!stored) {
+      return null;
+    }
+    const documentData = JSON.parse(stored)[documentName] as documentList;
+    return documentData;
+  } catch (error) {
+    console.error(`Error fetching local document: ${documentName}:`, error);
+    throw error as Error;
+  }
 }

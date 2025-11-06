@@ -145,3 +145,7 @@ export interface Permission {
   if_owner: number;
   docType: string;
 }
+
+export interface documentList {
+  name: string;
+}
